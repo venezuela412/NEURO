@@ -7,7 +7,7 @@ export function useNeuroWallet() {
   return {
     connected: Boolean(wallet),
     address,
-    walletName: wallet?.device.appName ?? wallet?.name ?? "TON wallet",
+    walletName: wallet?.device.appName ?? "TON wallet",
     wallet,
   };
 }

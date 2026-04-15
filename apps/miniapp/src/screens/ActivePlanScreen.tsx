@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldCheck, TrendingUp, Wallet } from "lucide-react";
+import { ShieldCheck, TrendingUp } from "lucide-react";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { useAppStore } from "../store/appStore";

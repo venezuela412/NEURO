@@ -15,7 +15,7 @@ export function PlanSelectorScreen() {
     goal,
     wantsFlexibility,
     riskPreference,
-    walletConnected,
+    hasWallet,
     setAmountTon,
     setGoal,
     setWantsFlexibility,
@@ -31,7 +31,7 @@ export function PlanSelectorScreen() {
     generatePlan();
     setRecommendation(recommendation);
     setFeePreview(feePreview);
-    setExecutionStatus(walletConnected ? "ready-to-sign" : "idle");
+    setExecutionStatus(hasWallet ? "ready-to-sign" : "idle");
     navigate("/result");
   };
 

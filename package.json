@@ -7,8 +7,9 @@
     "dev": "pnpm --filter @neuro/miniapp dev",
     "dev:miniapp": "pnpm --filter @neuro/miniapp dev",
     "dev:control-plane": "pnpm --filter @neuro/control-plane dev",
-    "build": "pnpm --filter @neuro/shared build && pnpm --filter @neuro/domain build && pnpm --filter @neuro/adapters build && pnpm --filter @neuro/contracts build && pnpm --filter @neuro/miniapp build && pnpm --filter @neuro/control-plane build",
-    "lint": "pnpm --filter @neuro/shared lint && pnpm --filter @neuro/domain lint && pnpm --filter @neuro/adapters lint && pnpm --filter @neuro/contracts lint && pnpm --filter @neuro/miniapp lint && pnpm --filter @neuro/control-plane lint",
+    "build": "pnpm --filter @neuro/miniapp build",
+    "build:control-plane": "pnpm --filter @neuro/control-plane build",
+    "lint": "pnpm --filter @neuro/miniapp lint",
     "check": "pnpm build"
   },
   "devDependencies": {

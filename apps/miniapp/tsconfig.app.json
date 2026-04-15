@@ -10,5 +10,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "../../packages/shared/src/**/*.ts",
+    "../../packages/domain/src/**/*.ts",
+    "../../packages/adapters/src/**/*.ts"
+  ]
 }
