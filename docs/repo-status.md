@@ -13,6 +13,7 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - Fastify control-plane preview API
 - real wallet signature approval flow
 - Telegram WebApp bridge layer
+- Tonstakers Safe Income read-side adapter seam
 - deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
@@ -49,6 +50,8 @@ This is the current source of truth for what has been built so far.
 - `clsx`: `^2.1.1`
 - `@tonconnect/ui-react`: `^2.4.2`
 - `@telegram-apps/sdk-react`: `^3.3.9`
+- `tonstakers-sdk`: `0.0.19-development`
+- `@ton/core`: `^0.63.1`
 
 ### Mini App dev tooling
 - `vite`: `^8.0.4`
@@ -125,6 +128,7 @@ Contains:
 - execution-state copy helpers
 - plan preview response builder
 - mock portfolio helper
+- Tonstakers adapter helpers
 
 ### `packages/contracts`
 Currently reserved for future thin TON contract work.
@@ -140,6 +144,7 @@ Currently reserved for future thin TON contract work.
 - wallet-required activation gating
 - real wallet signature capture for plan approval
 - technical details drawer
+- Safe Income Tonstakers pool context when available
 - Telegram-style dark presentation
 
 ### Domain logic
@@ -160,6 +165,7 @@ Currently reserved for future thin TON contract work.
 - control-plane preview endpoint with CORS enabled
 - Docker-based local test stack
 - build-time TonConnect manifest generation
+- Docker engine verified in cloud environment via `sudo docker`
 
 ## What is not implemented yet
 
@@ -187,7 +193,17 @@ pnpm lint
 Internal packages are currently consumed directly from source in the workspace during development. This keeps implementation fast while the architecture is still evolving.
 
 ### Bundle size
-The Mini App currently builds successfully, but Vite warns that the main chunk is large. This should be addressed in a later pass with code splitting.
+The Mini App currently builds successfully, but Vite warns that the main chunk is large. Tonstakers SDK integration increased the bundle size further, so code splitting should move higher in priority.
+
+### Cloud Docker runtime nuance
+In this cloud environment:
+
+- `sudo docker` works
+- Docker daemon is reachable
+- Compose v2 plugin is not installed
+- legacy `docker-compose` is unreliable here
+
+So the repo's Docker artifacts are valid, but end-to-end Compose execution should be verified on a host with a healthier Compose setup.
 
 ### Documentation set currently present
 - `README.md`

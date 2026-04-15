@@ -700,6 +700,34 @@ ul {
   gap: 0.75rem;
 }
 
+.safe-signal {
+  display: grid;
+  gap: 0.75rem;
+  border-color: rgba(58, 210, 136, 0.22);
+  background:
+    radial-gradient(circle at top right, rgba(58, 210, 136, 0.12), transparent 32%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.safe-signal-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.safe-signal-metric {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.safe-signal-metric strong {
+  font-size: 1.05rem;
+}
+
 .technical-drawer {
   border: 1px solid var(--border);
   border-radius: 1.25rem;
@@ -777,7 +805,8 @@ ul {
   .choice-grid,
   .goal-grid,
   .grid.three-up,
-  .badge-row {
+  .badge-row,
+  .safe-signal-grid {
     grid-template-columns: 1fr;
   }
 

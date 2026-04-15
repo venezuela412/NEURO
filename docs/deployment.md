@@ -101,6 +101,18 @@ Then test:
 
 This is the closest current approximation to a deployable stack.
 
+### Cloud environment note
+
+In the current cloud VM used during development:
+
+- Docker engine was successfully installed
+- `sudo docker` works
+- the Docker daemon is reachable
+- Compose v2 is not installed
+- the legacy `docker-compose` package is unreliable in this environment
+
+So for this cloud environment specifically, Docker itself is verified, but Compose-based testing should be treated as environment-dependent.
+
 ## Container images
 
 ### Mini App image
@@ -149,6 +161,7 @@ Before public testing:
 - [ ] wallet connect works from the deployed domain
 - [ ] plan preview route returns expected payloads
 - [ ] wallet approval flow works on the chosen network
+- [ ] Safe Income Tonstakers context loads when connector and API conditions allow
 - [ ] fallback copy remains clear when API is unavailable
 
 ## What is still needed before real user rollout

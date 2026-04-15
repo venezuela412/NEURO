@@ -47,6 +47,7 @@ The adapter package currently provides:
 - execution state copy
 - preview response construction
 - mock portfolio helpers
+- Tonstakers read-side adapter helpers for Safe Income
 
 This keeps future protocol integration isolated from UI code.
 
@@ -81,10 +82,11 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 - wallet signature approval flow
 - Telegram WebApp bridge for ready/expand/theme sync
 - control-plane preview API
+- Tonstakers pool data seam for Safe Income context
 
 ### Placeholder / next step
 
-- live Tonstakers execution
+- live Tonstakers execution write path
 - live STON.fi quote and route integration
 - persistent backend storage
 - policy-bound automation contract

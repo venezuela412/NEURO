@@ -65,6 +65,7 @@ The novelty is the combination of:
 5. **real TON integration path**
    - TonConnect provider wiring is already included
    - a real wallet signature step is now included for plan approval
+   - a Tonstakers read-side adapter seam is now wired for Safe Income pool context
    - architecture is prepared for Tonstakers and STON.fi adapters through thin integration seams
 
 ## What is implemented right now
@@ -84,6 +85,7 @@ This branch contains the foundation checkpoint for NEURO:
 - TonConnect provider wiring
 - wallet-sign approval flow using `signData`
 - Telegram WebApp bridge for ready/expand/theme binding when available
+- Safe Income result enhancement with Tonstakers pool context when available
 - tonconnect manifest file
 
 ### Shared domain logic
@@ -106,6 +108,13 @@ This branch contains the foundation checkpoint for NEURO:
 
 This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
 
+### Adapter layer
+- Tonstakers adapter seam for:
+  - pool APY and rates
+  - available-to-stake guidance
+  - instant liquidity checks
+  - future Safe Income execution
+
 For exact package versions and validation status, see `docs/repo-status.md`.
 
 ## What is real vs simulated in this checkpoint
@@ -121,12 +130,12 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - control-plane foundation
 
 ### Simulated for now
-- protocol execution after approval
+- most protocol execution after approval
 - live portfolio sync
 - live quote ingestion
 - live rebalancing
 - on-chain automation contract
-- live Tonstakers / STON.fi transaction construction
+- live STON.fi transaction construction
 
 Important: this repo does **not** fake successful on-chain execution. It currently demonstrates the product and architecture foundation honestly, with live protocol execution reserved for later phases.
 
@@ -284,6 +293,8 @@ This serves:
 - Mini App at `http://localhost:8080`
 - control plane at `http://localhost:8787`
 
+In this cloud environment specifically, Docker is available with `sudo docker`, but Compose v2 is not installed and the legacy `docker-compose` binary is unreliable. The repo still includes the Compose stack for local/devhost usage.
+
 ### Lint / typecheck
 
 ```bash
@@ -314,7 +325,7 @@ See `docs/deployment.md` for:
 
 ## Limitations in this checkpoint
 
-- no live Tonstakers execution yet
+- no full live Tonstakers execution flow yet
 - no live STON.fi quote/execution adapter yet
 - no persistent database yet
 - no transaction reconciliation after wallet signature yet

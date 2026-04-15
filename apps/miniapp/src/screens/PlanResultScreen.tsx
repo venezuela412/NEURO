@@ -7,6 +7,7 @@ import { TechnicalDetailsDrawer } from "../components/plans/TechnicalDetailsDraw
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { usePlanEngine } from "../hooks/usePlanEngine";
 import { usePlanExecution } from "../hooks/usePlanExecution";
+import { useTonstakers } from "../hooks/useTonstakers";
 import { useAppStore } from "../store/appStore";
 
 export function PlanResultScreen() {
@@ -18,6 +19,9 @@ export function PlanResultScreen() {
   const executionStatus = useAppStore((state) => state.executionStatus);
   const { recommendation, feePreview } = usePlanEngine();
   const { activateWithWallet } = usePlanExecution();
+  const { safeIncomeQuery } = useTonstakers({
+    enabled: recommendation.plan.id === "safe-income",
+  });
 
   const handleActivate = async () => {
     acknowledgeRisk();
@@ -55,6 +59,49 @@ export function PlanResultScreen() {
 
       <PlanCard recommendation={recommendation} feePreview={feePreview} />
       <ExecutionStatusCard status={executionStatus} />
+
+      {recommendation.plan.id === "safe-income" ? (
+        <motion.section
+          className="card"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.04, duration: 0.28 }}
+        >
+          <div className="inline-icon-row">
+            <ShieldCheck size={18} />
+            <span>Safe path signal</span>
+          </div>
+          {safeIncomeQuery.isLoading ? (
+            <p className="muted">
+              Checking Tonstakers pool conditions and available balance guidance...
+            </p>
+          ) : safeIncomeQuery.data ? (
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <span className="metric-label">Current staking APY</span>
+                <strong>{safeIncomeQuery.data.currentApy?.toFixed(2) ?? "--"}%</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Available for staking</span>
+                <strong>{safeIncomeQuery.data.availableToStakeTon?.toFixed(2) ?? "--"} TON</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Instant liquidity</span>
+                <strong>{safeIncomeQuery.data.instantLiquidityTon?.toFixed(2) ?? "--"} TON</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Projected tsTON rate</span>
+                <strong>{safeIncomeQuery.data.projectedTsTonRate?.toFixed(4) ?? "--"} TON</strong>
+              </div>
+            </div>
+          ) : (
+            <p className="muted">
+              Tonstakers data is currently unavailable, so NEURO is keeping the plan
+              explanation conservative and relying on safe-mode fallback rules.
+            </p>
+          )}
+        </motion.section>
+      ) : null}
 
       <motion.section
         className="card"
