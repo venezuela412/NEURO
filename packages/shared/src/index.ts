@@ -62,6 +62,14 @@ export interface FeePreview {
   estimatedNetValueTon: number;
 }
 
+export interface ExecutionReceipt {
+  mode: "wallet-approval" | "tonstakers-stake";
+  reference: string;
+  summary: string;
+  address?: string;
+  createdAt: string;
+}
+
 export interface NeuroOverview {
   appName: string;
   tagline: string;

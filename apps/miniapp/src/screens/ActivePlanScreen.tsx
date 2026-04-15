@@ -10,6 +10,7 @@ export function ActivePlanScreen() {
   const navigate = useNavigate();
   const portfolio = useAppStore((state) => state.portfolio);
   const executionStatus = useAppStore((state) => state.executionStatus);
+  const executionReceipt = useAppStore((state) => state.executionReceipt);
 
   if (!portfolio) {
     return (
@@ -67,10 +68,21 @@ export function ActivePlanScreen() {
           <section className="card">
             <h3>Current branch scope</h3>
             <p className="muted">
-              This phase captures real wallet approval and portfolio staging.
-              Live protocol execution adapters are the next implementation layer.
+              This phase captures real wallet approval, Tonstakers Safe Income
+              request staging, and portfolio updates. Deeper reconciliation is the
+              next implementation layer.
             </p>
           </section>
+          {executionReceipt ? (
+            <section className="card">
+              <h3>Latest execution receipt</h3>
+              <p className="muted">{executionReceipt.summary}</p>
+              <p className="muted">
+                Mode: {executionReceipt.mode}{" "}
+                {executionReceipt.address ? `· Address: ${executionReceipt.address}` : ""}
+              </p>
+            </section>
+          ) : null}
         </div>
       </motion.section>
 
