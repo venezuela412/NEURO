@@ -8,6 +8,7 @@ import {
   type FeePreview,
   type ExecutionStatus,
   type Goal,
+  type PersistedPortfolioState,
   type PlanPreviewResponse,
   type PlanRecommendation,
   type PortfolioSnapshot,
@@ -29,6 +30,7 @@ interface AppState {
   portfolio: PortfolioSnapshot | null;
   executionStatus: ExecutionStatus;
   executionReceipt: ExecutionReceipt | null;
+  isPortfolioHydrating: boolean;
   setAmountTon: (amount: number) => void;
   setGoal: (goal: Goal) => void;
   setWantsFlexibility: (value: boolean) => void;
@@ -40,9 +42,11 @@ interface AppState {
   setFeePreview: (feePreview: FeePreview | null) => void;
   setPortfolio: (portfolio: PortfolioSnapshot | null) => void;
   setExecutionReceipt: (receipt: ExecutionReceipt | null) => void;
+  setPortfolioHydrating: (value: boolean) => void;
   appendActivityEvent: (event: ActivityEvent) => void;
   setRouteQualityScore: (score: number) => void;
   applyPlanPreview: (preview: PlanPreviewResponse) => void;
+  applyPersistedPortfolioState: (state: PersistedPortfolioState) => void;
   clearGeneratedPlan: () => void;
   generatePlan: () => void;
   activatePlan: () => void;
@@ -64,6 +68,7 @@ export const useAppStore = create<AppState>()(
   portfolio: null,
   executionStatus: "idle",
   executionReceipt: null,
+  isPortfolioHydrating: false,
   setAmountTon: (amountTon) =>
     set({
       amountTon,
@@ -107,6 +112,7 @@ export const useAppStore = create<AppState>()(
   setFeePreview: (feePreview) => set({ feePreview }),
   setPortfolio: (portfolio) => set({ portfolio }),
   setExecutionReceipt: (executionReceipt) => set({ executionReceipt }),
+  setPortfolioHydrating: (isPortfolioHydrating) => set({ isPortfolioHydrating }),
   appendActivityEvent: (event) =>
     set((state) => ({
       portfolio: state.portfolio
@@ -125,6 +131,15 @@ export const useAppStore = create<AppState>()(
       executionStatus: preview.executionStatus,
       acknowledgedRisk: false,
       executionReceipt: null,
+    }),
+  applyPersistedPortfolioState: (persistedState) =>
+    set({
+      recommendation: persistedState.recommendation,
+      feePreview: persistedState.feePreview,
+      portfolio: persistedState.portfolio,
+      executionStatus: persistedState.executionStatus,
+      executionReceipt: persistedState.executionReceipt,
+      routeQualityScore: persistedState.routeQualityScore,
     }),
   clearGeneratedPlan: () =>
     set({

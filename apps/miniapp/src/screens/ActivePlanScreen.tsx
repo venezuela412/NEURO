@@ -11,6 +11,18 @@ export function ActivePlanScreen() {
   const portfolio = useAppStore((state) => state.portfolio);
   const executionStatus = useAppStore((state) => state.executionStatus);
   const executionReceipt = useAppStore((state) => state.executionReceipt);
+  const isPortfolioHydrating = useAppStore((state) => state.isPortfolioHydrating);
+
+  if (isPortfolioHydrating) {
+    return (
+      <section className="card page-stack center-stack">
+        <h1 className="headline-sm">Loading your active plan</h1>
+        <p className="muted">
+          NEURO is restoring your latest portfolio and execution history from the control plane.
+        </p>
+      </section>
+    );
+  }
 
   if (!portfolio) {
     return (

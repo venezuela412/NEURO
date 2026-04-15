@@ -23,6 +23,10 @@ function buildExecutionEvent(title: string, description: string, tone: ActivityE
   };
 }
 
+function buildReceiptId() {
+  return `receipt-${crypto.randomUUID()}`;
+}
+
 export function usePlanExecution(): PlanExecutionController {
   const [tonConnectUI] = useTonConnectUI();
   const amountTon = useAppStore((state) => state.amountTon);
@@ -46,7 +50,10 @@ export function usePlanExecution(): PlanExecutionController {
       });
       const result = await tonstakers.stake(toNano(amountTon.toFixed(3)));
       receipt = {
+        id: buildReceiptId(),
+        planId: recommendation.plan.id,
         mode: "tonstakers-stake",
+        status: "submitted",
         reference: result.boc,
         summary: `Tonstakers staking request prepared for ${amountTon.toFixed(2)} TON.`,
         createdAt: new Date().toISOString(),
@@ -65,7 +72,10 @@ export function usePlanExecution(): PlanExecutionController {
       });
 
       receipt = {
+        id: buildReceiptId(),
+        planId: recommendation.plan.id,
         mode: "wallet-approval",
+        status: "captured",
         reference: result.signature,
         summary: `Wallet approval captured for ${recommendation.plan.title}.`,
         address: result.address,

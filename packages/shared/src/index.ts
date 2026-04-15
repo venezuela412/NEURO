@@ -63,7 +63,10 @@ export interface FeePreview {
 }
 
 export interface ExecutionReceipt {
+  id: string;
+  planId: PlanId;
   mode: "wallet-approval" | "tonstakers-stake";
+  status: "captured" | "submitted" | "reconciling" | "confirmed" | "failed";
   reference: string;
   summary: string;
   address?: string;
@@ -119,4 +122,15 @@ export interface PlanPreviewResponse {
   executionTitle: string;
   executionDescription: string;
   routeQualityScore: number;
+}
+
+export interface PersistedPortfolioState {
+  walletAddress: string;
+  recommendation: PlanRecommendation | null;
+  feePreview: FeePreview | null;
+  portfolio: PortfolioSnapshot | null;
+  executionStatus: ExecutionStatus;
+  executionReceipt: ExecutionReceipt | null;
+  routeQualityScore: number;
+  updatedAt: string;
 }

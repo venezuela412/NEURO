@@ -1,5 +1,7 @@
 import {
+  type ExecutionReceipt,
   type NeuroOverview,
+  type PersistedPortfolioState,
   type PlanPreviewResponse,
   type PlanRecommendationInput,
 } from "@neuro/shared";
@@ -40,5 +42,40 @@ export async function fetchPlanPreview(
     return await parseJson<PlanPreviewResponse>(response);
   } catch {
     return buildPlanPreviewResponse(getDefaultPlanRecommendationInput(input));
+  }
+}
+
+export async function fetchPersistedPortfolioState(walletAddress: string): Promise<PersistedPortfolioState | null> {
+  try {
+    const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/state`);
+    if (response.status === 404) {
+      return null;
+    }
+
+    return await parseJson<PersistedPortfolioState>(response);
+  } catch {
+    return null;
+  }
+}
+
+export async function savePersistedPortfolioState(state: PersistedPortfolioState) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(state.walletAddress)}/state`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(state),
+  });
+
+  return parseJson<{ ok: true; updatedAt: string }>(response);
+}
+
+export async function fetchExecutionReceipts(walletAddress: string) {
+  try {
+    const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/executions`);
+    const payload = await parseJson<{ items: ExecutionReceipt[] }>(response);
+    return payload.items;
+  } catch {
+    return [];
   }
 }

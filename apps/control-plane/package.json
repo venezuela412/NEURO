@@ -10,6 +10,7 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.4.4",
     "@fastify/cors": "^11.2.0",
     "@neuro/adapters": "workspace:*",
     "@neuro/domain": "workspace:*",
