@@ -108,6 +108,10 @@ This branch contains the foundation checkpoint for NEURO:
   - `/overview`
   - `/portfolio/demo`
   - `/plan/preview`
+  - persisted portfolio state routes
+  - persisted execution receipt routes
+  - switch-to-safety and withdraw action routes
+  - execution reconciliation route
 
 This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
 
@@ -137,10 +141,12 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - control-plane foundation
 - Tonstakers Safe Income pool context seam
 - STON.fi quote-signal seam for Balanced/Growth
+- DB-backed control-plane persistence
+- persisted switch-to-safety and withdraw flows
+- execution reconciliation endpoint for Tonstakers-style submitted requests
 
 ### Simulated for now
-- most protocol execution after approval
-- live portfolio sync
+- parts of protocol execution after approval
 - live rebalancing
 - on-chain automation contract
 - live STON.fi transaction construction
@@ -322,6 +328,7 @@ The repository now includes a concrete deployment path for the end of developmen
 - environment-driven TonConnect manifest generation
 - Dockerfiles for both services
 - `docker-compose.yml` for local end-to-end testing
+- file-backed embedded DB for control-plane persistence in the current implementation
 
 See `docs/deployment.md` for:
 
@@ -335,8 +342,8 @@ See `docs/deployment.md` for:
 
 - no full live Tonstakers execution flow yet
 - no live STON.fi execution flow yet
-- no persistent database yet
-- no transaction reconciliation after wallet signature yet
+- control-plane persistence currently uses embedded file-backed PGlite, not a multi-instance external database
+- transaction reconciliation is implemented for submitted Tonstakers-style receipts, but still needs richer indexer-backed semantics for broader execution modes
 - no custom Tact automation contract yet
 - no backend reconciliation or live transaction indexing yet
 
@@ -345,8 +352,8 @@ See `docs/deployment.md` for:
 ### Next product/engineering steps
 1. complete Tonstakers Safe Income execution write path
 2. deepen the STON.fi quote seam into execution-ready routing
-3. reconcile signed approval to live execution states
-4. persist portfolio/activity state in the control plane
+3. broaden reconciliation/indexing beyond Tonstakers-style submitted requests
+4. upgrade control-plane persistence from embedded DB to a more production-scalable external store if multi-instance deployment is required
 5. continue reducing protocol bundle weight and split heavy wallet/protocol code further
 6. document API and execution-state contracts in more detail
 7. add thin automation contract only if it creates real value without unsafe custody

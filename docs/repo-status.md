@@ -15,6 +15,9 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - Telegram WebApp bridge layer
 - Tonstakers Safe Income read-side adapter seam
 - STON.fi quote signal seam for Balanced/Growth
+- DB-backed control-plane persistence
+- persisted switch/withdraw actions
+- execution reconciliation endpoint
 - deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
@@ -100,6 +103,11 @@ Contains:
 - `/overview`
 - `/portfolio/demo`
 - `/plan/preview`
+- `/portfolio/:walletAddress/state`
+- `/portfolio/:walletAddress/executions`
+- `/portfolio/:walletAddress/switch-to-safety`
+- `/portfolio/:walletAddress/withdraw`
+- `/portfolio/:walletAddress/executions/:executionId/reconcile`
 
 ### Deployment artifacts
 Contains:
@@ -170,19 +178,21 @@ Currently reserved for future thin TON contract work.
 - Mini App build and lint pipeline
 - control-plane TypeScript build
 - control-plane preview endpoint with CORS enabled
+- embedded file-backed PGlite persistence for control-plane state
 - Docker-based local test stack
 - build-time TonConnect manifest generation
 - Docker engine verified in cloud environment via `sudo docker`
 - both Docker images built successfully in cloud using alternate `vfs` daemon
 - control-plane container `/health` smoke test passed in cloud Docker path
+- control-plane persisted portfolio roundtrip verified via API
+- control-plane execution reconcile route verified via API
 
 ## What is not implemented yet
 
 - live Tonstakers adapter
 - live STON.fi quote/execution adapter
-- persistent database
-- transaction reconciliation after wallet signature
-- real withdrawal / switch flows
+- external multi-instance production database
+- broad transaction reconciliation beyond current Tonstakers-style submitted receipts
 - thin automation contract
 - code splitting for the large frontend bundle
 
