@@ -19,6 +19,18 @@ NEURO is built for:
 - users who value safety, clarity, and easy exits
 - judges and partners looking for a consumer-first TON finance product rather than another dashboard
 
+## Documentation map
+
+The GitHub repository is intended to be the source of truth for current state, architecture, and submission materials.
+
+- `README.md` - product overview, setup, architecture summary, and current implementation state
+- `docs/repo-status.md` - implementation status, package versions, and validation status
+- `docs/architecture.md` - architecture and module boundaries
+- `docs/judge-qa.md` - hackathon judge answers
+- `docs/demo-script.md` - 60-second and 90-second demo flow
+- `docs/launch-copy.md` - launch and pitch copy
+- `.env.example` - expected environment variables for local development
+
 ## Why NEURO is novel
 
 NEURO is not:
@@ -88,6 +100,8 @@ This branch contains the foundation checkpoint for NEURO:
   - `/portfolio/demo`
 
 This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
+
+For exact package versions and validation status, see `docs/repo-status.md`.
 
 ## What is real vs simulated in this checkpoint
 
@@ -209,6 +223,7 @@ packages/
 - Vite
 - React
 - TypeScript
+- Tailwind CSS v4 toolchain
 - Zustand
 - React Query
 - React Router
