@@ -10,7 +10,9 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - Telegram-native React Mini App foundation
 - deterministic plan engine
 - fee preview and portfolio snapshot logic
-- Fastify control-plane stub
+- Fastify control-plane preview API
+- real wallet signature approval flow
+- Telegram WebApp bridge layer
 - hackathon/judge documentation set
 
 This is the current source of truth for what has been built so far.
@@ -58,6 +60,7 @@ This is the current source of truth for what has been built so far.
 - `vite-tsconfig-paths`: `^5.1.4`
 
 ### Control plane
+- `@fastify/cors`: `^11.2.0`
 - `fastify`: `^5.6.1`
 - `tsx`: `^4.20.6`
 - `typescript`: `^6.0.2`
@@ -69,12 +72,15 @@ Contains:
 - app providers
 - routing
 - wallet-aware app shell
+- Telegram WebApp bridge
 - landing screen
 - wallet onboarding screen
 - plan selector screen
 - plan result screen
 - active plan screen
 - activity screen
+- execution status card
+- technical details drawer
 - dark premium styling system
 
 ### `apps/control-plane`
@@ -83,6 +89,7 @@ Contains:
 - `/health`
 - `/overview`
 - `/portfolio/demo`
+- `/plan/preview`
 
 ### `packages/shared`
 Contains:
@@ -103,9 +110,10 @@ Contains:
 
 ### `packages/adapters`
 Contains:
-- mock Telegram environment adapter
-- execution-state copy helpers
 - overview helper
+- default plan preview input builder
+- execution-state copy helpers
+- plan preview response builder
 - mock portfolio helper
 
 ### `packages/contracts`
@@ -115,10 +123,13 @@ Currently reserved for future thin TON contract work.
 
 ### UX
 - simple goal-first flow
+- async plan preview through the control plane
 - plan recommendation in plain English
 - transparent fee preview
 - activity feed
 - wallet-required activation gating
+- real wallet signature capture for plan approval
+- technical details drawer
 - Telegram-style dark presentation
 
 ### Domain logic
@@ -136,12 +147,12 @@ Currently reserved for future thin TON contract work.
 - source-first internal packages
 - Mini App build and lint pipeline
 - control-plane TypeScript build
+- control-plane preview endpoint with CORS enabled
 
 ## What is not implemented yet
 
 - live Tonstakers adapter
 - live STON.fi quote/execution adapter
-- real Telegram SDK bridge mounting
 - persistent database
 - transaction reconciliation after wallet signature
 - real withdrawal / switch flows
@@ -185,7 +196,7 @@ As the next technical phase lands, the repo should gain:
    - TonConnect details
 
 2. `docs/execution-states.md`
-   - lifecycle from preparing to success/failure
+   - lifecycle from preparing to wallet approval and live execution
 
 3. `docs/fee-accounting.md`
    - high-water mark model

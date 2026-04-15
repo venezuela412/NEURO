@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 interface TelegramWebApp {
   platform?: string;
@@ -28,27 +28,22 @@ function getBrowserFallback(): TelegramEnvironmentState {
 }
 
 export function useTelegramEnv() {
-  const [env, setEnv] = useState<TelegramEnvironmentState>(() =>
-    typeof window === "undefined"
-      ? { isTelegram: false, platform: "server", colorScheme: "dark", isExpanded: true }
-      : getBrowserFallback(),
-  );
+  return useMemo(() => {
+    if (typeof window === "undefined") {
+      return { isTelegram: false, platform: "server", colorScheme: "dark", isExpanded: true };
+    }
 
-  useEffect(() => {
     const telegram = (window as Window & { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp;
 
     if (!telegram) {
-      setEnv(getBrowserFallback());
-      return;
+      return getBrowserFallback();
     }
 
-    setEnv({
+    return {
       isTelegram: true,
       platform: telegram.platform ?? "telegram",
       colorScheme: telegram.colorScheme ?? "dark",
       isExpanded: telegram.isExpanded ?? true,
-    });
+    };
   }, []);
-
-  return env;
 }

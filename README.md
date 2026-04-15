@@ -63,6 +63,7 @@ The novelty is the combination of:
 
 5. **real TON integration path**
    - TonConnect provider wiring is already included
+   - a real wallet signature step is now included for plan approval
    - architecture is prepared for Tonstakers and STON.fi adapters through thin integration seams
 
 ## What is implemented right now
@@ -80,6 +81,8 @@ This branch contains the foundation checkpoint for NEURO:
   - active plan
   - activity feed
 - TonConnect provider wiring
+- wallet-sign approval flow using `signData`
+- Telegram WebApp bridge for ready/expand/theme binding when available
 - tonconnect manifest file
 
 ### Shared domain logic
@@ -98,6 +101,7 @@ This branch contains the foundation checkpoint for NEURO:
   - `/health`
   - `/overview`
   - `/portfolio/demo`
+  - `/plan/preview`
 
 This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
 
@@ -109,13 +113,14 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - product architecture
 - Telegram-native Mini App structure
 - TonConnect integration layer
+- wallet signature approval flow
 - deterministic plan recommendation logic
 - fee preview and accounting model
 - portfolio/activity state model
 - control-plane foundation
 
 ### Simulated for now
-- protocol execution
+- protocol execution after approval
 - live portfolio sync
 - live quote ingestion
 - live rebalancing
@@ -233,6 +238,7 @@ packages/
 ### Backend/control-plane stack
 - Node.js
 - Fastify
+- Fastify CORS
 - TypeScript
 
 ## Setup
@@ -281,21 +287,20 @@ See `.env.example` for the next-phase environment variables we expect to support
 - no live Tonstakers execution yet
 - no live STON.fi quote/execution adapter yet
 - no persistent database yet
-- no real Telegram SDK binding beyond environment-ready structure
+- no transaction reconciliation after wallet signature yet
 - no custom Tact automation contract yet
 - no backend reconciliation or live transaction indexing yet
 
 ## Roadmap
 
 ### Next product/engineering steps
-1. wire TonConnect session state into plan activation UX
-2. bind Telegram SDK theme and viewport events
-3. implement Tonstakers safe-path adapter
-4. implement STON.fi quote adapter
-5. add execution state machine and preflight validation
-6. persist portfolio/activity state in the control plane
-7. add judge/demo docs and launch content polish
-8. add thin automation contract only if it creates real value without unsafe custody
+1. implement Tonstakers safe-path adapter
+2. implement STON.fi quote adapter
+3. reconcile signed approval to live execution states
+4. persist portfolio/activity state in the control plane
+5. add code splitting for the Mini App bundle
+6. document API and execution-state contracts in more detail
+7. add thin automation contract only if it creates real value without unsafe custody
 
 ## Why this can win a hackathon
 

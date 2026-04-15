@@ -84,12 +84,13 @@ Current implemented foundation:
 
 - Telegram-native React Mini App shell
 - TonConnect provider wiring
+- wallet signature approval flow via TonConnect signData
 - deterministic plan engine
 - plan catalog for Safe, Balanced, Growth, and Exit to Safety
 - fee preview logic
 - portfolio snapshot model
 - activity feed model
-- control-plane service foundation
+- control-plane service foundation with plan preview endpoint
 
 Still to be integrated in later phases:
 

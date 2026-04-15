@@ -42,10 +42,11 @@ This layer is intentionally inspectable and LLM-free.
 
 The adapter package currently provides:
 
-- mock Telegram environment data
+- overview values
+- default preview input construction
 - execution state copy
+- preview response construction
 - mock portfolio helpers
-- overview values for the control plane
 
 This keeps future protocol integration isolated from UI code.
 
@@ -56,6 +57,7 @@ The current Fastify service exposes:
 - `GET /health`
 - `GET /overview`
 - `GET /portfolio/demo`
+- `POST /plan/preview`
 
 This is intentionally minimal for the first branch checkpoint, but it creates the seam for:
 
@@ -76,22 +78,22 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 - portfolio snapshot logic
 - activity feed logic
 - TON Connect provider wiring
-- control-plane service stub
+- wallet signature approval flow
+- Telegram WebApp bridge for ready/expand/theme sync
+- control-plane preview API
 
 ### Placeholder / next step
 
 - live Tonstakers execution
 - live STON.fi quote and route integration
-- Telegram SDK bridge/theme mounting
 - persistent backend storage
 - policy-bound automation contract
 - withdraw / switch transaction flows
 
 ## Next recommended architecture steps
 
-1. Add a typed API client between `miniapp` and `control-plane`
-2. Persist plan snapshots and activity in a real database
-3. Introduce adapter interfaces for Tonstakers and STON.fi
-4. Add execution state reconciliation after wallet signature
-5. Implement a hidden technical drawer with route and fee details
-6. Explore a thin policy-wallet contract only after the live execution path is stable
+1. Persist plan snapshots and activity in a real database
+2. Introduce adapter interfaces for Tonstakers and STON.fi
+3. Add execution state reconciliation after wallet signature
+4. Expand the preview API into transaction-preflight and position endpoints
+5. Explore a thin policy-wallet contract only after the live execution path is stable

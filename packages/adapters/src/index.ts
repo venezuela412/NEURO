@@ -172,6 +172,3 @@ export function getDefaultPlanRecommendationInput(
     ...overrides,
   };
 }
-    feePreview,
-  };
-}

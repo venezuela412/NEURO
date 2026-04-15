@@ -10,7 +10,7 @@
 6. Show the recommendation card and say:
    - "The user does not need to learn DeFi."
    - "NEURO explains the plan in human language, shows the expected range, the safety fallback, and the estimated fee."
-7. Tap **Activate this plan**.
+7. Tap **Activate this plan** and approve the plan text in the wallet.
 8. Show the active plan screen and say:
    - "Now the user sees current mode, estimated value, available to withdraw, and the latest safety-aware update."
 9. Tap **View activity**.
@@ -48,12 +48,15 @@
   - what NEURO will do
   - fallback behavior
   - estimated fee
+  - technical details drawer
 - Say:
   - "The fee is transparent and only charged on profit."
   - "If conditions deteriorate, NEURO suggests or prepares a safer path."
+  - "There is also a hidden technical drawer for judges and advanced users, but the main path stays simple."
 
-### Step 4 — Active plan
+### Step 4 — Approval and active plan
 - Activate the plan.
+- Approve the NEURO plan text in the wallet.
 - Show:
   - estimated current value
   - estimated profit
@@ -86,8 +89,8 @@
 If a wallet or external integration is not available during the demo:
 
 - "The product architecture is ready for TON Connect and adapter-based protocol execution."
-- "This build already includes a deterministic plan engine, fee previews, execution state framing, and a control-plane seam."
-- "The current implementation prioritizes a polished Mini App flow and a clean non-custodial architecture while keeping live execution adapters modular."
+- "This build already includes a deterministic plan engine, control-plane-backed preview generation, fee previews, wallet-sign approval, execution state framing, and a technical details drawer."
+- "The current implementation prioritizes a polished Mini App flow and a clean non-custodial architecture while keeping live protocol adapters modular."
 
 If Telegram context is unavailable:
 
