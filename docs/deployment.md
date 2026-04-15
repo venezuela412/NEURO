@@ -108,6 +108,8 @@ In the current cloud VM used during development:
 - Docker engine was successfully installed
 - `sudo docker` works
 - the Docker daemon is reachable
+- both `apps/control-plane/Dockerfile` and `apps/miniapp/Dockerfile` were successfully built against an alternate `vfs` Docker daemon
+- the control-plane container was smoke-tested successfully via `/health`
 - Compose v2 is not installed
 - the legacy `docker-compose` package is unreliable in this environment
 

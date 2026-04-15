@@ -77,6 +77,7 @@ This is the current source of truth for what has been built so far.
 Contains:
 - app providers
 - routing
+- lazy-loaded route modules
 - wallet-aware app shell
 - Telegram WebApp bridge
 - landing screen
@@ -89,6 +90,7 @@ Contains:
 - technical details drawer
 - Omniston provider bridge
 - STON.fi quote signal hook
+- persisted Zustand store
 - dark premium styling system
 
 ### `apps/control-plane`
@@ -171,6 +173,8 @@ Currently reserved for future thin TON contract work.
 - Docker-based local test stack
 - build-time TonConnect manifest generation
 - Docker engine verified in cloud environment via `sudo docker`
+- both Docker images built successfully in cloud using alternate `vfs` daemon
+- control-plane container `/health` smoke test passed in cloud Docker path
 
 ## What is not implemented yet
 
@@ -198,7 +202,7 @@ pnpm lint
 Internal packages are currently consumed directly from source in the workspace during development. This keeps implementation fast while the architecture is still evolving.
 
 ### Bundle size
-The Mini App currently builds successfully, but Vite warns that the main chunk is large. Tonstakers plus STON.fi integration increased the bundle size further, so code splitting should move higher in priority.
+The Mini App currently builds successfully, but Vite still warns that one chunk remains large. Route-level lazy loading is now in place and improved the build shape materially, but Tonstakers and STON.fi still add significant protocol weight, so further bundle splitting remains valuable.
 
 ### Cloud Docker runtime nuance
 In this cloud environment:

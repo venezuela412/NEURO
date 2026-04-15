@@ -30,12 +30,6 @@ export function usePlanExecution(): PlanExecutionController {
   const setPortfolio = useAppStore((state) => state.setPortfolio);
   const setExecutionReceipt = useAppStore((state) => state.setExecutionReceipt);
   const appendActivityEvent = useAppStore((state) => state.appendActivityEvent);
-  const tonstakers = createTonstakersAdapter(tonConnectUI, {
-    partnerCode: import.meta.env.VITE_TONSTAKERS_PARTNER_CODE
-      ? Number(import.meta.env.VITE_TONSTAKERS_PARTNER_CODE)
-      : undefined,
-    tonApiKey: import.meta.env.VITE_TONAPI_KEY,
-  });
 
   async function activateWithWallet(recommendation: PlanRecommendation) {
     setExecutionStatus("waiting-for-wallet");
@@ -44,6 +38,12 @@ export function usePlanExecution(): PlanExecutionController {
     let receipt: ExecutionReceipt;
 
     if (recommendation.plan.id === "safe-income") {
+      const tonstakers = await createTonstakersAdapter(tonConnectUI, {
+        partnerCode: import.meta.env.VITE_TONSTAKERS_PARTNER_CODE
+          ? Number(import.meta.env.VITE_TONSTAKERS_PARTNER_CODE)
+          : undefined,
+        tonApiKey: import.meta.env.VITE_TONAPI_KEY,
+      });
       const result = await tonstakers.stake(toNano(amountTon.toFixed(3)));
       receipt = {
         mode: "tonstakers-stake",

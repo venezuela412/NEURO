@@ -76,6 +76,7 @@ This branch contains the foundation checkpoint for NEURO:
 ### Mini App
 - Vite + React + TypeScript Telegram-style Mini App
 - premium dark visual system
+- route-level lazy loading for protocol-heavy screens
 - routed product flow:
   - landing
   - wallet onboarding
@@ -86,6 +87,7 @@ This branch contains the foundation checkpoint for NEURO:
 - TonConnect provider wiring
 - wallet-sign approval flow using `signData`
 - Telegram WebApp bridge for ready/expand/theme binding when available
+- persisted local app state for plans, receipts, and activity
 - Safe Income result enhancement with Tonstakers pool context when available
 - tonconnect manifest file
 
@@ -299,7 +301,7 @@ This serves:
 - Mini App at `http://localhost:8080`
 - control plane at `http://localhost:8787`
 
-In this cloud environment specifically, Docker is available with `sudo docker`, but Compose v2 is not installed and the legacy `docker-compose` binary is unreliable. The repo still includes the Compose stack for local/devhost usage.
+In this cloud environment specifically, Docker is available with `sudo docker`. The repo's container images were validated here using an alternate `vfs` daemon path, including a working control-plane `/health` response. Compose v2 is not installed and the legacy `docker-compose` binary is unreliable, so the Compose stack should still be rechecked on a healthier host.
 
 ### Lint / typecheck
 
@@ -345,7 +347,7 @@ See `docs/deployment.md` for:
 2. deepen the STON.fi quote seam into execution-ready routing
 3. reconcile signed approval to live execution states
 4. persist portfolio/activity state in the control plane
-5. add code splitting for the Mini App bundle
+5. continue reducing protocol bundle weight and split heavy wallet/protocol code further
 6. document API and execution-state contracts in more detail
 7. add thin automation contract only if it creates real value without unsafe custody
 

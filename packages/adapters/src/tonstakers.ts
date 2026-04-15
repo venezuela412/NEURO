@@ -1,6 +1,5 @@
 import { fromNano, toNano } from "@ton/core";
 import type { TonConnectUI } from "@tonconnect/ui";
-import { Tonstakers } from "tonstakers-sdk";
 
 export interface TonstakersPoolSnapshot {
   currentApy: number | null;
@@ -20,6 +19,25 @@ export interface SafeIncomeExecutionPreview {
   approvalMode: "wallet-transaction";
 }
 
+type TonstakersSdkConstructor = new (options: {
+  connector: TonConnectUI;
+  partnerCode?: number;
+  tonApiKey?: string;
+}) => {
+  getCurrentApy(): Promise<number>;
+  getRates(): Promise<{
+    tsTONTONProjected?: number;
+  }>;
+  getInstantLiquidity(): Promise<number>;
+  getAvailableBalance(): Promise<number>;
+  getStakedBalance(): Promise<number>;
+  getTvl(): Promise<number>;
+  getStakersCount(): Promise<number>;
+  stake(amount: bigint): Promise<{
+    boc: string;
+  }>;
+};
+
 function clampPositive(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
@@ -32,13 +50,32 @@ function fromNanoNumber(value: number | null | undefined) {
   return Number(fromNano(BigInt(Math.round(value))).toString());
 }
 
-export function createTonstakersAdapter(
+async function getTonstakersConstructor(): Promise<TonstakersSdkConstructor> {
+  const sdkModule = (await import("tonstakers-sdk")) as {
+    Tonstakers?: TonstakersSdkConstructor;
+    default?: TonstakersSdkConstructor | { Tonstakers?: TonstakersSdkConstructor };
+  };
+
+  const constructor =
+    sdkModule.Tonstakers ??
+    (typeof sdkModule.default === "function" ? sdkModule.default : sdkModule.default?.Tonstakers);
+
+  if (!constructor) {
+    throw new Error("Tonstakers SDK constructor is unavailable in this environment.");
+  }
+
+  return constructor;
+}
+
+export async function createTonstakersAdapter(
   connector: TonConnectUI,
   options?: {
     partnerCode?: number;
     tonApiKey?: string;
-  },
+  }
 ) {
+  const Tonstakers = await getTonstakersConstructor();
+
   return new Tonstakers({
     connector,
     partnerCode: options?.partnerCode,
@@ -51,9 +88,9 @@ export async function fetchTonstakersPoolSnapshot(
   options?: {
     partnerCode?: number;
     tonApiKey?: string;
-  },
+  }
 ): Promise<TonstakersPoolSnapshot> {
-  const client = createTonstakersAdapter(connector, options);
+  const client = await createTonstakersAdapter(connector, options);
 
   const [
     currentApy,
