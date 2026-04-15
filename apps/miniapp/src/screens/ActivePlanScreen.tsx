@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp } from "lucide-react";
+import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { useAppStore } from "../store/appStore";
@@ -8,6 +9,7 @@ import { useAppStore } from "../store/appStore";
 export function ActivePlanScreen() {
   const navigate = useNavigate();
   const portfolio = useAppStore((state) => state.portfolio);
+  const executionStatus = useAppStore((state) => state.executionStatus);
 
   if (!portfolio) {
     return (
@@ -47,6 +49,7 @@ export function ActivePlanScreen() {
           </p>
         </div>
 
+        <ExecutionStatusCard status={executionStatus} />
         <PortfolioSummary portfolio={portfolio} />
 
         <div className="feature-grid">
@@ -59,6 +62,13 @@ export function ActivePlanScreen() {
             <p className="muted">
               If route quality weakens, NEURO can guide this plan into a calmer
               mode before you take on more movement than intended.
+            </p>
+          </section>
+          <section className="card">
+            <h3>Current branch scope</h3>
+            <p className="muted">
+              This phase captures real wallet approval and portfolio staging.
+              Live protocol execution adapters are the next implementation layer.
             </p>
           </section>
         </div>

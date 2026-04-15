@@ -1,20 +1,25 @@
 import { motion } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PlanCard } from "../components/plans/PlanCard";
+import { TechnicalDetailsDrawer } from "../components/plans/TechnicalDetailsDrawer";
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { usePlanEngine } from "../hooks/usePlanEngine";
+import { usePlanExecution } from "../hooks/usePlanExecution";
 import { useAppStore } from "../store/appStore";
 
 export function PlanResultScreen() {
   const navigate = useNavigate();
   const acknowledgeRisk = useAppStore((state) => state.acknowledgeRisk);
   const setExecutionStatus = useAppStore((state) => state.setExecutionStatus);
-  const setPortfolio = useAppStore((state) => state.setPortfolio);
   const hasWallet = useAppStore((state) => state.hasWallet);
-  const { recommendation, feePreview, portfolio } = usePlanEngine();
+  const routeQualityScore = useAppStore((state) => state.routeQualityScore);
+  const executionStatus = useAppStore((state) => state.executionStatus);
+  const { recommendation, feePreview } = usePlanEngine();
+  const { activateWithWallet } = usePlanExecution();
 
-  const handleActivate = () => {
+  const handleActivate = async () => {
     acknowledgeRisk();
     if (!hasWallet) {
       setExecutionStatus("waiting-for-wallet");
@@ -22,8 +27,13 @@ export function PlanResultScreen() {
       return;
     }
 
-    setExecutionStatus("success");
-    setPortfolio(portfolio);
+    try {
+      await activateWithWallet(recommendation);
+    } catch {
+      setExecutionStatus("failed-safely");
+      return;
+    }
+
     navigate("/active");
   };
 
@@ -44,6 +54,7 @@ export function PlanResultScreen() {
       </motion.section>
 
       <PlanCard recommendation={recommendation} feePreview={feePreview} />
+      <ExecutionStatusCard status={executionStatus} />
 
       <motion.section
         className="card"
@@ -61,6 +72,13 @@ export function PlanResultScreen() {
           weaken.
         </p>
       </motion.section>
+
+      <TechnicalDetailsDrawer
+        recommendation={recommendation}
+        feePreview={feePreview}
+        routeQualityScore={routeQualityScore}
+        hasWallet={hasWallet}
+      />
 
       <StickyActionBar
         primaryLabel={hasWallet ? "Activate this plan" : "Connect wallet to activate"}

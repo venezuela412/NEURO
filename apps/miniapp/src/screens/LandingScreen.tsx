@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "@neuro/shared";
 import { StickyActionBar } from "../components/core/StickyActionBar";
+import { useNeuroOverview } from "../hooks/useNeuroOverview";
 import { useTelegramEnv } from "../hooks/useTelegramEnv";
 
 const featureCards = [
@@ -26,6 +27,7 @@ const featureCards = [
 export function LandingScreen() {
   const navigate = useNavigate();
   const telegramEnv = useTelegramEnv();
+  const { data: overview } = useNeuroOverview();
 
   return (
     <>
@@ -54,11 +56,15 @@ export function LandingScreen() {
             </div>
             <div>
               <strong>Only charged on profit</strong>
-              <span>Transparent monetization</span>
+              <span>{overview?.platformFeeNotice ?? "Transparent monetization"}</span>
             </div>
             <div>
               <strong>{telegramEnv.isTelegram ? "Telegram mode" : "Browser mode"}</strong>
-              <span>Theme-aware and mobile-first</span>
+              <span>
+                {overview
+                  ? `Gas reserve from ${overview.minimumGasReserveTon.toFixed(1)} TON`
+                  : "Theme-aware and mobile-first"}
+              </span>
             </div>
           </div>
         </motion.div>

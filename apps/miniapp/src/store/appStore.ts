@@ -5,6 +5,7 @@ import {
   type FeePreview,
   type ExecutionStatus,
   type Goal,
+  type PlanPreviewResponse,
   type PlanRecommendation,
   type PortfolioSnapshot,
 } from "@neuro/shared";
@@ -34,6 +35,9 @@ interface AppState {
   setRecommendation: (recommendation: PlanRecommendation | null) => void;
   setFeePreview: (feePreview: FeePreview | null) => void;
   setPortfolio: (portfolio: PortfolioSnapshot | null) => void;
+  setRouteQualityScore: (score: number) => void;
+  applyPlanPreview: (preview: PlanPreviewResponse) => void;
+  clearGeneratedPlan: () => void;
   generatePlan: () => void;
   activatePlan: () => void;
   setExecutionStatus: (status: ExecutionStatus) => void;
@@ -51,16 +55,60 @@ export const useAppStore = create<AppState>((set, get) => ({
   feePreview: null,
   portfolio: null,
   executionStatus: "idle",
-  setAmountTon: (amountTon) => set({ amountTon, acknowledgedRisk: false }),
-  setGoal: (goal) => set({ goal, acknowledgedRisk: false }),
-  setWantsFlexibility: (wantsFlexibility) => set({ wantsFlexibility, acknowledgedRisk: false }),
-  setRiskPreference: (riskPreference) => set({ riskPreference, acknowledgedRisk: false }),
+  setAmountTon: (amountTon) =>
+    set({
+      amountTon,
+      acknowledgedRisk: false,
+      recommendation: null,
+      feePreview: null,
+      executionStatus: "idle",
+    }),
+  setGoal: (goal) =>
+    set({
+      goal,
+      acknowledgedRisk: false,
+      recommendation: null,
+      feePreview: null,
+      executionStatus: "idle",
+    }),
+  setWantsFlexibility: (wantsFlexibility) =>
+    set({
+      wantsFlexibility,
+      acknowledgedRisk: false,
+      recommendation: null,
+      feePreview: null,
+      executionStatus: "idle",
+    }),
+  setRiskPreference: (riskPreference) =>
+    set({
+      riskPreference,
+      acknowledgedRisk: false,
+      recommendation: null,
+      feePreview: null,
+      executionStatus: "idle",
+    }),
   setHasWallet: (hasWallet) => set({ hasWallet }),
   acknowledgeRisk: () => set({ acknowledgedRisk: true }),
   resetAcknowledgedRisk: () => set({ acknowledgedRisk: false }),
   setRecommendation: (recommendation) => set({ recommendation }),
   setFeePreview: (feePreview) => set({ feePreview }),
   setPortfolio: (portfolio) => set({ portfolio }),
+  setRouteQualityScore: (routeQualityScore) => set({ routeQualityScore }),
+  applyPlanPreview: (preview) =>
+    set({
+      recommendation: preview.recommendation,
+      feePreview: preview.feePreview,
+      routeQualityScore: preview.routeQualityScore,
+      executionStatus: preview.executionStatus,
+      acknowledgedRisk: false,
+    }),
+  clearGeneratedPlan: () =>
+    set({
+      recommendation: null,
+      feePreview: null,
+      executionStatus: "idle",
+      acknowledgedRisk: false,
+    }),
   generatePlan: () => {
     const state = get();
     const recommendation = recommendPlan({

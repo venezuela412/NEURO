@@ -62,6 +62,14 @@ export interface FeePreview {
   estimatedNetValueTon: number;
 }
 
+export interface NeuroOverview {
+  appName: string;
+  tagline: string;
+  platformFeeNotice: string;
+  minimumGasReserveTon: number;
+  routeQualityBaseline: number;
+}
+
 export type ExecutionStatus =
   | "idle"
   | "preparing"
@@ -93,4 +101,14 @@ export interface PortfolioSnapshot {
   currentModeLabel: string;
   lastOptimizationLabel: string;
   activity: ActivityEvent[];
+}
+
+export interface PlanPreviewResponse {
+  recommendation: PlanRecommendation;
+  feePreview: FeePreview;
+  portfolio: PortfolioSnapshot;
+  executionStatus: ExecutionStatus;
+  executionTitle: string;
+  executionDescription: string;
+  routeQualityScore: number;
 }

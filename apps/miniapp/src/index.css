@@ -176,6 +176,9 @@ button {
 .wallet-slot {
   min-width: 112px;
   display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   justify-content: flex-end;
 }
 
@@ -675,6 +678,83 @@ ul {
   background: rgba(58, 210, 136, 0.12);
   color: #a6efc9;
   border: 1px solid rgba(58, 210, 136, 0.22);
+}
+
+.wallet-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+}
+
+.execution-card {
+  gap: 0.75rem;
+}
+
+.technical-drawer {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.technical-drawer summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 1rem 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.technical-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.technical-grid {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1.15rem 1.15rem;
+}
+
+.technical-block {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.technical-block h3 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.technical-block p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 640px) {

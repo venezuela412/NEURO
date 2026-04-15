@@ -3,6 +3,7 @@ import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { APP_NAME } from "@neuro/shared";
+import { useTelegramEnv } from "../../hooks/useTelegramEnv";
 import { useNeuroWallet } from "../../hooks/useTonWallet";
 import { useAppStore } from "../../store/appStore";
 
@@ -26,6 +27,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const navigate = useNavigate();
   const location = useLocation();
   const wallet = useNeuroWallet();
+  const telegramEnv = useTelegramEnv();
   const setHasWallet = useAppStore((state) => state.setHasWallet);
   const canGoBack = location.pathname !== "/";
 
@@ -56,7 +58,9 @@ export function AppShell({ children }: PropsWithChildren) {
             <Link to="/" className="brand-link">
               {APP_NAME}
             </Link>
-            <p className="header-subtitle">{titles[location.pathname] ?? "Put your TON to work"}</p>
+            <p className="header-subtitle">
+              {titles[location.pathname] ?? "Put your TON to work"} · {telegramEnv.platform}
+            </p>
           </div>
         </div>
 
@@ -65,6 +69,7 @@ export function AppShell({ children }: PropsWithChildren) {
             <BellDot size={18} />
           </button>
           <div className="wallet-slot">
+            {wallet.connected ? <span className="wallet-pill">{wallet.walletName}</span> : null}
             <TonConnectButton className="wallet-button" />
           </div>
         </div>

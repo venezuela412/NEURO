@@ -5,6 +5,9 @@ import {
   GAS_RESERVE_MIN_TON,
   PLATFORM_FEE_NOTICE,
   type ExecutionStatus,
+  type NeuroOverview,
+  type PlanPreviewResponse,
+  type PlanRecommendationInput,
 } from "@neuro/shared";
 import {
   buildPortfolioSnapshot,
@@ -78,8 +81,8 @@ export function getExecutionPreview(status: ExecutionStatus): PlanExecutionPrevi
     },
     success: {
       status,
-      title: "Plan active",
-      description: "Your TON is now in its selected income mode.",
+      title: "Wallet approval captured",
+      description: "NEURO received a real wallet signature and staged the plan for the next execution step.",
     },
     "retry-needed": {
       status,
@@ -101,7 +104,7 @@ export function getExecutionPreview(status: ExecutionStatus): PlanExecutionPrevi
   return mapping[status];
 }
 
-export function getNeuroOverview() {
+export function getNeuroOverview(): NeuroOverview {
   return {
     appName: APP_NAME,
     tagline: APP_TAGLINE,
@@ -112,7 +115,7 @@ export function getNeuroOverview() {
 }
 
 export function createMockPortfolio(goalAmountTon: number) {
-  const recommendation = recommendPlan({
+  const payload = buildPlanPreviewResponse({
     amountTon: goalAmountTon,
     goal: "earn",
     wantsFlexibility: true,
@@ -124,16 +127,51 @@ export function createMockPortfolio(goalAmountTon: number) {
     hasActivePlan: false,
   });
 
-  const snapshot = buildPortfolioSnapshot(recommendation, goalAmountTon);
+  return {
+    recommendation: payload.recommendation,
+    snapshot: payload.portfolio,
+    feePreview: payload.feePreview,
+  };
+}
+
+export function buildPlanPreviewResponse(input: PlanRecommendationInput): PlanPreviewResponse {
+  const recommendation = recommendPlan(input);
+  const portfolio = buildPortfolioSnapshot(recommendation, input.amountTon);
   const feePreview = calculateFeePreview(
     recommendation.plan.id,
-    snapshot.principalTon,
-    snapshot.estimatedValueTon,
+    portfolio.principalTon,
+    portfolio.estimatedValueTon,
   );
+  const executionStatus: ExecutionStatus = input.hasWallet ? "ready-to-sign" : "waiting-for-wallet";
+  const executionPreview = getExecutionPreview(executionStatus);
 
   return {
     recommendation,
-    snapshot,
+    feePreview,
+    portfolio,
+    executionStatus,
+    executionTitle: executionPreview.title,
+    executionDescription: executionPreview.description,
+    routeQualityScore: input.routeQualityScore,
+  };
+}
+
+export function getDefaultPlanRecommendationInput(
+  overrides: Partial<PlanRecommendationInput> = {},
+): PlanRecommendationInput {
+  return {
+    amountTon: 100,
+    goal: "earn",
+    wantsFlexibility: true,
+    riskPreference: "medium",
+    hasWallet: false,
+    gasReserveTon: GAS_RESERVE_MIN_TON,
+    routeQualityScore: DEFAULT_ROUTE_QUALITY,
+    safePathAvailable: true,
+    hasActivePlan: false,
+    ...overrides,
+  };
+}
     feePreview,
   };
 }

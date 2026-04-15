@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { buildPortfolioSnapshot, calculateFeePreview, recommendPlan } from "@neuro/domain";
-import { DEFAULT_ROUTE_QUALITY, GAS_RESERVE_MIN_TON } from "@neuro/shared";
+import { GAS_RESERVE_MIN_TON } from "@neuro/shared";
 import { useAppStore } from "../store/appStore";
 import { useNeuroWallet } from "./useTonWallet";
 
@@ -10,6 +10,7 @@ export function usePlanEngine() {
   const goal = useAppStore((state) => state.goal);
   const wantsFlexibility = useAppStore((state) => state.wantsFlexibility);
   const riskPreference = useAppStore((state) => state.riskPreference);
+  const routeQualityScore = useAppStore((state) => state.routeQualityScore);
   const portfolio = useAppStore((state) => state.portfolio);
   const storedRecommendation = useAppStore((state) => state.recommendation);
   const storedFeePreview = useAppStore((state) => state.feePreview);
@@ -25,7 +26,7 @@ export function usePlanEngine() {
         riskPreference,
         hasWallet: wallet.connected,
         gasReserveTon: GAS_RESERVE_MIN_TON,
-        routeQualityScore: DEFAULT_ROUTE_QUALITY,
+        routeQualityScore,
         safePathAvailable: true,
         hasActivePlan,
       });
@@ -52,7 +53,7 @@ export function usePlanEngine() {
           riskPreference,
           hasWallet: wallet.connected,
           gasReserveTon: GAS_RESERVE_MIN_TON,
-          routeQualityScore: DEFAULT_ROUTE_QUALITY,
+          routeQualityScore,
           safePathAvailable: true,
           hasActivePlan,
         }),
@@ -62,6 +63,7 @@ export function usePlanEngine() {
     goal,
     wantsFlexibility,
     riskPreference,
+    routeQualityScore,
     wallet,
     hasActivePlan,
     portfolio,

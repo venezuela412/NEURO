@@ -5,8 +5,8 @@ import { GoalSelector } from "../components/core/GoalSelector";
 import { FlexibilitySelector } from "../components/core/FlexibilitySelector";
 import { RiskSelector } from "../components/core/RiskSelector";
 import { StickyActionBar } from "../components/core/StickyActionBar";
+import { usePlanPreview } from "../hooks/usePlanPreview";
 import { useAppStore } from "../store/appStore";
-import { usePlanEngine } from "../hooks/usePlanEngine";
 
 export function PlanSelectorScreen() {
   const navigate = useNavigate();
@@ -20,18 +20,21 @@ export function PlanSelectorScreen() {
     setGoal,
     setWantsFlexibility,
     setRiskPreference,
-    setRecommendation,
-    setFeePreview,
+    applyPlanPreview,
     setExecutionStatus,
-    generatePlan,
   } = useAppStore();
-  const { recommendation, feePreview } = usePlanEngine();
+  const previewMutation = usePlanPreview();
 
-  const handleGeneratePlan = () => {
-    generatePlan();
-    setRecommendation(recommendation);
-    setFeePreview(feePreview);
-    setExecutionStatus(hasWallet ? "ready-to-sign" : "idle");
+  const handleGeneratePlan = async () => {
+    setExecutionStatus("preparing");
+    const preview = await previewMutation.mutateAsync({
+      amountTon,
+      goal,
+      wantsFlexibility,
+      riskPreference,
+      hasWallet,
+    });
+    applyPlanPreview(preview);
     navigate("/result");
   };
 
@@ -69,11 +72,16 @@ export function PlanSelectorScreen() {
       </motion.section>
 
       <StickyActionBar
-        primaryLabel="Generate my plan"
+        primaryLabel={previewMutation.isPending ? "Preparing your plan..." : "Generate my plan"}
         secondaryLabel="Back"
         onPrimaryClick={handleGeneratePlan}
         onSecondaryClick={() => navigate("/")}
-        helper={`Preparing a ${goal} recommendation for ${amountTon.toFixed(2)} TON`}
+        disabled={previewMutation.isPending || amountTon <= 0}
+        helper={
+          previewMutation.isPending
+            ? "Checking route quality, fee impact, and safer fallback options."
+            : `Preparing a ${goal} recommendation for ${amountTon.toFixed(2)} TON`
+        }
       />
     </>
   );

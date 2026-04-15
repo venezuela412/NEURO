@@ -9,6 +9,7 @@
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fastify/cors": "^11.2.0",
     "@neuro/adapters": "workspace:*",
     "@neuro/domain": "workspace:*",
     "@neuro/shared": "workspace:*",
