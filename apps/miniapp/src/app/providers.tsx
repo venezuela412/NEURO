@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import type { PropsWithChildren } from "react";
 import { useMemo } from "react";
+import { OmnistonBridge, createOmnistonBridge } from "../components/stonfi/OmnistonBridge";
 import { TelegramBridge } from "../components/telegram/TelegramBridge";
 
 const TON_MANIFEST_URL =
@@ -11,6 +12,7 @@ const TON_MANIFEST_URL =
 
 export function AppProviders({ children }: PropsWithChildren) {
   const queryClient = useMemo(() => new QueryClient(), []);
+  const omniston = useMemo(() => createOmnistonBridge(), []);
 
   return (
     <TonConnectUIProvider
@@ -26,8 +28,10 @@ export function AppProviders({ children }: PropsWithChildren) {
       analytics={{ mode: "off" }}
     >
       <QueryClientProvider client={queryClient}>
-        <TelegramBridge />
-        {children}
+        <OmnistonBridge omniston={omniston}>
+          <TelegramBridge />
+          {children}
+        </OmnistonBridge>
       </QueryClientProvider>
     </TonConnectUIProvider>
   );

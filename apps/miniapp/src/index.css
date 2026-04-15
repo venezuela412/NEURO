@@ -370,6 +370,18 @@ ul {
   font-size: 1.08rem;
 }
 
+.quote-signal {
+  border-color: rgba(143, 115, 255, 0.26);
+  background:
+    radial-gradient(circle at top right, rgba(143, 115, 255, 0.12), transparent 40%),
+    rgba(255, 255, 255, 0.03);
+}
+
+.quote-warning {
+  border-color: rgba(246, 196, 107, 0.28);
+  background: rgba(246, 196, 107, 0.06);
+}
+
 .metric-label {
   font-size: 0.8rem;
   text-transform: uppercase;

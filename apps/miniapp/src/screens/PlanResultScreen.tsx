@@ -7,6 +7,7 @@ import { TechnicalDetailsDrawer } from "../components/plans/TechnicalDetailsDraw
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { usePlanEngine } from "../hooks/usePlanEngine";
 import { usePlanExecution } from "../hooks/usePlanExecution";
+import { useStonQuote } from "../hooks/useStonQuote";
 import { useTonstakers } from "../hooks/useTonstakers";
 import { useAppStore } from "../store/appStore";
 
@@ -17,10 +18,15 @@ export function PlanResultScreen() {
   const hasWallet = useAppStore((state) => state.hasWallet);
   const routeQualityScore = useAppStore((state) => state.routeQualityScore);
   const executionStatus = useAppStore((state) => state.executionStatus);
+  const amountTon = useAppStore((state) => state.amountTon);
   const { recommendation, feePreview } = usePlanEngine();
   const { activateWithWallet } = usePlanExecution();
   const { safeIncomeQuery } = useTonstakers({
     enabled: recommendation.plan.id === "safe-income",
+  });
+  const stonQuote = useStonQuote({
+    enabled: recommendation.plan.id !== "safe-income",
+    amountTon,
   });
 
   const handleActivate = async () => {
@@ -98,6 +104,53 @@ export function PlanResultScreen() {
             <p className="muted">
               Tonstakers data is currently unavailable, so NEURO is keeping the plan
               explanation conservative and relying on safe-mode fallback rules.
+            </p>
+          )}
+        </motion.section>
+      ) : null}
+
+      {recommendation.plan.id !== "safe-income" ? (
+        <motion.section
+          className="card"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06, duration: 0.28 }}
+        >
+          <div className="inline-icon-row">
+            <ShieldCheck size={18} />
+            <span>Growth route signal</span>
+          </div>
+          {stonQuote.query.isLoading ? (
+            <p className="muted">
+              Checking STON.fi route quality for a stronger growth-oriented path...
+            </p>
+          ) : stonQuote.isQuoted && stonQuote.signal ? (
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <span className="metric-label">Quote quality</span>
+                <strong>{stonQuote.signal.qualityLabel}</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Estimated route score</span>
+                <strong>{(stonQuote.signal.routeQualityScore * 100).toFixed(0)} / 100</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Signal source</span>
+                <strong>STON.fi quote seam</strong>
+              </div>
+              <div className="metric-card">
+                <span className="metric-label">Current stance</span>
+                <strong>
+                  {stonQuote.signal.routeQualityScore >= 0.8
+                    ? "Route supports this plan"
+                    : "Keep fallback ready"}
+                </strong>
+              </div>
+            </div>
+          ) : (
+            <p className="muted">
+              STON.fi quote context is unavailable right now, so NEURO is keeping
+              this recommendation conservative and leaning harder on fallback rules.
             </p>
           )}
         </motion.section>
