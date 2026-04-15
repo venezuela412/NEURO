@@ -1,17 +1,21 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp } from "lucide-react";
 import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
+import { useNeuroWallet } from "../hooks/useTonWallet";
+import { usePortfolioActions } from "../hooks/usePortfolioActions";
 import { useAppStore } from "../store/appStore";
 
 export function ActivePlanScreen() {
-  const navigate = useNavigate();
+  const wallet = useNeuroWallet();
   const portfolio = useAppStore((state) => state.portfolio);
   const executionStatus = useAppStore((state) => state.executionStatus);
   const executionReceipt = useAppStore((state) => state.executionReceipt);
   const isPortfolioHydrating = useAppStore((state) => state.isPortfolioHydrating);
+  const { moveToSafetyMutation, withdrawMutation } = usePortfolioActions();
+  const isPending = moveToSafetyMutation.isPending || withdrawMutation.isPending;
 
   if (isPortfolioHydrating) {
     return (
@@ -99,11 +103,16 @@ export function ActivePlanScreen() {
       </motion.section>
 
       <StickyActionBar
-        primaryLabel="View activity"
-        secondaryLabel="Build another plan"
-        onPrimaryClick={() => navigate("/activity")}
-        onSecondaryClick={() => navigate("/plans")}
-        helper={`Available to withdraw now: ${portfolio.availableToWithdrawTon.toFixed(2)} TON`}
+        primaryLabel={isPending ? "Working..." : "Switch to safety"}
+        secondaryLabel={isPending ? "..." : "Withdraw"}
+        disabled={isPending || !wallet.address}
+        onPrimaryClick={() => void moveToSafetyMutation.mutateAsync()}
+        onSecondaryClick={() => void withdrawMutation.mutateAsync(portfolio.availableToWithdrawTon)}
+        helper={
+          wallet.address
+            ? `Available to withdraw now: ${portfolio.availableToWithdrawTon.toFixed(2)} TON`
+            : "Connect a wallet to enable switch and withdraw actions."
+        }
       />
     </>
   );

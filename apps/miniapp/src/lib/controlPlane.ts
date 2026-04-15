@@ -2,6 +2,7 @@ import {
   type ExecutionReceipt,
   type NeuroOverview,
   type PersistedPortfolioState,
+  type PortfolioSnapshot,
   type PlanPreviewResponse,
   type PlanRecommendationInput,
 } from "@neuro/shared";
@@ -78,4 +79,34 @@ export async function fetchExecutionReceipts(walletAddress: string) {
   } catch {
     return [];
   }
+}
+
+export async function movePortfolioToSafety(walletAddress: string) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
+    method: "POST",
+  });
+
+  return parseJson<{
+    ok: true;
+    portfolio: PortfolioSnapshot;
+    executionReceipt: ExecutionReceipt;
+  }>(response);
+}
+
+export async function withdrawPortfolio(walletAddress: string, amountTon?: number) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/withdraw`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amountTon,
+    }),
+  });
+
+  return parseJson<{
+    ok: true;
+    portfolio: PortfolioSnapshot;
+    executionReceipt: ExecutionReceipt;
+  }>(response);
 }

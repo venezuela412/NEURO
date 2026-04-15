@@ -65,7 +65,7 @@ export interface FeePreview {
 export interface ExecutionReceipt {
   id: string;
   planId: PlanId;
-  mode: "wallet-approval" | "tonstakers-stake";
+  mode: "wallet-approval" | "tonstakers-stake" | "move-to-safety" | "withdraw";
   status: "captured" | "submitted" | "reconciling" | "confirmed" | "failed";
   reference: string;
   summary: string;

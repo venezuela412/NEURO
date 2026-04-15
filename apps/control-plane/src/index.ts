@@ -10,6 +10,8 @@ import {
 import type { PersistedPortfolioState, PlanRecommendationInput } from "@neuro/shared";
 import {
   addExecutionReceipt,
+  applySwitchToSafety,
+  applyWithdraw,
   getPersistedPortfolioState,
   listExecutionReceipts,
   savePersistedPortfolioState,
@@ -84,6 +86,29 @@ server.get<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/exe
     items: await listExecutionReceipts(request.params.walletAddress),
   };
 });
+
+server.post<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/switch-to-safety", async (request, reply) => {
+  const result = await applySwitchToSafety(request.params.walletAddress);
+  if (!result) {
+    reply.code(404);
+    return { error: "not_found" };
+  }
+
+  return result;
+});
+
+server.post<{ Params: { walletAddress: string }; Body: { amountTon?: number } }>(
+  "/portfolio/:walletAddress/withdraw",
+  async (request, reply) => {
+    const result = await applyWithdraw(request.params.walletAddress, request.body?.amountTon);
+  if (!result) {
+    reply.code(404);
+    return { error: "not_found" };
+  }
+
+  return result;
+  },
+);
 
 const port = Number(process.env.PORT ?? 8787);
 

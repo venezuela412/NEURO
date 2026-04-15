@@ -282,3 +282,85 @@ export function buildPortfolioSnapshot(
     activity: buildActivityFeed(recommendation.plan.id, amountTon),
   };
 }
+
+function buildTimestampLabel() {
+  return "Just now";
+}
+
+export function appendPortfolioActivity(
+  portfolio: PortfolioSnapshot,
+  event: Omit<ActivityEvent, "id" | "timestampLabel">,
+): PortfolioSnapshot {
+  return {
+    ...portfolio,
+    activity: [
+      {
+        ...event,
+        id: `event-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        timestampLabel: buildTimestampLabel(),
+      },
+      ...portfolio.activity,
+    ],
+  };
+}
+
+export function movePortfolioToSafety(portfolio: PortfolioSnapshot): PortfolioSnapshot {
+  const saferValue = Number((portfolio.estimatedValueTon * 0.998).toFixed(2));
+  const estimatedFeeTon = portfolio.estimatedFeeTon;
+  const netEstimatedValueTon = Number((saferValue - estimatedFeeTon).toFixed(2));
+  const availableToWithdrawTon = Number((saferValue - GAS_RESERVE_MIN_TON).toFixed(2));
+
+  return appendPortfolioActivity(
+    {
+      ...portfolio,
+      activePlanId: "exit-to-safety",
+      estimatedValueTon: saferValue,
+      netEstimatedValueTon,
+      availableToWithdrawTon,
+      currentModeLabel: "Safety mode",
+      lastOptimizationLabel: "Moved into a calmer supported mode",
+    },
+    {
+      title: "Moved to safety",
+      description:
+        "NEURO shifted the active plan into a calmer mode to reduce movement and keep funds easier to manage.",
+      tone: "calm",
+    },
+  );
+}
+
+export function withdrawFromPortfolio(
+  portfolio: PortfolioSnapshot,
+  amountTon?: number,
+): PortfolioSnapshot {
+  const requestedAmount = amountTon ?? portfolio.availableToWithdrawTon;
+  const clampedAmount = Math.max(0, Math.min(requestedAmount, portfolio.availableToWithdrawTon));
+  const nextEstimatedValue = Number((portfolio.estimatedValueTon - clampedAmount).toFixed(2));
+  const nextPrincipal = Math.max(0, Number((portfolio.principalTon - clampedAmount).toFixed(2)));
+  const nextProfit = Math.max(0, Number((nextEstimatedValue - nextPrincipal).toFixed(2)));
+  const nextNetEstimatedValue = Math.max(
+    0,
+    Number((portfolio.netEstimatedValueTon - clampedAmount).toFixed(2)),
+  );
+  const nextAvailableToWithdraw = Math.max(
+    0,
+    Number((Math.max(0, nextEstimatedValue - GAS_RESERVE_MIN_TON)).toFixed(2)),
+  );
+
+  return appendPortfolioActivity(
+    {
+      ...portfolio,
+      principalTon: nextPrincipal,
+      estimatedValueTon: nextEstimatedValue,
+      estimatedProfitTon: nextProfit,
+      netEstimatedValueTon: nextNetEstimatedValue,
+      availableToWithdrawTon: nextAvailableToWithdraw,
+      lastOptimizationLabel: "Withdrawal processed against available balance",
+    },
+    {
+      title: "Withdrawal prepared",
+      description: `NEURO marked ${clampedAmount.toFixed(2)} TON as withdrawn from the active plan state.`,
+      tone: "positive",
+    },
+  );
+}
