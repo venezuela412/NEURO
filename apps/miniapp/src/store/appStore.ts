@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   DEFAULT_ROUTE_QUALITY,
   GAS_RESERVE_MIN_TON,
@@ -48,7 +49,9 @@ interface AppState {
   setExecutionStatus: (status: ExecutionStatus) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
   amountTon: 100,
   goal: "earn",
   wantsFlexibility: true,
@@ -172,5 +175,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       executionReceipt: null,
     });
   },
-  setExecutionStatus: (executionStatus) => set({ executionStatus }),
-}));
+      setExecutionStatus: (executionStatus) => set({ executionStatus }),
+    }),
+    {
+      name: "neuro-app-store",
+      partialize: (state) => ({
+        amountTon: state.amountTon,
+        goal: state.goal,
+        wantsFlexibility: state.wantsFlexibility,
+        riskPreference: state.riskPreference,
+        hasWallet: state.hasWallet,
+        routeQualityScore: state.routeQualityScore,
+        recommendation: state.recommendation,
+        feePreview: state.feePreview,
+        portfolio: state.portfolio,
+        executionStatus: state.executionStatus,
+        executionReceipt: state.executionReceipt,
+      }),
+    },
+  ),
+);

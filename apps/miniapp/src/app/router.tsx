@@ -1,13 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
-import { ActivityScreen } from "../screens/ActivityScreen";
-import { LandingScreen } from "../screens/LandingScreen";
-import { PlanResultScreen } from "../screens/PlanResultScreen";
-import { PlanSelectorScreen } from "../screens/PlanSelectorScreen";
-import { ActivePlanScreen } from "../screens/ActivePlanScreen";
-import { NotFoundScreen } from "../screens/NotFoundScreen";
-import { WalletOnboardingScreen } from "../screens/WalletOnboardingScreen";
 
 function ShellLayout() {
   return (
@@ -22,13 +15,55 @@ export const appRouter = createBrowserRouter([
     path: "/",
     element: <ShellLayout />,
     children: [
-      { index: true, element: <LandingScreen /> },
-      { path: "onboarding", element: <WalletOnboardingScreen /> },
-      { path: "plans", element: <PlanSelectorScreen /> },
-      { path: "result", element: <PlanResultScreen /> },
-      { path: "active", element: <ActivePlanScreen /> },
-      { path: "activity", element: <ActivityScreen /> },
-      { path: "*", element: <NotFoundScreen /> },
+      {
+        index: true,
+        lazy: async () => {
+          const { LandingScreen } = await import("../screens/LandingScreen");
+          return { Component: LandingScreen };
+        },
+      },
+      {
+        path: "onboarding",
+        lazy: async () => {
+          const { WalletOnboardingScreen } = await import("../screens/WalletOnboardingScreen");
+          return { Component: WalletOnboardingScreen };
+        },
+      },
+      {
+        path: "plans",
+        lazy: async () => {
+          const { PlanSelectorRoute } = await import("../screens/PlanSelectorRoute");
+          return { Component: PlanSelectorRoute };
+        },
+      },
+      {
+        path: "result",
+        lazy: async () => {
+          const { PlanResultRoute } = await import("../screens/PlanResultRoute");
+          return { Component: PlanResultRoute };
+        },
+      },
+      {
+        path: "active",
+        lazy: async () => {
+          const { ActivePlanScreen } = await import("../screens/ActivePlanScreen");
+          return { Component: ActivePlanScreen };
+        },
+      },
+      {
+        path: "activity",
+        lazy: async () => {
+          const { ActivityScreen } = await import("../screens/ActivityScreen");
+          return { Component: ActivityScreen };
+        },
+      },
+      {
+        path: "*",
+        lazy: async () => {
+          const { NotFoundScreen } = await import("../screens/NotFoundScreen");
+          return { Component: NotFoundScreen };
+        },
+      },
     ],
   },
 ]);
