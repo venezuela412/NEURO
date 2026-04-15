@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import {
   Blockchain,
+  GaslessSettlement,
   SettlementMethod,
   type QuoteRequest,
-  type QuoteResponseEvent,
   useConnectionStatus,
   useRfq,
 } from "@ston-fi/omniston-sdk-react";
@@ -29,8 +29,12 @@ function getRiskSlippageBps(riskPreference: "low" | "medium" | "high") {
   return 40;
 }
 
-function deriveRouteQualityScore(event: QuoteResponseEvent | undefined) {
-  if (!event || !("type" in event)) {
+function hasEventType(value: unknown): value is { type: string } {
+  return typeof value === "object" && value !== null && "type" in value;
+}
+
+function deriveRouteQualityScore(event: unknown) {
+  if (!hasEventType(event)) {
     return null;
   }
 
@@ -74,6 +78,7 @@ export function useStonQuote(options: UseStonQuoteOptions = {}) {
         bidUnits: String(Math.round(amountTon * 1_000_000_000)),
       },
       settlementParams: {
+        gaslessSettlement: GaslessSettlement.GASLESS_SETTLEMENT_PROHIBITED,
         maxPriceSlippageBps: getRiskSlippageBps(riskPreference),
       },
     }),
@@ -84,13 +89,20 @@ export function useStonQuote(options: UseStonQuoteOptions = {}) {
     enabled,
   });
 
+  const routeQualityScore = deriveRouteQualityScore(quote.data);
+  const routeEventType = hasEventType(quote.data) ? quote.data.type : undefined;
+  const rfqId =
+    typeof quote.data === "object" && quote.data !== null && "rfqId" in quote.data
+      ? String(quote.data.rfqId)
+      : undefined;
+
   return {
     enabled,
     connectionStatus,
-    quote,
     isLoading: quote.isLoading || quote.isPending,
-    routeQualityScore: deriveRouteQualityScore(quote.data),
-    routeEventType: quote.data?.type,
-    rfqId: "rfqId" in (quote.data ?? {}) ? quote.data.rfqId : undefined,
+    routeQualityScore,
+    routeEventType,
+    rfqId,
+    hasLiveQuote: routeQualityScore !== null,
   };
 }

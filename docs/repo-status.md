@@ -14,6 +14,7 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - real wallet signature approval flow
 - Telegram WebApp bridge layer
 - Tonstakers Safe Income read-side adapter seam
+- STON.fi quote signal seam for Balanced/Growth
 - deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
@@ -44,6 +45,7 @@ This is the current source of truth for what has been built so far.
 - `react-dom`: `^19.2.4`
 - `react-router-dom`: `^7.9.5`
 - `zustand`: `^5.0.8`
+- `@ston-fi/omniston-sdk-react`: `^0.7.12`
 - `@tanstack/react-query`: `^5.90.2`
 - `framer-motion`: `^12.23.24`
 - `lucide-react`: `^0.554.0`
@@ -85,6 +87,8 @@ Contains:
 - activity screen
 - execution status card
 - technical details drawer
+- Omniston provider bridge
+- STON.fi quote signal hook
 - dark premium styling system
 
 ### `apps/control-plane`
@@ -145,6 +149,7 @@ Currently reserved for future thin TON contract work.
 - real wallet signature capture for plan approval
 - technical details drawer
 - Safe Income Tonstakers pool context when available
+- Balanced/Growth STON.fi route-quality context when available
 - Telegram-style dark presentation
 
 ### Domain logic
@@ -193,7 +198,7 @@ pnpm lint
 Internal packages are currently consumed directly from source in the workspace during development. This keeps implementation fast while the architecture is still evolving.
 
 ### Bundle size
-The Mini App currently builds successfully, but Vite warns that the main chunk is large. Tonstakers SDK integration increased the bundle size further, so code splitting should move higher in priority.
+The Mini App currently builds successfully, but Vite warns that the main chunk is large. Tonstakers plus STON.fi integration increased the bundle size further, so code splitting should move higher in priority.
 
 ### Cloud Docker runtime nuance
 In this cloud environment:

@@ -66,7 +66,8 @@ The novelty is the combination of:
    - TonConnect provider wiring is already included
    - a real wallet signature step is now included for plan approval
    - a Tonstakers read-side adapter seam is now wired for Safe Income pool context
-   - architecture is prepared for Tonstakers and STON.fi adapters through thin integration seams
+   - a first STON.fi quote seam is now wired for Balanced/Growth route-quality context
+   - architecture is prepared for deeper Tonstakers and STON.fi execution adapters through thin integration seams
 
 ## What is implemented right now
 
@@ -114,6 +115,10 @@ This gives the frontend a realistic seam for future persistence, monitoring, and
   - available-to-stake guidance
   - instant liquidity checks
   - future Safe Income execution
+- STON.fi quote seam for:
+  - route-quality signal gathering
+  - Balanced/Growth recommendation context
+  - future quote-to-execution expansion
 
 For exact package versions and validation status, see `docs/repo-status.md`.
 
@@ -128,11 +133,12 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - fee preview and accounting model
 - portfolio/activity state model
 - control-plane foundation
+- Tonstakers Safe Income pool context seam
+- STON.fi quote-signal seam for Balanced/Growth
 
 ### Simulated for now
 - most protocol execution after approval
 - live portfolio sync
-- live quote ingestion
 - live rebalancing
 - on-chain automation contract
 - live STON.fi transaction construction
@@ -326,7 +332,7 @@ See `docs/deployment.md` for:
 ## Limitations in this checkpoint
 
 - no full live Tonstakers execution flow yet
-- no live STON.fi quote/execution adapter yet
+- no live STON.fi execution flow yet
 - no persistent database yet
 - no transaction reconciliation after wallet signature yet
 - no custom Tact automation contract yet
@@ -335,8 +341,8 @@ See `docs/deployment.md` for:
 ## Roadmap
 
 ### Next product/engineering steps
-1. implement Tonstakers safe-path adapter
-2. implement STON.fi quote adapter
+1. complete Tonstakers Safe Income execution write path
+2. deepen the STON.fi quote seam into execution-ready routing
 3. reconcile signed approval to live execution states
 4. persist portfolio/activity state in the control plane
 5. add code splitting for the Mini App bundle

@@ -86,8 +86,8 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 
 ### Placeholder / next step
 
-- live Tonstakers execution write path
-- live STON.fi quote and route integration
+- live Tonstakers execution write path with reconciliation
+- full STON.fi execution routing beyond quote signals
 - persistent backend storage
 - policy-bound automation contract
 - withdraw / switch transaction flows

@@ -120,28 +120,34 @@ export function PlanResultScreen() {
             <ShieldCheck size={18} />
             <span>Growth route signal</span>
           </div>
-          {stonQuote.query.isLoading ? (
+          {stonQuote.isLoading ? (
             <p className="muted">
               Checking STON.fi route quality for a stronger growth-oriented path...
             </p>
-          ) : stonQuote.isQuoted && stonQuote.signal ? (
+          ) : stonQuote.routeQualityScore !== null ? (
             <div className="metrics-grid">
               <div className="metric-card">
                 <span className="metric-label">Quote quality</span>
-                <strong>{stonQuote.signal.qualityLabel}</strong>
+                <strong>
+                  {stonQuote.routeQualityScore >= 0.85
+                    ? "Strong"
+                    : stonQuote.routeQualityScore >= 0.7
+                      ? "Usable"
+                      : "Weak"}
+                </strong>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Estimated route score</span>
-                <strong>{(stonQuote.signal.routeQualityScore * 100).toFixed(0)} / 100</strong>
+                <strong>{(stonQuote.routeQualityScore * 100).toFixed(0)} / 100</strong>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Signal source</span>
-                <strong>STON.fi quote seam</strong>
+                <strong>{stonQuote.rfqId ? "STON.fi live RFQ" : "STON.fi quote seam"}</strong>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Current stance</span>
                 <strong>
-                  {stonQuote.signal.routeQualityScore >= 0.8
+                  {stonQuote.routeQualityScore >= 0.8
                     ? "Route supports this plan"
                     : "Keep fallback ready"}
                 </strong>
