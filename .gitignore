@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+.env
+.env.local
+*.tsbuildinfo
+coverage
+apps/miniapp/.vite
+apps/miniapp/node_modules
+apps/control-plane/node_modules
+packages/*/node_modules
