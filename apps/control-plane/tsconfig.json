@@ -1,10 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
     "lib": ["ES2023"],
-    "types": ["node"]
+    "types": ["node"],
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "../../packages/shared/src/**/*.ts", "../../packages/domain/src/**/*.ts", "../../packages/adapters/src/**/*.ts"]
 }
