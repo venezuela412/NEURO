@@ -81,6 +81,21 @@ export async function fetchExecutionReceipts(walletAddress: string) {
   }
 }
 
+export async function reconcileExecutionReceipt(walletAddress: string, executionId: string) {
+  const response = await fetch(
+    `${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/executions/${encodeURIComponent(executionId)}/reconcile`,
+    {
+      method: "POST",
+    },
+  );
+
+  return parseJson<{
+    portfolio: PortfolioSnapshot | null;
+    executionReceipt: ExecutionReceipt;
+    executionStatus: "success" | "confirming" | "failed-safely";
+  }>(response);
+}
+
 export async function movePortfolioToSafety(walletAddress: string) {
   const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
     method: "POST",

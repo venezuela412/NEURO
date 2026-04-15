@@ -1,6 +1,7 @@
 import type { ActivityEvent, ExecutionReceipt, PersistedPortfolioState } from "@neuro/shared";
 import { buildPortfolioSnapshot, getPlanDefinition } from "@neuro/domain";
 import { getDb } from "./db";
+import { reconcileExecutionReceipt } from "./reconciliation";
 
 interface PortfolioStateRow {
   wallet_address: string;
@@ -79,6 +80,30 @@ export async function listExecutionReceipts(walletAddress: string) {
   );
 
   return result.rows.map((row) => JSON.parse(row.receipt_json) as ExecutionReceipt);
+}
+
+export async function getExecutionReceipt(walletAddress: string, receiptId: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const result = await db.query<ExecutionReceiptRow>(
+    `
+      SELECT id, wallet_address, receipt_json, created_at
+      FROM execution_receipts
+      WHERE wallet_address = $1 AND id = $2
+      LIMIT 1
+    `,
+    [normalized, receiptId],
+  );
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  return JSON.parse(result.rows[0].receipt_json) as ExecutionReceipt;
+}
+
+export async function updateExecutionReceipt(walletAddress: string, receipt: ExecutionReceipt) {
+  return addExecutionReceipt(walletAddress, receipt);
 }
 
 function buildServerEvent(title: string, description: string, tone: ActivityEvent["tone"]): ActivityEvent {
@@ -235,5 +260,62 @@ export async function applyWithdraw(walletAddress: string, requestedAmountTon?: 
   return {
     portfolio: nextState.portfolio!,
     executionReceipt: receipt,
+  };
+}
+
+export async function reconcilePersistedExecution(walletAddress: string, receiptId: string) {
+  const current = await getPersistedPortfolioState(walletAddress);
+  if (!current) {
+    return null;
+  }
+
+  const receipt = await getExecutionReceipt(walletAddress, receiptId);
+  if (!receipt) {
+    return null;
+  }
+
+  const result = await reconcileExecutionReceipt(receipt);
+  const updatedReceipt = result.receipt;
+  await updateExecutionReceipt(walletAddress, updatedReceipt);
+
+  let nextState: PersistedPortfolioState = {
+    ...current,
+    executionReceipt:
+      current.executionReceipt?.id === updatedReceipt.id ? updatedReceipt : current.executionReceipt,
+    executionStatus:
+      updatedReceipt.status === "confirmed"
+        ? "success"
+        : updatedReceipt.status === "failed"
+          ? "failed-safely"
+          : "confirming",
+    updatedAt: new Date().toISOString(),
+  };
+
+  const activity =
+    updatedReceipt.status === "confirmed"
+      ? buildServerEvent(
+          "Execution confirmed",
+          "NEURO located the submitted request on-chain and marked it confirmed.",
+          "positive",
+        )
+      : updatedReceipt.status === "failed"
+        ? buildServerEvent(
+            "Execution needs review",
+            updatedReceipt.errorMessage ?? "NEURO could not confirm the request on-chain yet.",
+            "warning",
+          )
+        : buildServerEvent(
+            "Execution still reconciling",
+            "NEURO checked the chain and the request is still pending confirmation.",
+            "calm",
+          );
+
+  nextState = appendServerActivity(nextState, activity);
+  await savePersistedPortfolioState(nextState);
+
+  return {
+    portfolio: nextState.portfolio,
+    executionReceipt: updatedReceipt,
+    executionStatus: nextState.executionStatus,
   };
 }

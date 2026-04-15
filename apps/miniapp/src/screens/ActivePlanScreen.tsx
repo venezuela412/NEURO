@@ -4,6 +4,7 @@ import { ShieldCheck, TrendingUp } from "lucide-react";
 import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
+import { useExecutionReconciliation } from "../hooks/useExecutionReconciliation";
 import { useNeuroWallet } from "../hooks/useTonWallet";
 import { usePortfolioActions } from "../hooks/usePortfolioActions";
 import { useAppStore } from "../store/appStore";
@@ -15,6 +16,7 @@ export function ActivePlanScreen() {
   const executionReceipt = useAppStore((state) => state.executionReceipt);
   const isPortfolioHydrating = useAppStore((state) => state.isPortfolioHydrating);
   const { moveToSafetyMutation, withdrawMutation } = usePortfolioActions();
+  const reconcileMutation = useExecutionReconciliation();
   const isPending = moveToSafetyMutation.isPending || withdrawMutation.isPending;
 
   if (isPortfolioHydrating) {
@@ -97,6 +99,21 @@ export function ActivePlanScreen() {
                 Mode: {executionReceipt.mode}{" "}
                 {executionReceipt.address ? `· Address: ${executionReceipt.address}` : ""}
               </p>
+              <p className="muted">
+                Status: {executionReceipt.status}
+                {executionReceipt.transactionHash ? ` · Tx: ${executionReceipt.transactionHash.slice(0, 16)}...` : ""}
+              </p>
+              {executionReceipt.mode === "tonstakers-stake" &&
+              (executionReceipt.status === "submitted" || executionReceipt.status === "reconciling") ? (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  disabled={reconcileMutation.isPending}
+                  onClick={() => void reconcileMutation.mutate(executionReceipt.id)}
+                >
+                  {reconcileMutation.isPending ? "Checking chain..." : "Check chain status"}
+                </button>
+              ) : null}
             </section>
           ) : null}
         </div>

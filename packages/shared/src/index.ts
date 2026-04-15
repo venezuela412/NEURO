@@ -71,6 +71,11 @@ export interface ExecutionReceipt {
   summary: string;
   address?: string;
   createdAt: string;
+  transactionHash?: string;
+  accountAddress?: string;
+  reconciledAt?: string;
+  lastCheckedAt?: string;
+  errorMessage?: string;
 }
 
 export interface NeuroOverview {

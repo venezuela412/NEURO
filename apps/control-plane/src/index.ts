@@ -14,6 +14,7 @@ import {
   applyWithdraw,
   getPersistedPortfolioState,
   listExecutionReceipts,
+  reconcilePersistedExecution,
   savePersistedPortfolioState,
 } from "./repository";
 
@@ -86,6 +87,22 @@ server.get<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/exe
     items: await listExecutionReceipts(request.params.walletAddress),
   };
 });
+
+server.post<{ Params: { walletAddress: string; executionId: string } }>(
+  "/portfolio/:walletAddress/executions/:executionId/reconcile",
+  async (request, reply) => {
+    const result = await reconcilePersistedExecution(
+      request.params.walletAddress,
+      request.params.executionId,
+    );
+    if (!result) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+
+    return result;
+  },
+);
 
 server.post<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/switch-to-safety", async (request, reply) => {
   const result = await applySwitchToSafety(request.params.walletAddress);
