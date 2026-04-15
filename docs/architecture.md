@@ -97,3 +97,20 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 3. Add execution state reconciliation after wallet signature
 4. Expand the preview API into transaction-preflight and position endpoints
 5. Explore a thin policy-wallet contract only after the live execution path is stable
+
+## Deployment shape
+
+The repository now supports a practical end-of-development deployment path:
+
+- static frontend build for the Mini App
+- Fastify API deployment for the control plane
+- Dockerfiles for both services
+- Docker Compose for local end-to-end testing
+- environment-driven TonConnect manifest generation
+
+See `docs/deployment.md` for:
+
+- local test workflow
+- staging and production topology
+- container usage
+- pre-launch validation checklist

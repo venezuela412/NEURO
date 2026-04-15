@@ -13,6 +13,7 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - Fastify control-plane preview API
 - real wallet signature approval flow
 - Telegram WebApp bridge layer
+- deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
 This is the current source of truth for what has been built so far.
@@ -91,6 +92,15 @@ Contains:
 - `/portfolio/demo`
 - `/plan/preview`
 
+### Deployment artifacts
+Contains:
+- `apps/miniapp/Dockerfile`
+- `apps/control-plane/Dockerfile`
+- `apps/miniapp/nginx.conf`
+- `docker-compose.yml`
+- `scripts/generate-tonconnect-manifest.mjs`
+- `docs/deployment.md`
+
 ### `packages/shared`
 Contains:
 - shared types
@@ -148,6 +158,8 @@ Currently reserved for future thin TON contract work.
 - Mini App build and lint pipeline
 - control-plane TypeScript build
 - control-plane preview endpoint with CORS enabled
+- Docker-based local test stack
+- build-time TonConnect manifest generation
 
 ## What is not implemented yet
 
@@ -184,6 +196,7 @@ The Mini App currently builds successfully, but Vite warns that the main chunk i
 - `docs/judge-qa.md`
 - `docs/demo-script.md`
 - `docs/launch-copy.md`
+- `docs/deployment.md`
 - `.env.example`
 
 ## Recommended next documentation additions

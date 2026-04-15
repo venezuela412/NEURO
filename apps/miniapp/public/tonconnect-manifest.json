@@ -1,7 +1,7 @@
 {
-  "url": "https://neuro-ton.app",
+  "url": "http://localhost:5173",
   "name": "NEURO",
-  "iconUrl": "https://neuro-ton.app/icon-192.png",
-  "termsOfUseUrl": "https://neuro-ton.app/terms",
-  "privacyPolicyUrl": "https://neuro-ton.app/privacy"
+  "iconUrl": "http://localhost:5173/favicon.svg",
+  "termsOfUseUrl": "http://localhost:5173/terms",
+  "privacyPolicyUrl": "http://localhost:5173/privacy"
 }

@@ -29,6 +29,7 @@ The GitHub repository is intended to be the source of truth for current state, a
 - `docs/judge-qa.md` - hackathon judge answers
 - `docs/demo-script.md` - 60-second and 90-second demo flow
 - `docs/launch-copy.md` - launch and pitch copy
+- `docs/deployment.md` - local, staging, production, and Docker deployment path
 - `.env.example` - expected environment variables for local development
 
 ## Why NEURO is novel
@@ -272,6 +273,17 @@ pnpm build
 pnpm build:control-plane
 ```
 
+### Docker test stack
+
+```bash
+docker compose up --build
+```
+
+This serves:
+
+- Mini App at `http://localhost:8080`
+- control plane at `http://localhost:8787`
+
 ### Lint / typecheck
 
 ```bash
@@ -281,6 +293,24 @@ pnpm lint
 ## Environment
 
 See `.env.example` for the next-phase environment variables we expect to support.
+
+## Deployment and testing path
+
+The repository now includes a concrete deployment path for the end of development:
+
+- static/container deploy for the Mini App
+- container/server deploy for the control plane
+- environment-driven TonConnect manifest generation
+- Dockerfiles for both services
+- `docker-compose.yml` for local end-to-end testing
+
+See `docs/deployment.md` for:
+
+- local testing flow
+- staging and production topology
+- container usage
+- pre-launch checklist
+- recommended hosting options
 
 ## Limitations in this checkpoint
 
