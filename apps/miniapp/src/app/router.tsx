@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
+import { RouterErrorPage } from "./RouterErrorPage";
 
 function ShellLayout() {
   return (
@@ -14,6 +15,7 @@ export const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <ShellLayout />,
+    errorElement: <RouterErrorPage />,
     children: [
       {
         index: true,

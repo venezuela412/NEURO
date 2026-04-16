@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 import type { SignedActionProof, WalletSession } from "@neuro/shared";
 import { createWalletActionSession } from "../lib/controlPlane";
@@ -36,55 +36,61 @@ export function useWalletActionAuth(): WalletActionAuthController {
   const wallet = useNeuroWallet();
   const [session, setSession] = useState<WalletSession | null>(null);
 
-  async function ensureSession(providedProof?: SignedActionProof): Promise<WalletSession> {
-    if (!wallet.address) {
-      throw new Error("Wallet address is required");
-    }
+  const signAction = useCallback(
+    async (action: string, payload: string): Promise<SignedActionProof> => {
+      if (!wallet.address) {
+        throw new Error("Wallet address is required");
+      }
 
-    if (session && session.walletAddress === wallet.address && isSessionFresh(session.expiresAt)) {
-      return session;
-    }
+      const nonce = buildNonce();
+      const message = [
+        "NEURO protected action",
+        `Action: ${action}`,
+        `Payload: ${payload}`,
+        `Nonce: ${nonce}`,
+        `Domain: ${getDomain()}`,
+      ].join("\n");
 
-    const proof = providedProof ?? (await signAction("session", wallet.address));
-    const nextSession = await createWalletActionSession(proof);
-    setSession(nextSession);
-    return nextSession;
-  }
-
-  async function signAction(action: string, payload: string): Promise<SignedActionProof> {
-    if (!wallet.address) {
-      throw new Error("Wallet address is required");
-    }
-
-    const nonce = buildNonce();
-    const message = [
-      "NEURO protected action",
-      `Action: ${action}`,
-      `Payload: ${payload}`,
-      `Nonce: ${nonce}`,
-      `Domain: ${getDomain()}`,
-    ].join("\n");
-
-    const result = await tonConnectUI.signData({
-      type: "text",
-      text: message,
-      network: getTonNetwork(),
-      from: wallet.address,
-    });
-
-    return {
-      action,
-      nonce,
-      walletAddress: result.address,
-      timestamp: result.timestamp,
-      domain: result.domain,
-      signature: result.signature,
-      payload: {
+      const result = await tonConnectUI.signData({
         type: "text",
         text: message,
-      },
-    };
-  }
+        network: getTonNetwork(),
+        from: wallet.address,
+      });
+
+      return {
+        action,
+        nonce,
+        walletAddress: result.address,
+        timestamp: result.timestamp,
+        domain: result.domain,
+        signature: result.signature,
+        payload: {
+          type: "text",
+          text: message,
+        },
+      };
+    },
+    [tonConnectUI, wallet.address],
+  );
+
+  const ensureSession = useCallback(
+    async (providedProof?: SignedActionProof): Promise<WalletSession> => {
+      if (!wallet.address) {
+        throw new Error("Wallet address is required");
+      }
+
+      if (session && session.walletAddress === wallet.address && isSessionFresh(session.expiresAt)) {
+        return session;
+      }
+
+      const proof = providedProof ?? (await signAction("session", wallet.address));
+      const nextSession = await createWalletActionSession(proof);
+      setSession(nextSession);
+      return nextSession;
+    },
+    [session, signAction, wallet.address],
+  );
 
   return {
     signAction,
