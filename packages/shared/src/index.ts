@@ -62,6 +62,22 @@ export interface FeePreview {
   estimatedNetValueTon: number;
 }
 
+export interface ExecutionReceipt {
+  id: string;
+  planId: PlanId;
+  mode: "wallet-approval" | "tonstakers-stake" | "move-to-safety" | "withdraw";
+  status: "captured" | "submitted" | "reconciling" | "confirmed" | "failed";
+  reference: string;
+  summary: string;
+  address?: string;
+  createdAt: string;
+  transactionHash?: string;
+  accountAddress?: string;
+  reconciledAt?: string;
+  lastCheckedAt?: string;
+  errorMessage?: string;
+}
+
 export interface NeuroOverview {
   appName: string;
   tagline: string;
@@ -111,4 +127,38 @@ export interface PlanPreviewResponse {
   executionTitle: string;
   executionDescription: string;
   routeQualityScore: number;
+}
+
+export interface PersistedPortfolioState {
+  walletAddress: string;
+  recommendation: PlanRecommendation | null;
+  feePreview: FeePreview | null;
+  portfolio: PortfolioSnapshot | null;
+  executionStatus: ExecutionStatus;
+  executionReceipt: ExecutionReceipt | null;
+  routeQualityScore: number;
+  updatedAt: string;
+}
+
+export interface SignedActionPayload {
+  type: "text";
+  text: string;
+}
+
+export interface SignedActionProof {
+  action: string;
+  walletAddress: string;
+  nonce: string;
+  publicKey?: string;
+  walletStateInit?: string;
+  domain: string;
+  timestamp: number;
+  signature: string;
+  payload: SignedActionPayload;
+}
+
+export interface WalletSession {
+  token: string;
+  walletAddress: string;
+  expiresAt: string;
 }

@@ -6,6 +6,15 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ items }: ActivityFeedProps) {
+  if (items.length === 0) {
+    return (
+      <div className="card page-stack center-stack">
+        <h3>No activity yet</h3>
+        <p className="muted">Generate and activate a plan to start a clear activity history.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="activity-feed">
       {items.map((item, index) => (

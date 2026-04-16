@@ -28,13 +28,13 @@ Pick:
 - Earn
 - Grow
 
-Get a clear recommendation, fee transparency, and safety fallback without learning DeFi jargon.
+Get a clear recommendation, wallet-based approval, fee transparency, and safety fallback without learning DeFi jargon.
 
 Put your TON to work. Simply.
 
 ## Product Hunt style blurb
 
-NEURO is a Telegram-native passive income app for TON. Instead of asking users to understand staking routes, vaults, or LP mechanics, it turns idle TON into a simple plan: Protect, Earn, or Grow. The app explains what will happen, shows estimated outcomes and fees, keeps safety fallback visible, and makes passive income on TON feel calm, clear, and usable for normal people.
+NEURO is a Telegram-native passive income app for TON. Instead of asking users to understand staking routes, vaults, or LP mechanics, it turns idle TON into a simple plan: Protect, Earn, or Grow. The app explains what will happen, shows estimated outcomes and fees, uses TonConnect-compatible TON wallet approval, keeps safety fallback visible, and makes passive income on TON feel calm, clear, and usable for normal people.
 
 ## Investor / judge one-paragraph summary
 

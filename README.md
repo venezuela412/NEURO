@@ -29,6 +29,7 @@ The GitHub repository is intended to be the source of truth for current state, a
 - `docs/judge-qa.md` - hackathon judge answers
 - `docs/demo-script.md` - 60-second and 90-second demo flow
 - `docs/launch-copy.md` - launch and pitch copy
+- `docs/deployment.md` - local, staging, production, and Docker deployment path
 - `.env.example` - expected environment variables for local development
 
 ## Why NEURO is novel
@@ -64,7 +65,38 @@ The novelty is the combination of:
 5. **real TON integration path**
    - TonConnect provider wiring is already included
    - a real wallet signature step is now included for plan approval
-   - architecture is prepared for Tonstakers and STON.fi adapters through thin integration seams
+   - a Tonstakers read-side adapter seam is now wired for Safe Income pool context
+   - a first STON.fi quote seam is now wired for Balanced/Growth route-quality context
+   - signed mutation proofs now protect control-plane write actions
+   - architecture is prepared for deeper Tonstakers and STON.fi execution adapters through thin integration seams
+
+## Wallet support
+
+NEURO uses **TonConnect** for wallet connection.
+
+That means the app supports **TonConnect-compatible TON wallets** surfaced by the connection modal.
+
+In practice, this typically includes wallets such as:
+
+- **Tonkeeper**
+- **TON Space**
+- other TonConnect-compatible TON wallets supported by the user's environment
+
+The product does not hardcode a single wallet vendor. It supports the TonConnect wallet ecosystem.
+
+## What someone can demo right now
+
+This repository already supports a meaningful hackathon demo flow:
+
+1. Open the Mini App
+2. Choose **Protect**, **Earn**, or **Grow**
+3. Generate a recommended plan
+4. See live Safe Income or STON route-quality context where available
+5. Connect a TonConnect-compatible wallet
+6. Approve a plan
+7. View the active plan, execution receipt, and activity trail
+
+The product is honest about what is fully live versus what is staged for deeper execution.
 
 ## What is implemented right now
 
@@ -73,6 +105,7 @@ This branch contains the foundation checkpoint for NEURO:
 ### Mini App
 - Vite + React + TypeScript Telegram-style Mini App
 - premium dark visual system
+- route-level lazy loading for protocol-heavy screens
 - routed product flow:
   - landing
   - wallet onboarding
@@ -83,6 +116,8 @@ This branch contains the foundation checkpoint for NEURO:
 - TonConnect provider wiring
 - wallet-sign approval flow using `signData`
 - Telegram WebApp bridge for ready/expand/theme binding when available
+- persisted local app state for plans, receipts, and activity
+- Safe Income result enhancement with Tonstakers pool context when available
 - tonconnect manifest file
 
 ### Shared domain logic
@@ -96,14 +131,30 @@ This branch contains the foundation checkpoint for NEURO:
 - portfolio snapshot logic
 - activity feed generation
 
-### Control plane stub
+### Control plane
 - Fastify service with:
   - `/health`
   - `/overview`
   - `/portfolio/demo`
   - `/plan/preview`
+  - persisted portfolio state routes
+  - persisted execution receipt routes
+  - switch-to-safety and withdraw action routes
+  - execution reconciliation route
+  - signed mutation verification and replay protection for write routes
 
-This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
+This gives the frontend a realistic seam for persistence, monitoring, and execution services.
+
+### Adapter layer
+- Tonstakers adapter seam for:
+  - pool APY and rates
+  - available-to-stake guidance
+  - instant liquidity checks
+  - future Safe Income execution
+- STON.fi quote seam for:
+  - route-quality signal gathering
+  - Balanced/Growth recommendation context
+  - future quote-to-execution expansion
 
 For exact package versions and validation status, see `docs/repo-status.md`.
 
@@ -114,18 +165,22 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - Telegram-native Mini App structure
 - TonConnect integration layer
 - wallet signature approval flow
+- wallet-signed proof protection for control-plane write actions
 - deterministic plan recommendation logic
 - fee preview and accounting model
 - portfolio/activity state model
 - control-plane foundation
+- Tonstakers Safe Income pool context seam
+- STON.fi quote-signal seam for Balanced/Growth
+- DB-backed control-plane persistence
+- persisted switch-to-safety and withdraw flows
+- execution reconciliation endpoint for Tonstakers-style submitted requests
 
 ### Simulated for now
-- protocol execution after approval
-- live portfolio sync
-- live quote ingestion
+- parts of protocol execution after approval
 - live rebalancing
 - on-chain automation contract
-- live Tonstakers / STON.fi transaction construction
+- live STON.fi transaction construction
 
 Important: this repo does **not** fake successful on-chain execution. It currently demonstrates the product and architecture foundation honestly, with live protocol execution reserved for later phases.
 
@@ -272,6 +327,19 @@ pnpm build
 pnpm build:control-plane
 ```
 
+### Docker test stack
+
+```bash
+docker compose up --build
+```
+
+This serves:
+
+- Mini App at `http://localhost:8080`
+- control plane at `http://localhost:8787`
+
+In this cloud environment specifically, Docker is available with `sudo docker`. The repo's container images were validated here using an alternate `vfs` daemon path, including a working control-plane `/health` response. Compose v2 is not installed and the legacy `docker-compose` binary is unreliable, so the Compose stack should still be rechecked on a healthier host.
+
 ### Lint / typecheck
 
 ```bash
@@ -282,23 +350,44 @@ pnpm lint
 
 See `.env.example` for the next-phase environment variables we expect to support.
 
+## Deployment and testing path
+
+The repository now includes a concrete deployment path for the end of development:
+
+- static/container deploy for the Mini App
+- container/server deploy for the control plane
+- environment-driven TonConnect manifest generation
+- Dockerfiles for both services
+- `docker-compose.yml` for local end-to-end testing
+- file-backed embedded DB for control-plane persistence in the current implementation
+- Postgres-backed runtime path for more production-like deployments when `DATABASE_URL` is set
+
+See `docs/deployment.md` for:
+
+- local testing flow
+- staging and production topology
+- container usage
+- signed mutation and runtime security notes
+- pre-launch checklist
+- recommended hosting options
+
 ## Limitations in this checkpoint
 
-- no live Tonstakers execution yet
-- no live STON.fi quote/execution adapter yet
-- no persistent database yet
-- no transaction reconciliation after wallet signature yet
+- no full live Tonstakers execution flow yet
+- no live STON.fi execution flow yet
+- control-plane persistence currently uses embedded file-backed PGlite, not a multi-instance external database
+- transaction reconciliation is implemented for submitted Tonstakers-style receipts, but still needs richer indexer-backed semantics for broader execution modes
 - no custom Tact automation contract yet
 - no backend reconciliation or live transaction indexing yet
 
 ## Roadmap
 
 ### Next product/engineering steps
-1. implement Tonstakers safe-path adapter
-2. implement STON.fi quote adapter
-3. reconcile signed approval to live execution states
-4. persist portfolio/activity state in the control plane
-5. add code splitting for the Mini App bundle
+1. complete Tonstakers Safe Income execution write path
+2. deepen the STON.fi quote seam into execution-ready routing
+3. broaden reconciliation/indexing beyond Tonstakers-style submitted requests
+4. upgrade control-plane persistence from embedded DB to a more production-scalable external store if multi-instance deployment is required
+5. continue reducing protocol bundle weight and split heavy wallet/protocol code further
 6. document API and execution-state contracts in more detail
 7. add thin automation contract only if it creates real value without unsafe custody
 

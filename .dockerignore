@@ -1,0 +1,8 @@
+node_modules
+.git
+.cursor
+dist
+coverage
+*.tsbuildinfo
+apps/miniapp/dist
+apps/control-plane/dist

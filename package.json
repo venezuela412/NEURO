@@ -10,7 +10,10 @@
     "build": "pnpm --filter @neuro/miniapp build",
     "build:control-plane": "pnpm --filter @neuro/control-plane build",
     "lint": "pnpm --filter @neuro/miniapp lint",
-    "check": "pnpm build"
+    "check": "pnpm build && pnpm build:control-plane && pnpm lint",
+    "start:control-plane": "pnpm --filter @neuro/control-plane start",
+    "preview:miniapp": "pnpm --filter @neuro/miniapp preview",
+    "deploy:test": "docker compose up --build"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

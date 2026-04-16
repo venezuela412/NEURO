@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: neuro
+      POSTGRES_USER: neuro
+      POSTGRES_PASSWORD: neuro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  control-plane:
+    build:
+      context: .
+      dockerfile: apps/control-plane/Dockerfile
+    environment:
+      PORT: 8787
+      DATABASE_URL: postgres://neuro:neuro@postgres:5432/neuro
+    ports:
+      - "8787:8787"
+    depends_on:
+      - postgres
+
+  miniapp:
+    build:
+      context: .
+      dockerfile: apps/miniapp/Dockerfile
+      args:
+        VITE_APP_URL: http://localhost:8080
+        VITE_CONTROL_PLANE_URL: http://localhost:8787
+        VITE_TELEGRAM_BOT_USERNAME: your_bot_username
+        VITE_TON_NETWORK: mainnet
+    ports:
+      - "8080:80"
+    depends_on:
+      - control-plane
+
+volumes:
+  postgres-data:

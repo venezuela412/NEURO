@@ -47,6 +47,7 @@ The adapter package currently provides:
 - execution state copy
 - preview response construction
 - mock portfolio helpers
+- Tonstakers read-side adapter helpers for Safe Income
 
 This keeps future protocol integration isolated from UI code.
 
@@ -58,10 +59,21 @@ The current Fastify service exposes:
 - `GET /overview`
 - `GET /portfolio/demo`
 - `POST /plan/preview`
+- persisted portfolio state routes
+- execution receipt routes
+- switch-to-safety and withdraw action routes
+- execution reconciliation route
 
-This is intentionally minimal for the first branch checkpoint, but it creates the seam for:
+It now does more than a pure stub. The control plane currently owns:
 
-- persistent user portfolio state
+- persisted portfolio state
+- execution receipt storage
+- switch-to-safety mutations
+- withdraw mutations
+- Tonstakers-style receipt reconciliation attempts
+
+It still creates the seam for deeper future work such as:
+
 - route monitoring
 - safety checks
 - partner attribution
@@ -81,14 +93,18 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 - wallet signature approval flow
 - Telegram WebApp bridge for ready/expand/theme sync
 - control-plane preview API
+- Tonstakers pool data seam for Safe Income context
+- DB-backed persisted portfolio state
+- persisted switch/withdraw flows
+- Tonstakers-style execution reconciliation endpoint
 
 ### Placeholder / next step
 
-- live Tonstakers execution
-- live STON.fi quote and route integration
-- persistent backend storage
+- live Tonstakers execution write path with reconciliation
+- full STON.fi execution routing beyond quote signals
+- production-grade multi-instance persistence beyond embedded file-backed DB
 - policy-bound automation contract
-- withdraw / switch transaction flows
+- broader reconciliation/indexer coverage across more execution modes
 
 ## Next recommended architecture steps
 
@@ -97,3 +113,20 @@ This is intentionally minimal for the first branch checkpoint, but it creates th
 3. Add execution state reconciliation after wallet signature
 4. Expand the preview API into transaction-preflight and position endpoints
 5. Explore a thin policy-wallet contract only after the live execution path is stable
+
+## Deployment shape
+
+The repository now supports a practical end-of-development deployment path:
+
+- static frontend build for the Mini App
+- Fastify API deployment for the control plane
+- Dockerfiles for both services
+- Docker Compose for local end-to-end testing
+- environment-driven TonConnect manifest generation
+
+See `docs/deployment.md` for:
+
+- local test workflow
+- staging and production topology
+- container usage
+- pre-launch validation checklist

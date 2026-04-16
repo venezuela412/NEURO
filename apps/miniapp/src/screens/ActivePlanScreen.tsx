@@ -1,15 +1,34 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp } from "lucide-react";
 import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
+import { useExecutionReconciliation } from "../hooks/useExecutionReconciliation";
+import { useNeuroWallet } from "../hooks/useTonWallet";
+import { usePortfolioActions } from "../hooks/usePortfolioActions";
 import { useAppStore } from "../store/appStore";
 
 export function ActivePlanScreen() {
-  const navigate = useNavigate();
+  const wallet = useNeuroWallet();
   const portfolio = useAppStore((state) => state.portfolio);
   const executionStatus = useAppStore((state) => state.executionStatus);
+  const executionReceipt = useAppStore((state) => state.executionReceipt);
+  const isPortfolioHydrating = useAppStore((state) => state.isPortfolioHydrating);
+  const { moveToSafetyMutation, withdrawMutation } = usePortfolioActions();
+  const reconcileMutation = useExecutionReconciliation();
+  const isPending = moveToSafetyMutation.isPending || withdrawMutation.isPending;
+
+  if (isPortfolioHydrating) {
+    return (
+      <section className="card page-stack center-stack">
+        <h1 className="headline-sm">Loading your active plan</h1>
+        <p className="muted">
+          NEURO is restoring your latest portfolio and execution history from the control plane.
+        </p>
+      </section>
+    );
+  }
 
   if (!portfolio) {
     return (
@@ -67,19 +86,50 @@ export function ActivePlanScreen() {
           <section className="card">
             <h3>Current branch scope</h3>
             <p className="muted">
-              This phase captures real wallet approval and portfolio staging.
-              Live protocol execution adapters are the next implementation layer.
+              This phase captures real wallet approval, Tonstakers Safe Income
+              request staging, and portfolio updates. Deeper reconciliation is the
+              next implementation layer.
             </p>
           </section>
+          {executionReceipt ? (
+            <section className="card">
+              <h3>Latest execution receipt</h3>
+              <p className="muted">{executionReceipt.summary}</p>
+              <p className="muted">
+                Mode: {executionReceipt.mode}{" "}
+                {executionReceipt.address ? `· Address: ${executionReceipt.address}` : ""}
+              </p>
+              <p className="muted">
+                Status: {executionReceipt.status}
+                {executionReceipt.transactionHash ? ` · Tx: ${executionReceipt.transactionHash.slice(0, 16)}...` : ""}
+              </p>
+              {executionReceipt.mode === "tonstakers-stake" &&
+              (executionReceipt.status === "submitted" || executionReceipt.status === "reconciling") ? (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  disabled={reconcileMutation.isPending}
+                  onClick={() => void reconcileMutation.mutate(executionReceipt.id)}
+                >
+                  {reconcileMutation.isPending ? "Checking chain..." : "Check chain status"}
+                </button>
+              ) : null}
+            </section>
+          ) : null}
         </div>
       </motion.section>
 
       <StickyActionBar
-        primaryLabel="View activity"
-        secondaryLabel="Build another plan"
-        onPrimaryClick={() => navigate("/activity")}
-        onSecondaryClick={() => navigate("/plans")}
-        helper={`Available to withdraw now: ${portfolio.availableToWithdrawTon.toFixed(2)} TON`}
+        primaryLabel={isPending ? "Working..." : "Switch to safety"}
+        secondaryLabel={isPending ? "..." : "Withdraw"}
+        disabled={isPending || !wallet.address}
+        onPrimaryClick={() => void moveToSafetyMutation.mutateAsync()}
+        onSecondaryClick={() => void withdrawMutation.mutateAsync(portfolio.availableToWithdrawTon)}
+        helper={
+          wallet.address
+            ? `Available to withdraw now: ${portfolio.availableToWithdrawTon.toFixed(2)} TON`
+            : "Connect a wallet to enable switch and withdraw actions."
+        }
       />
     </>
   );

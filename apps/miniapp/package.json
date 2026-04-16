@@ -5,16 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:manifest": "node ../../scripts/generate-tonconnect-manifest.mjs",
+    "build": "pnpm run build:manifest && vite build",
     "lint": "tsc -p tsconfig.app.json --noEmit && eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "dependencies": {
     "@neuro/adapters": "workspace:*",
     "@neuro/domain": "workspace:*",
     "@neuro/shared": "workspace:*",
+    "@ston-fi/omniston-sdk-react": "^0.7.12",
     "@tanstack/react-query": "^5.90.2",
     "@telegram-apps/sdk-react": "^3.3.9",
+    "@ton/core": "^0.63.1",
     "@tonconnect/ui-react": "^2.4.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
@@ -22,11 +25,12 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.9.5",
+    "tonstakers-sdk": "0.0.19-development",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.14",
     "@eslint/js": "^9.39.4",
+    "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

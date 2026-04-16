@@ -13,6 +13,13 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - Fastify control-plane preview API
 - real wallet signature approval flow
 - Telegram WebApp bridge layer
+- Tonstakers Safe Income read-side adapter seam
+- STON.fi quote signal seam for Balanced/Growth
+- DB-backed control-plane persistence
+- persisted switch/withdraw actions
+- execution reconciliation endpoint
+- signed mutation verification and replay protection
+- deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
 This is the current source of truth for what has been built so far.
@@ -42,12 +49,15 @@ This is the current source of truth for what has been built so far.
 - `react-dom`: `^19.2.4`
 - `react-router-dom`: `^7.9.5`
 - `zustand`: `^5.0.8`
+- `@ston-fi/omniston-sdk-react`: `^0.7.12`
 - `@tanstack/react-query`: `^5.90.2`
 - `framer-motion`: `^12.23.24`
 - `lucide-react`: `^0.554.0`
 - `clsx`: `^2.1.1`
 - `@tonconnect/ui-react`: `^2.4.2`
 - `@telegram-apps/sdk-react`: `^3.3.9`
+- `tonstakers-sdk`: `0.0.19-development`
+- `@ton/core`: `^0.63.1`
 
 ### Mini App dev tooling
 - `vite`: `^8.0.4`
@@ -62,6 +72,7 @@ This is the current source of truth for what has been built so far.
 ### Control plane
 - `@fastify/cors`: `^11.2.0`
 - `fastify`: `^5.6.1`
+- `pg`: `^8.16.3`
 - `tsx`: `^4.20.6`
 - `typescript`: `^6.0.2`
 
@@ -71,6 +82,7 @@ This is the current source of truth for what has been built so far.
 Contains:
 - app providers
 - routing
+- lazy-loaded route modules
 - wallet-aware app shell
 - Telegram WebApp bridge
 - landing screen
@@ -81,6 +93,9 @@ Contains:
 - activity screen
 - execution status card
 - technical details drawer
+- Omniston provider bridge
+- STON.fi quote signal hook
+- persisted Zustand store
 - dark premium styling system
 
 ### `apps/control-plane`
@@ -90,6 +105,22 @@ Contains:
 - `/overview`
 - `/portfolio/demo`
 - `/plan/preview`
+- `/portfolio/:walletAddress/state`
+- `/portfolio/:walletAddress/executions`
+- `/portfolio/:walletAddress/switch-to-safety`
+- `/portfolio/:walletAddress/withdraw`
+- `/portfolio/:walletAddress/executions/:executionId/reconcile`
+- signed mutation verification for write endpoints
+- consumed nonce tracking for replay protection
+
+### Deployment artifacts
+Contains:
+- `apps/miniapp/Dockerfile`
+- `apps/control-plane/Dockerfile`
+- `apps/miniapp/nginx.conf`
+- `docker-compose.yml`
+- `scripts/generate-tonconnect-manifest.mjs`
+- `docs/deployment.md`
 
 ### `packages/shared`
 Contains:
@@ -115,6 +146,7 @@ Contains:
 - execution-state copy helpers
 - plan preview response builder
 - mock portfolio helper
+- Tonstakers adapter helpers
 
 ### `packages/contracts`
 Currently reserved for future thin TON contract work.
@@ -130,6 +162,8 @@ Currently reserved for future thin TON contract work.
 - wallet-required activation gating
 - real wallet signature capture for plan approval
 - technical details drawer
+- Safe Income Tonstakers pool context when available
+- Balanced/Growth STON.fi route-quality context when available
 - Telegram-style dark presentation
 
 ### Domain logic
@@ -148,14 +182,23 @@ Currently reserved for future thin TON contract work.
 - Mini App build and lint pipeline
 - control-plane TypeScript build
 - control-plane preview endpoint with CORS enabled
+- control-plane persistence with external Postgres support via `DATABASE_URL`
+- embedded file-backed PGlite fallback for local/dev when `DATABASE_URL` is absent
+- signed mutation verification on write endpoints
+- replay protection via consumed nonces
+- Docker-based local test stack
+- build-time TonConnect manifest generation
+- Docker engine verified in cloud environment via `sudo docker`
+- both Docker images built successfully in cloud using alternate `vfs` daemon
+- control-plane container `/health` smoke test passed in cloud Docker path
+- control-plane persisted portfolio roundtrip verified via API
+- control-plane execution reconcile route verified via API
 
 ## What is not implemented yet
 
 - live Tonstakers adapter
 - live STON.fi quote/execution adapter
-- persistent database
-- transaction reconciliation after wallet signature
-- real withdrawal / switch flows
+- broad transaction reconciliation beyond current Tonstakers-style submitted receipts
 - thin automation contract
 - code splitting for the large frontend bundle
 
@@ -175,7 +218,25 @@ pnpm lint
 Internal packages are currently consumed directly from source in the workspace during development. This keeps implementation fast while the architecture is still evolving.
 
 ### Bundle size
-The Mini App currently builds successfully, but Vite warns that the main chunk is large. This should be addressed in a later pass with code splitting.
+The Mini App currently builds successfully, but Vite still warns that one chunk remains large. Route-level lazy loading is now in place and improved the build shape materially, but Tonstakers and STON.fi still add significant protocol weight, so further bundle splitting remains valuable.
+
+### Cloud Docker runtime nuance
+In this cloud environment:
+
+- `sudo docker` works
+- Docker daemon is reachable
+- Compose v2 plugin is not installed
+- legacy `docker-compose` is unreliable here
+
+So the repo's Docker artifacts are valid, but end-to-end Compose execution should be verified on a host with a healthier Compose setup.
+
+### Persistence mode
+Current control-plane persistence behavior:
+
+- **preferred production mode**: external Postgres via `DATABASE_URL`
+- **local/dev fallback**: file-backed PGlite when `DATABASE_URL` is not set
+
+This means the codebase now supports a more production-like persistence topology while retaining a zero-setup local fallback.
 
 ### Documentation set currently present
 - `README.md`
@@ -184,6 +245,7 @@ The Mini App currently builds successfully, but Vite warns that the main chunk i
 - `docs/judge-qa.md`
 - `docs/demo-script.md`
 - `docs/launch-copy.md`
+- `docs/deployment.md`
 - `.env.example`
 
 ## Recommended next documentation additions

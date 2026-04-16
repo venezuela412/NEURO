@@ -1,10 +1,14 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   DEFAULT_ROUTE_QUALITY,
   GAS_RESERVE_MIN_TON,
+  type ActivityEvent,
+  type ExecutionReceipt,
   type FeePreview,
   type ExecutionStatus,
   type Goal,
+  type PersistedPortfolioState,
   type PlanPreviewResponse,
   type PlanRecommendation,
   type PortfolioSnapshot,
@@ -25,6 +29,8 @@ interface AppState {
   feePreview: FeePreview | null;
   portfolio: PortfolioSnapshot | null;
   executionStatus: ExecutionStatus;
+  executionReceipt: ExecutionReceipt | null;
+  isPortfolioHydrating: boolean;
   setAmountTon: (amount: number) => void;
   setGoal: (goal: Goal) => void;
   setWantsFlexibility: (value: boolean) => void;
@@ -35,15 +41,21 @@ interface AppState {
   setRecommendation: (recommendation: PlanRecommendation | null) => void;
   setFeePreview: (feePreview: FeePreview | null) => void;
   setPortfolio: (portfolio: PortfolioSnapshot | null) => void;
+  setExecutionReceipt: (receipt: ExecutionReceipt | null) => void;
+  setPortfolioHydrating: (value: boolean) => void;
+  appendActivityEvent: (event: ActivityEvent) => void;
   setRouteQualityScore: (score: number) => void;
   applyPlanPreview: (preview: PlanPreviewResponse) => void;
+  applyPersistedPortfolioState: (state: PersistedPortfolioState) => void;
   clearGeneratedPlan: () => void;
   generatePlan: () => void;
   activatePlan: () => void;
   setExecutionStatus: (status: ExecutionStatus) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
   amountTon: 100,
   goal: "earn",
   wantsFlexibility: true,
@@ -55,6 +67,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   feePreview: null,
   portfolio: null,
   executionStatus: "idle",
+  executionReceipt: null,
+  isPortfolioHydrating: false,
   setAmountTon: (amountTon) =>
     set({
       amountTon,
@@ -62,6 +76,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       recommendation: null,
       feePreview: null,
       executionStatus: "idle",
+      executionReceipt: null,
     }),
   setGoal: (goal) =>
     set({
@@ -70,6 +85,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       recommendation: null,
       feePreview: null,
       executionStatus: "idle",
+      executionReceipt: null,
     }),
   setWantsFlexibility: (wantsFlexibility) =>
     set({
@@ -78,6 +94,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       recommendation: null,
       feePreview: null,
       executionStatus: "idle",
+      executionReceipt: null,
     }),
   setRiskPreference: (riskPreference) =>
     set({
@@ -86,6 +103,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       recommendation: null,
       feePreview: null,
       executionStatus: "idle",
+      executionReceipt: null,
     }),
   setHasWallet: (hasWallet) => set({ hasWallet }),
   acknowledgeRisk: () => set({ acknowledgedRisk: true }),
@@ -93,6 +111,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   setRecommendation: (recommendation) => set({ recommendation }),
   setFeePreview: (feePreview) => set({ feePreview }),
   setPortfolio: (portfolio) => set({ portfolio }),
+  setExecutionReceipt: (executionReceipt) => set({ executionReceipt }),
+  setPortfolioHydrating: (isPortfolioHydrating) => set({ isPortfolioHydrating }),
+  appendActivityEvent: (event) =>
+    set((state) => ({
+      portfolio: state.portfolio
+        ? {
+            ...state.portfolio,
+            activity: [event, ...state.portfolio.activity],
+          }
+        : state.portfolio,
+    })),
   setRouteQualityScore: (routeQualityScore) => set({ routeQualityScore }),
   applyPlanPreview: (preview) =>
     set({
@@ -101,6 +130,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       routeQualityScore: preview.routeQualityScore,
       executionStatus: preview.executionStatus,
       acknowledgedRisk: false,
+      executionReceipt: null,
+    }),
+  applyPersistedPortfolioState: (persistedState) =>
+    set({
+      recommendation: persistedState.recommendation,
+      feePreview: persistedState.feePreview,
+      portfolio: persistedState.portfolio,
+      executionStatus: persistedState.executionStatus,
+      executionReceipt: persistedState.executionReceipt,
+      routeQualityScore: persistedState.routeQualityScore,
     }),
   clearGeneratedPlan: () =>
     set({
@@ -108,6 +147,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       feePreview: null,
       executionStatus: "idle",
       acknowledgedRisk: false,
+      executionReceipt: null,
     }),
   generatePlan: () => {
     const state = get();
@@ -147,7 +187,26 @@ export const useAppStore = create<AppState>((set, get) => ({
       portfolio,
       feePreview: calculateFeePreview(state.recommendation.plan.id, portfolio.principalTon, portfolio.estimatedValueTon),
       executionStatus: "success",
+      executionReceipt: null,
     });
   },
-  setExecutionStatus: (executionStatus) => set({ executionStatus }),
-}));
+      setExecutionStatus: (executionStatus) => set({ executionStatus }),
+    }),
+    {
+      name: "neuro-app-store",
+      partialize: (state) => ({
+        amountTon: state.amountTon,
+        goal: state.goal,
+        wantsFlexibility: state.wantsFlexibility,
+        riskPreference: state.riskPreference,
+        hasWallet: state.hasWallet,
+        routeQualityScore: state.routeQualityScore,
+        recommendation: state.recommendation,
+        feePreview: state.feePreview,
+        portfolio: state.portfolio,
+        executionStatus: state.executionStatus,
+        executionReceipt: state.executionReceipt,
+      }),
+    },
+  ),
+);
