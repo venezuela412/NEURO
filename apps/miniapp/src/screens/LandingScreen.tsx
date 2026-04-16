@@ -1,28 +1,10 @@
-import { ArrowRight, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "@neuro/shared";
 import { StickyActionBar } from "../components/core/StickyActionBar";
 import { useNeuroOverview } from "../hooks/useNeuroOverview";
 import { useTelegramEnv } from "../hooks/useTelegramEnv";
-
-const featureCards = [
-  {
-    icon: ShieldCheck,
-    title: "Simple plans, not DeFi jargon",
-    text: "Choose Protect, Earn, or Grow. NEURO handles the complexity under the hood.",
-  },
-  {
-    icon: Sparkles,
-    title: "Income autopilot with safety rules",
-    text: "NEURO tracks route quality, preserves gas, and keeps a calmer fallback ready.",
-  },
-  {
-    icon: Wallet,
-    title: "Built for Telegram and TON",
-    text: "Compact, mobile-first, and ready for real wallet connection inside a familiar flow.",
-  },
-];
 
 export function LandingScreen() {
   const navigate = useNavigate();
@@ -31,85 +13,58 @@ export function LandingScreen() {
 
   return (
     <>
+      <section className="welcome-card" aria-labelledby="welcome-heading">
+        <p className="welcome-kicker">Welcome</p>
+        <h2 id="welcome-heading" className="welcome-title">
+          {APP_NAME} is your income plan for TON
+        </h2>
+        <p className="welcome-lead">
+          Connect a wallet when you are ready. Until then, explore a simple plan in under a minute — no DeFi jargon on
+          the main path.
+        </p>
+      </section>
+
       <section className="hero-card">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
+          transition={{ duration: 0.4 }}
           className="page-stack"
         >
-          <span className="eyebrow">Telegram-native passive income for TON</span>
+          <span className="eyebrow">Start here</span>
           <h1 className="headline">{APP_TAGLINE}</h1>
           <p className="lead-copy">
-            {APP_NAME} helps normal people activate an income plan for idle TON
-            without learning DeFi, yield routing, or manual position management.
+            Choose <strong>Protect</strong>, <strong>Earn</strong>, or <strong>Grow</strong>. We turn that into one clear
+            plan — with safety rules and fee transparency.
           </p>
           <div className="badge-row">
             <span>Protect</span>
             <span>Earn</span>
             <span>Grow</span>
           </div>
-          <div className="metrics-grid">
-            <div>
-              <strong>1 tap intent</strong>
-              <span>Goal-first onboarding</span>
-            </div>
-            <div>
-              <strong>Only charged on profit</strong>
-              <span>{overview?.platformFeeNotice ?? "Transparent monetization"}</span>
-            </div>
-            <div>
-              <strong>{telegramEnv.isTelegram ? "Telegram mode" : "Browser mode"}</strong>
-              <span>
-                {overview
-                  ? `Gas reserve from ${overview.minimumGasReserveTon.toFixed(1)} TON`
-                  : "Theme-aware and mobile-first"}
-              </span>
-            </div>
-          </div>
+          <p className="landing-meta-line muted">
+            <span>Goal-first flow</span>
+            <span className="landing-meta-dot" aria-hidden>
+              ·
+            </span>
+            <span>{overview?.platformFeeNotice ?? "Fees only when you are in profit"}</span>
+            <span className="landing-meta-dot" aria-hidden>
+              ·
+            </span>
+            <span>{telegramEnv.isTelegram ? "Telegram" : "Browser"}</span>
+          </p>
         </motion.div>
       </section>
 
-      <section className="page-stack">
-        <div className="section-intro">
-          <span className="eyebrow">Why it feels different</span>
-          <h2>Not another crypto dashboard</h2>
-          <p className="muted">
-            NEURO is built for people who want their TON working quietly in the
-            background, with clear outcomes and easy exits.
-          </p>
+      <section className="card split-card">
+        <div>
+          <span className="eyebrow">New to TON?</span>
+          <h3 className="split-card-title">Wallet setup</h3>
+          <p className="muted">Short guide: choose a wallet, secure your phrase, add TON, then come back.</p>
         </div>
-
-        <div className="feature-grid">
-          {featureCards.map(({ icon: Icon, title, text }) => (
-            <motion.article
-              key={title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35 }}
-              className="card"
-            >
-              <Icon size={18} />
-              <h3>{title}</h3>
-              <p className="muted">{text}</p>
-            </motion.article>
-          ))}
-        </div>
-
-        <div className="card split-card">
-          <div>
-            <span className="eyebrow">New to TON?</span>
-            <h3>Start with a wallet guide</h3>
-            <p className="muted">
-              We recommend a wallet, explain the setup steps, and bring you back
-              here to activate your first plan.
-            </p>
-          </div>
-          <Link to="/onboarding" className="inline-link">
-            I&apos;m new to TON <ArrowRight size={16} />
-          </Link>
-        </div>
+        <Link to="/onboarding" className="inline-link">
+          Open guide <ArrowRight size={16} />
+        </Link>
       </section>
 
       <StickyActionBar
@@ -117,7 +72,7 @@ export function LandingScreen() {
         secondaryLabel="New to TON?"
         onPrimaryClick={() => navigate("/plans")}
         onSecondaryClick={() => navigate("/onboarding")}
-        helper="Choose a goal and see NEURO’s recommendation in under a minute."
+        helper="One goal, one recommendation — then connect your wallet to continue."
       />
     </>
   );

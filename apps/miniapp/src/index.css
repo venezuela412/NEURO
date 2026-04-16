@@ -97,7 +97,6 @@ button {
 
 .app-header-left,
 .app-header-right,
-.section-intro,
 .split-card,
 .activity-item-header,
 .sticky-bar-actions,
@@ -116,6 +115,28 @@ button {
 .app-header-left,
 .brand {
   gap: 12px;
+}
+
+/* Stacked section titles (do not use row + space-between here — it caused title/body overlap on narrow screens). */
+.section-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+}
+
+.section-intro h1,
+.section-intro h2,
+.section-intro .headline {
+  max-width: 100%;
+}
+
+.section-intro--row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
 }
 
 .app-header-right,
@@ -235,6 +256,60 @@ button {
   background:
     radial-gradient(circle at top right, rgba(143, 115, 255, 0.22), transparent 38%),
     linear-gradient(180deg, rgba(23, 28, 47, 0.94), rgba(10, 12, 22, 0.96));
+}
+
+/* Landing welcome strip — clear “first screen” without stacking long sections */
+.welcome-card {
+  border: 1px solid rgba(143, 115, 255, 0.22);
+  border-radius: var(--radius-xl);
+  padding: 22px 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(38, 211, 199, 0.12), transparent 45%),
+    linear-gradient(165deg, rgba(17, 20, 34, 0.95), rgba(10, 12, 22, 0.98));
+  box-shadow: var(--shadow);
+}
+
+.welcome-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.welcome-title {
+  margin: 0 0 12px;
+  font-size: clamp(1.25rem, 4.2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.welcome-lead {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+.landing-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.landing-meta-dot {
+  opacity: 0.45;
+}
+
+.split-card-title {
+  margin: 6px 0 8px;
+  font-size: 1.08rem;
 }
 
 .card-emphasis {
@@ -396,7 +471,6 @@ ul {
 }
 
 .split-card,
-.section-intro,
 .activity-item-header {
   justify-content: space-between;
 }

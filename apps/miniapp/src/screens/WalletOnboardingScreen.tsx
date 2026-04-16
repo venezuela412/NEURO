@@ -30,7 +30,7 @@ export function WalletOnboardingScreen() {
       </section>
 
       <section className="card">
-        <div className="section-intro">
+        <div className="section-intro section-intro--row">
           <div>
             <span className="eyebrow">Step guide</span>
             <h2>A smooth way in</h2>
@@ -67,7 +67,7 @@ export function WalletOnboardingScreen() {
             target="_blank"
             rel="noreferrer"
           >
-            <div className="section-intro">
+            <div className="section-intro section-intro--row">
               <div>
                 <h3>{walletOption.name}</h3>
                 <p className="muted">{walletOption.description}</p>
@@ -79,7 +79,7 @@ export function WalletOnboardingScreen() {
       </section>
 
       <section className="card">
-        <div className="section-intro">
+        <div className="section-intro section-intro--row">
           <div>
             <span className="eyebrow">Safety first</span>
             <h2>Protect your recovery phrase</h2>
