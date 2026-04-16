@@ -131,7 +131,7 @@ This branch contains the foundation checkpoint for NEURO:
 - portfolio snapshot logic
 - activity feed generation
 
-### Control plane stub
+### Control plane
 - Fastify service with:
   - `/health`
   - `/overview`
@@ -143,7 +143,7 @@ This branch contains the foundation checkpoint for NEURO:
   - execution reconciliation route
   - signed mutation verification and replay protection for write routes
 
-This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
+This gives the frontend a realistic seam for persistence, monitoring, and execution services.
 
 ### Adapter layer
 - Tonstakers adapter seam for:
@@ -360,6 +360,7 @@ The repository now includes a concrete deployment path for the end of developmen
 - Dockerfiles for both services
 - `docker-compose.yml` for local end-to-end testing
 - file-backed embedded DB for control-plane persistence in the current implementation
+- Postgres-backed runtime path for more production-like deployments when `DATABASE_URL` is set
 
 See `docs/deployment.md` for:
 

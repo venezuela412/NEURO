@@ -72,6 +72,7 @@ This is the current source of truth for what has been built so far.
 ### Control plane
 - `@fastify/cors`: `^11.2.0`
 - `fastify`: `^5.6.1`
+- `pg`: `^8.16.3`
 - `tsx`: `^4.20.6`
 - `typescript`: `^6.0.2`
 
@@ -181,7 +182,8 @@ Currently reserved for future thin TON contract work.
 - Mini App build and lint pipeline
 - control-plane TypeScript build
 - control-plane preview endpoint with CORS enabled
-- embedded file-backed PGlite persistence for control-plane state
+- control-plane persistence with external Postgres support via `DATABASE_URL`
+- embedded file-backed PGlite fallback for local/dev when `DATABASE_URL` is absent
 - signed mutation verification on write endpoints
 - replay protection via consumed nonces
 - Docker-based local test stack
@@ -196,7 +198,6 @@ Currently reserved for future thin TON contract work.
 
 - live Tonstakers adapter
 - live STON.fi quote/execution adapter
-- external multi-instance production database
 - broad transaction reconciliation beyond current Tonstakers-style submitted receipts
 - thin automation contract
 - code splitting for the large frontend bundle
@@ -228,6 +229,14 @@ In this cloud environment:
 - legacy `docker-compose` is unreliable here
 
 So the repo's Docker artifacts are valid, but end-to-end Compose execution should be verified on a host with a healthier Compose setup.
+
+### Persistence mode
+Current control-plane persistence behavior:
+
+- **preferred production mode**: external Postgres via `DATABASE_URL`
+- **local/dev fallback**: file-backed PGlite when `DATABASE_URL` is not set
+
+This means the codebase now supports a more production-like persistence topology while retaining a zero-setup local fallback.
 
 ### Documentation set currently present
 - `README.md`

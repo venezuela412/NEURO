@@ -11,6 +11,9 @@ NEURO currently has two deployable surfaces:
 2. **Control plane**
    - Node.js Fastify service
    - deployable as a small container or server process
+   - supports:
+     - embedded file-backed PGlite for local/single-instance mode
+     - external Postgres via `DATABASE_URL` for more production-like deployments
 
 For testing and initial launch, the simplest topology is:
 
@@ -52,6 +55,19 @@ For testing and initial launch, the simplest topology is:
 
 - `PORT`
   - API port, default `8787`
+
+- `DATABASE_URL`
+  - optional Postgres connection string
+  - when present, the control plane uses external Postgres instead of embedded PGlite
+
+- `NEURO_DB_PATH`
+  - optional filesystem path for embedded PGlite storage when `DATABASE_URL` is not set
+
+- `TON_RPC_ENDPOINT`
+  - TON RPC endpoint used for execution reconciliation lookups
+
+- `ALLOWED_SIGN_DOMAINS`
+  - comma-separated allowlist of domains accepted for signed wallet actions
 
 ## TonConnect manifest generation
 
@@ -98,8 +114,9 @@ Then test:
 
 - frontend at `http://localhost:8080`
 - control plane at `http://localhost:8787`
+- postgres at `localhost:5432`
 
-This is the closest current approximation to a deployable stack.
+This is the closest current approximation to a deployable stack and now includes a real Postgres service for the control plane.
 
 ### Cloud environment note
 
@@ -124,6 +141,9 @@ So for this cloud environment specifically, Docker itself is verified, but Compo
 ### Control plane image
 - Dockerfile: `apps/control-plane/Dockerfile`
 - output: Node.js runtime serving Fastify API
+- deploy with:
+  - `DATABASE_URL` for a production-style external DB
+  - or `NEURO_DB_PATH` for local embedded fallback
 
 ## End-of-development deployment path
 
@@ -132,6 +152,7 @@ When NEURO reaches the end of the core development phase, the recommended rollou
 1. **Deploy control plane first**
    - confirm `/health`, `/overview`, and `/plan/preview` work
    - verify CORS allows frontend origin
+   - prefer external Postgres by setting `DATABASE_URL`
 
 2. **Deploy Mini App with production env**
    - set `VITE_APP_URL`
@@ -170,7 +191,6 @@ Before public testing:
 
 The current deployment path is real for the app shell and preview API, but a full public rollout still needs:
 
-- persistent storage
 - live protocol adapters
 - transaction reconciliation
 - production logging/monitoring
