@@ -9,8 +9,13 @@ import { useWalletActionAuth } from "../../hooks/useWalletActionAuth";
 import { useNeuroWallet } from "../../hooks/useTonWallet";
 import { useAppStore } from "../../store/appStore";
 
-function serializeState(state: PersistedPortfolioState) {
-  return JSON.stringify(state);
+/** Stable JSON for equality — never include a ticking clock (that caused infinite re-renders / React #185). */
+function serializePersistableState(state: PersistedPortfolioState) {
+  return JSON.stringify(state, (key, value) => (key === "updatedAt" ? undefined : value));
+}
+
+function withPersistTimestamp(state: PersistedPortfolioState): PersistedPortfolioState {
+  return { ...state, updatedAt: new Date().toISOString() };
 }
 
 interface PersistPortfolioPayload {
@@ -54,7 +59,7 @@ export function PortfolioSyncBridge() {
       return;
     }
 
-    const serialized = serializeState(persistedQuery.data);
+    const serialized = serializePersistableState(persistedQuery.data);
     lastSerializedRef.current = serialized;
     applyPersistedPortfolioState(persistedQuery.data);
   }, [applyPersistedPortfolioState, persistedQuery.data, wallet.address, wallet.connected]);
@@ -72,7 +77,7 @@ export function PortfolioSyncBridge() {
       executionStatus,
       executionReceipt,
       routeQualityScore,
-      updatedAt: new Date().toISOString(),
+      updatedAt: "",
     };
   }, [
     executionReceipt,
@@ -90,7 +95,7 @@ export function PortfolioSyncBridge() {
       return;
     }
 
-    const serialized = serializeState(currentState);
+    const serialized = serializePersistableState(currentState);
     if (serialized === lastSerializedRef.current) {
       return;
     }
@@ -98,14 +103,15 @@ export function PortfolioSyncBridge() {
     const handle = window.setTimeout(() => {
       void (async () => {
         try {
-          const proof = await signAction("persist-state", serialized);
+          const payload = withPersistTimestamp(currentState);
+          const proof = await signAction("persist-state", serializePersistableState(payload));
           const session = await ensureSession(proof);
-          lastSerializedRef.current = serialized;
           await persistMutation.mutateAsync({
-            state: currentState,
+            state: payload,
             proof,
             session,
           });
+          lastSerializedRef.current = serializePersistableState(payload);
         } catch {
           lastSerializedRef.current = "";
         }
