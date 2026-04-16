@@ -58,15 +58,12 @@ export function AppShell({ children }: PropsWithChildren) {
             <Link to="/" className="brand-link">
               {APP_NAME}
             </Link>
-            <p className="header-subtitle">
-              {titles[location.pathname] ?? "Put your TON to work"}
-              {location.pathname !== "/" ? (
-                <>
-                  {" "}
-                  · <span className="header-env">{telegramEnv.platform}</span>
-                </>
-              ) : null}
-            </p>
+            {location.pathname !== "/" ? (
+              <p className="header-subtitle">
+                {titles[location.pathname] ?? "Put your TON to work"}{" "}
+                · <span className="header-env">{telegramEnv.platform}</span>
+              </p>
+            ) : null}
           </div>
         </div>
 

@@ -272,96 +272,46 @@ button {
     linear-gradient(180deg, rgba(23, 28, 47, 0.94), rgba(10, 12, 22, 0.96));
 }
 
-/* Home: single focused welcome — no stacked duplicate sections */
-.landing-hero {
-  border: 1px solid rgba(143, 115, 255, 0.2);
-  border-radius: var(--radius-xl);
-  padding: 24px 20px 28px;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(143, 115, 255, 0.2), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(38, 211, 199, 0.08), transparent 40%),
-    linear-gradient(180deg, rgba(17, 20, 34, 0.96), rgba(8, 10, 18, 0.98));
-  box-shadow: var(--shadow);
-}
-
-.landing-hero-inner {
+/* Home: minimal — title, one line, one button, one link */
+.landing-minimal {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 18px;
+  padding: 8px 4px 12px;
+  text-align: center;
 }
 
-.landing-kicker {
+.landing-minimal-title {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent-2);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
-.landing-hero-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.landing-headline {
-  font-size: clamp(1.65rem, 6vw, 2.35rem);
-  line-height: 1.12;
-}
-
-.landing-sub {
+.landing-minimal-line {
   margin: 0;
-  max-width: 38ch;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--text-soft);
-}
-
-.goal-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.goal-chip {
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-soft);
-}
-
-.landing-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-@media (min-width: 380px) {
-  .landing-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .landing-cta-primary {
-    flex: 1 1 56%;
-    min-width: 0;
-  }
-
-  .landing-cta-secondary {
-    flex: 1 1 36%;
-    min-width: 0;
-  }
-}
-
-.landing-footnote {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   line-height: 1.45;
-  max-width: 42ch;
+}
+
+.landing-minimal-cta {
+  width: 100%;
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+.landing-minimal-foot {
+  margin: 0;
+}
+
+.landing-minimal-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .split-card-title {
