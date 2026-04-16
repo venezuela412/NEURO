@@ -67,6 +67,7 @@ The novelty is the combination of:
    - a real wallet signature step is now included for plan approval
    - a Tonstakers read-side adapter seam is now wired for Safe Income pool context
    - a first STON.fi quote seam is now wired for Balanced/Growth route-quality context
+   - signed mutation proofs now protect control-plane write actions
    - architecture is prepared for deeper Tonstakers and STON.fi execution adapters through thin integration seams
 
 ## What is implemented right now
@@ -112,6 +113,7 @@ This branch contains the foundation checkpoint for NEURO:
   - persisted execution receipt routes
   - switch-to-safety and withdraw action routes
   - execution reconciliation route
+  - signed mutation verification and replay protection for write routes
 
 This gives the frontend a realistic seam for future persistence, monitoring, and execution services.
 
@@ -135,6 +137,7 @@ For exact package versions and validation status, see `docs/repo-status.md`.
 - Telegram-native Mini App structure
 - TonConnect integration layer
 - wallet signature approval flow
+- wallet-signed proof protection for control-plane write actions
 - deterministic plan recommendation logic
 - fee preview and accounting model
 - portfolio/activity state model
@@ -335,6 +338,7 @@ See `docs/deployment.md` for:
 - local testing flow
 - staging and production topology
 - container usage
+- signed mutation and runtime security notes
 - pre-launch checklist
 - recommended hosting options
 

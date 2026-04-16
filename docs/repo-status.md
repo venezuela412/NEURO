@@ -18,6 +18,7 @@ This repository currently contains the **foundation checkpoint** for NEURO:
 - DB-backed control-plane persistence
 - persisted switch/withdraw actions
 - execution reconciliation endpoint
+- signed mutation verification and replay protection
 - deployment and Docker testing artifacts
 - hackathon/judge documentation set
 
@@ -108,6 +109,8 @@ Contains:
 - `/portfolio/:walletAddress/switch-to-safety`
 - `/portfolio/:walletAddress/withdraw`
 - `/portfolio/:walletAddress/executions/:executionId/reconcile`
+- signed mutation verification for write endpoints
+- consumed nonce tracking for replay protection
 
 ### Deployment artifacts
 Contains:
@@ -179,6 +182,8 @@ Currently reserved for future thin TON contract work.
 - control-plane TypeScript build
 - control-plane preview endpoint with CORS enabled
 - embedded file-backed PGlite persistence for control-plane state
+- signed mutation verification on write endpoints
+- replay protection via consumed nonces
 - Docker-based local test stack
 - build-time TonConnect manifest generation
 - Docker engine verified in cloud environment via `sudo docker`
