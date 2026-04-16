@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import type { ActivityEvent, ExecutionReceipt, PortfolioSnapshot } from "@neuro/shared";
 import { movePortfolioToSafety, withdrawPortfolio } from "../lib/controlPlane";
+import { useWalletActionAuth } from "./useWalletActionAuth";
 import { useNeuroWallet } from "./useTonWallet";
 import { useAppStore } from "../store/appStore";
 
@@ -21,6 +22,7 @@ function buildActivityFromReceipt(receipt: ExecutionReceipt): ActivityEvent {
 
 export function usePortfolioActions() {
   const wallet = useNeuroWallet();
+  const { signAction } = useWalletActionAuth();
   const setPortfolio = useAppStore((state) => state.setPortfolio);
   const setExecutionReceipt = useAppStore((state) => state.setExecutionReceipt);
   const appendActivityEvent = useAppStore((state) => state.appendActivityEvent);
@@ -40,7 +42,8 @@ export function usePortfolioActions() {
       }
 
       setExecutionStatus("confirming");
-      return movePortfolioToSafety(wallet.address);
+      const auth = await signAction("move-to-safety", wallet.address);
+      return movePortfolioToSafety(wallet.address, auth);
     },
     onSuccess: ({ portfolio, executionReceipt }) => {
       applyMutationResult(portfolio, executionReceipt);
@@ -54,7 +57,8 @@ export function usePortfolioActions() {
       }
 
       setExecutionStatus("confirming");
-      return withdrawPortfolio(wallet.address, amountTon);
+      const auth = await signAction("withdraw", `${wallet.address}:${amountTon ?? "all"}`);
+      return withdrawPortfolio(wallet.address, auth, amountTon);
     },
     onSuccess: ({ portfolio, executionReceipt }) => {
       applyMutationResult(portfolio, executionReceipt);

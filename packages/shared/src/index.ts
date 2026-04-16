@@ -139,3 +139,20 @@ export interface PersistedPortfolioState {
   routeQualityScore: number;
   updatedAt: string;
 }
+
+export interface SignedActionPayload {
+  type: "text";
+  text: string;
+}
+
+export interface SignedActionProof {
+  action: string;
+  walletAddress: string;
+  nonce: string;
+  publicKey?: string;
+  walletStateInit?: string;
+  domain: string;
+  timestamp: number;
+  signature: string;
+  payload: SignedActionPayload;
+}

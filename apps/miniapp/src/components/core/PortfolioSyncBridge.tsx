@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { PersistedPortfolioState } from "@neuro/shared";
+import type { PersistedPortfolioState, SignedActionProof } from "@neuro/shared";
 import {
   fetchPersistedPortfolioState,
-  savePersistedPortfolioState,
+  savePersistedPortfolioStateAuthenticated,
 } from "../../lib/controlPlane";
+import { useWalletActionAuth } from "../../hooks/useWalletActionAuth";
 import { useNeuroWallet } from "../../hooks/useTonWallet";
 import { useAppStore } from "../../store/appStore";
 
 function serializeState(state: PersistedPortfolioState) {
   return JSON.stringify(state);
+}
+
+interface PersistPortfolioPayload {
+  state: PersistedPortfolioState;
+  proof: SignedActionProof;
 }
 
 export function PortfolioSyncBridge() {
@@ -22,6 +28,7 @@ export function PortfolioSyncBridge() {
   const routeQualityScore = useAppStore((state) => state.routeQualityScore);
   const applyPersistedPortfolioState = useAppStore((state) => state.applyPersistedPortfolioState);
   const setPortfolioHydrating = useAppStore((state) => state.setPortfolioHydrating);
+  const { signAction } = useWalletActionAuth();
 
   const lastSerializedRef = useRef<string>("");
 
@@ -33,7 +40,8 @@ export function PortfolioSyncBridge() {
   });
 
   const persistMutation = useMutation({
-    mutationFn: savePersistedPortfolioState,
+    mutationFn: async ({ state, proof }: PersistPortfolioPayload) =>
+      savePersistedPortfolioStateAuthenticated(state, proof),
   });
 
   useEffect(() => {
@@ -87,14 +95,22 @@ export function PortfolioSyncBridge() {
     }
 
     const handle = window.setTimeout(() => {
-      lastSerializedRef.current = serialized;
-      void persistMutation.mutateAsync(currentState).catch(() => {
-        lastSerializedRef.current = "";
-      });
+      void (async () => {
+        try {
+          const proof = await signAction("persist-state", serialized);
+          lastSerializedRef.current = serialized;
+          await persistMutation.mutateAsync({
+            state: currentState,
+            proof,
+          });
+        } catch {
+          lastSerializedRef.current = "";
+        }
+      })();
     }, 350);
 
     return () => window.clearTimeout(handle);
-  }, [currentState, persistMutation]);
+  }, [currentState, persistMutation, signAction]);
 
   return null;
 }

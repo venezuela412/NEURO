@@ -16,6 +16,11 @@ interface ExecutionReceiptRow {
   created_at: string;
 }
 
+interface ConsumedNonceRow {
+  wallet_address: string;
+  nonce: string;
+}
+
 function normalizeWalletAddress(walletAddress: string) {
   return walletAddress.trim();
 }
@@ -80,6 +85,35 @@ export async function listExecutionReceipts(walletAddress: string) {
   );
 
   return result.rows.map((row) => JSON.parse(row.receipt_json) as ExecutionReceipt);
+}
+
+export async function isNonceConsumed(walletAddress: string, nonce: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const result = await db.query<ConsumedNonceRow>(
+    `
+      SELECT wallet_address, nonce
+      FROM consumed_action_nonce
+      WHERE wallet_address = $1 AND nonce = $2
+      LIMIT 1
+    `,
+    [normalized, nonce],
+  );
+
+  return result.rows.length > 0;
+}
+
+export async function consumeNonce(walletAddress: string, nonce: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  await db.query(
+    `
+      INSERT INTO consumed_action_nonce (wallet_address, nonce)
+      VALUES ($1, $2)
+      ON CONFLICT (wallet_address, nonce) DO NOTHING
+    `,
+    [normalized, nonce],
+  );
 }
 
 export async function getExecutionReceipt(walletAddress: string, receiptId: string) {

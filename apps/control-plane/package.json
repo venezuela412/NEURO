@@ -12,12 +12,17 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.4.4",
     "@fastify/cors": "^11.2.0",
+    "@fastify/rate-limit": "^10.3.0",
     "@neuro/adapters": "workspace:*",
     "@neuro/domain": "workspace:*",
     "@neuro/shared": "workspace:*",
     "@ton/core": "^0.63.1",
+    "@ton/crypto": "^3.3.0",
     "@ton/ton": "^16.2.4",
-    "fastify": "^5.6.1"
+    "crc-32": "^1.2.2",
+    "fastify": "^5.6.1",
+    "tweetnacl": "^1.0.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^24.12.2",

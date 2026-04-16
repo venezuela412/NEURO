@@ -25,6 +25,13 @@ async function createDb() {
       receipt_json TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS used_signed_nonces (
+      wallet_address TEXT NOT NULL,
+      nonce TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (wallet_address, nonce)
+    );
   `);
 
   return db;

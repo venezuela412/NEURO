@@ -5,6 +5,7 @@ import {
   type PortfolioSnapshot,
   type PlanPreviewResponse,
   type PlanRecommendationInput,
+  type SignedActionProof,
 } from "@neuro/shared";
 import { buildPlanPreviewResponse, getDefaultPlanRecommendationInput, getNeuroOverview } from "@neuro/adapters";
 
@@ -71,6 +72,24 @@ export async function savePersistedPortfolioState(state: PersistedPortfolioState
   return parseJson<{ ok: true; updatedAt: string }>(response);
 }
 
+export async function savePersistedPortfolioStateAuthenticated(
+  state: PersistedPortfolioState,
+  auth: SignedActionProof,
+) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(state.walletAddress)}/state`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      state,
+      auth,
+    }),
+  });
+
+  return parseJson<{ ok: true; updatedAt: string }>(response);
+}
+
 export async function fetchExecutionReceipts(walletAddress: string) {
   try {
     const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/executions`);
@@ -96,9 +115,15 @@ export async function reconcileExecutionReceipt(walletAddress: string, execution
   }>(response);
 }
 
-export async function movePortfolioToSafety(walletAddress: string) {
+export async function movePortfolioToSafety(walletAddress: string, auth: SignedActionProof) {
   const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      auth,
+    }),
   });
 
   return parseJson<{
@@ -108,13 +133,18 @@ export async function movePortfolioToSafety(walletAddress: string) {
   }>(response);
 }
 
-export async function withdrawPortfolio(walletAddress: string, amountTon?: number) {
+export async function withdrawPortfolio(
+  walletAddress: string,
+  auth: SignedActionProof,
+  amountTon?: number,
+) {
   const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/withdraw`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      auth,
       amountTon,
     }),
   });
