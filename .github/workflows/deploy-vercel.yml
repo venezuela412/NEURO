@@ -1,0 +1,42 @@
+# Deploy NEURO miniapp to Vercel from GitHub (no local CLI login required).
+#
+# One-time setup:
+# 1. Vercel → Account Settings → Tokens → create token → GitHub repo → Secrets → VERCEL_TOKEN
+# 2. In any linked project folder locally: `vercel link` then copy from .vercel/project.json:
+#    - projectId → secret VERCEL_PROJECT_ID
+#    - orgId     → secret VERCEL_ORG_ID
+#    Or: Vercel project → Settings → General → Project ID / Team ID
+# 3. GitHub → Settings → Variables → Actions:
+#      VITE_APP_URL                (required) e.g. https://neuro-xxx.vercel.app
+#      VITE_CONTROL_PLANE_URL      (optional) public API URL
+#      VITE_TELEGRAM_BOT_USERNAME  (optional) bot username without @
+#      VITE_TON_NETWORK            (optional) default mainnet
+#
+# Run: Actions → "Deploy to Vercel" → Run workflow
+
+name: Deploy to Vercel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          target: production
+          build-env: |
+            VITE_APP_URL=${{ vars.VITE_APP_URL }}
+            VITE_CONTROL_PLANE_URL=${{ vars.VITE_CONTROL_PLANE_URL }}
+            VITE_TELEGRAM_BOT_USERNAME=${{ vars.VITE_TELEGRAM_BOT_USERNAME }}
+            VITE_TON_NETWORK=${{ vars.VITE_TON_NETWORK }}

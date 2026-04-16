@@ -228,6 +228,10 @@ The deploy command uses project name `neuro-miniapp`. Create a **Pages** project
 
 For **Vercel** (also free tier): connect the GitHub repo in the Vercel dashboard; root `vercel.json` already sets install/build/output. Set `VITE_APP_URL` and `VITE_CONTROL_PLANE_URL` in Vercel **Environment Variables** for Production.
 
+**Deploy from GitHub without local CLI:** use the **Deploy to Vercel** workflow (`.github/workflows/deploy-vercel.yml`). Add repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` and variables `VITE_APP_URL` (required), then **Actions → Deploy to Vercel → Run workflow**.
+
+**Telegram Mini App:** step-by-step bot + URL + env alignment is in `docs/telegram-mini-app.md`.
+
 ## Recommended hosting choices
 
 ### Mini App

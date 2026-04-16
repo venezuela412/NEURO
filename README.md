@@ -30,6 +30,7 @@ The GitHub repository is intended to be the source of truth for current state, a
 - `docs/demo-script.md` - 60-second and 90-second demo flow
 - `docs/launch-copy.md` - launch and pitch copy
 - `docs/deployment.md` - local, staging, production, and Docker deployment path
+- `docs/telegram-mini-app.md` - connect BotFather, HTTPS URL, env vars, and checklist
 - `.env.example` - expected environment variables for local development
 
 ## Why NEURO is novel
