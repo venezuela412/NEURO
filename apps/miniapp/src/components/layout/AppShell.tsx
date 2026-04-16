@@ -15,7 +15,7 @@ const navItems = [
 ];
 
 const titles: Record<string, string> = {
-  "/": "Income autopilot",
+  "/": "Home",
   "/onboarding": "New to TON?",
   "/plans": "Choose your goal",
   "/result": "Your recommended plan",
@@ -54,12 +54,18 @@ export function AppShell({ children }: PropsWithChildren) {
             </div>
           )}
 
-          <div>
+          <div className="brand-text">
             <Link to="/" className="brand-link">
               {APP_NAME}
             </Link>
             <p className="header-subtitle">
-              {titles[location.pathname] ?? "Put your TON to work"} · {telegramEnv.platform}
+              {titles[location.pathname] ?? "Put your TON to work"}
+              {location.pathname !== "/" ? (
+                <>
+                  {" "}
+                  · <span className="header-env">{telegramEnv.platform}</span>
+                </>
+              ) : null}
             </p>
           </div>
         </div>
