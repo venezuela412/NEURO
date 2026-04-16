@@ -197,6 +197,37 @@ The current deployment path is real for the app shell and preview API, but a ful
 - better origin restrictions for CORS
 - real terms/privacy pages referenced by the manifest
 
+## GitHub: “main branch isn’t protected”
+
+That banner is **informational**. GitHub is suggesting you turn on **branch protection** so nobody can force-push or delete `main` by mistake, and optionally **require status checks** before merge.
+
+After you merge the CI workflow in this repo:
+
+1. Open **Settings → Branches → Add branch protection rule** for `main`.
+2. Enable **Require a pull request before merging** (optional but recommended).
+3. Enable **Require status checks to pass before merging** and select the job **“Build and lint”** (from the `CI` workflow).
+
+Until CI exists on `main`, the status check list may be empty. Push the latest `main`, wait for one green run, then add the rule.
+
+## GitHub Actions CI
+
+The `CI` workflow (`.github/workflows/ci.yml`) runs `pnpm check` on every push and pull request to `main`. Use it as the required check for branch protection.
+
+## Deploy miniapp via Cloudflare Pages (optional)
+
+The workflow **Deploy miniapp (Cloudflare Pages)** runs only when you trigger it manually (**Actions → workflow → Run workflow**). Configure:
+
+| Type | Name | Example |
+|------|------|---------|
+| Secret | `CLOUDFLARE_API_TOKEN` | API token with Workers/Pages deploy permission |
+| Secret | `CLOUDFLARE_ACCOUNT_ID` | From Cloudflare dashboard |
+| Variable | `VITE_APP_URL` | Your real HTTPS URL (e.g. `https://neuro-miniapp.pages.dev` after first deploy you can update) |
+| Variable | `VITE_CONTROL_PLANE_URL` | Public API URL, or omit for default `localhost` (not useful in production) |
+
+The deploy command uses project name `neuro-miniapp`. Create a **Pages** project with that name in Cloudflare first, or change the `--project-name` in the workflow file to match your project.
+
+For **Vercel** (also free tier): connect the GitHub repo in the Vercel dashboard; root `vercel.json` already sets install/build/output. Set `VITE_APP_URL` and `VITE_CONTROL_PLANE_URL` in Vercel **Environment Variables** for Production.
+
 ## Recommended hosting choices
 
 ### Mini App
