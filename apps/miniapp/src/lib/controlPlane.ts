@@ -6,6 +6,7 @@ import {
   type PlanPreviewResponse,
   type PlanRecommendationInput,
   type SignedActionProof,
+  type WalletSession,
 } from "@neuro/shared";
 import { buildPlanPreviewResponse, getDefaultPlanRecommendationInput, getNeuroOverview } from "@neuro/adapters";
 
@@ -18,6 +19,16 @@ async function parseJson<T>(response: Response): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+function buildSessionHeaders(session?: WalletSession | null): Record<string, string> {
+  if (!session) {
+    return {};
+  }
+
+  return {
+    "X-Neuro-Session-Token": session.token,
+  };
 }
 
 export async function fetchNeuroOverview(): Promise<NeuroOverview> {
@@ -75,15 +86,17 @@ export async function savePersistedPortfolioState(state: PersistedPortfolioState
 export async function savePersistedPortfolioStateAuthenticated(
   state: PersistedPortfolioState,
   auth: SignedActionProof,
+  session?: WalletSession | null,
 ) {
   const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(state.walletAddress)}/state`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      ...buildSessionHeaders(session),
     },
     body: JSON.stringify({
       state,
-      auth,
+      proof: auth,
     }),
   });
 
@@ -115,14 +128,33 @@ export async function reconcileExecutionReceipt(walletAddress: string, execution
   }>(response);
 }
 
-export async function movePortfolioToSafety(walletAddress: string, auth: SignedActionProof) {
-  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
+export async function createWalletActionSession(proof: SignedActionProof) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/auth/session`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      auth,
+      proof,
+    }),
+  });
+
+  return parseJson<WalletSession>(response);
+}
+
+export async function movePortfolioToSafety(
+  walletAddress: string,
+  auth: SignedActionProof,
+  session?: WalletSession | null,
+) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildSessionHeaders(session),
+    },
+    body: JSON.stringify({
+      proof: auth,
     }),
   });
 
@@ -136,15 +168,17 @@ export async function movePortfolioToSafety(walletAddress: string, auth: SignedA
 export async function withdrawPortfolio(
   walletAddress: string,
   auth: SignedActionProof,
+  session?: WalletSession | null,
   amountTon?: number,
 ) {
   const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/withdraw`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...buildSessionHeaders(session),
     },
     body: JSON.stringify({
-      auth,
+      proof: auth,
       amountTon,
     }),
   });

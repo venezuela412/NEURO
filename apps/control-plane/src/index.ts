@@ -14,6 +14,8 @@ import {
   addExecutionReceipt,
   applySwitchToSafety,
   applyWithdraw,
+  createWalletSession,
+  getWalletSession,
   consumeNonce,
   getPersistedPortfolioState,
   isNonceConsumed,
@@ -101,6 +103,11 @@ const signedMutationSchema = z.object({
   proof: signedActionSchema,
 });
 
+const sessionMutationSchema = z.object({
+  sessionToken: z.string().min(16).optional(),
+  proof: signedActionSchema.optional(),
+});
+
 async function requireSignedAction(walletAddress: string, proof: z.infer<typeof signedActionSchema>) {
   if (proof.walletAddress !== walletAddress) {
     throw new Error("wallet_mismatch");
@@ -116,6 +123,36 @@ async function requireSignedAction(walletAddress: string, proof: z.infer<typeof 
   }
 
   await consumeNonce(walletAddress, proof.nonce);
+}
+
+async function requireWalletAuthorization(
+  walletAddress: string,
+  payload: z.infer<typeof sessionMutationSchema>,
+) {
+  if (payload.sessionToken) {
+    const session = await getWalletSession(walletAddress, payload.sessionToken);
+    if (session) {
+      return {
+        mode: "session" as const,
+        sessionToken: session.session_id,
+        expiresAt: session.expires_at,
+      };
+    }
+  }
+
+  if (!payload.proof) {
+    throw new Error("missing_proof");
+  }
+
+  await requireSignedAction(walletAddress, payload.proof);
+  const sessionToken = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  await createWalletSession(walletAddress, sessionToken, expiresAt);
+  return {
+    mode: "proof" as const,
+    sessionToken,
+    expiresAt,
+  };
 }
 
 server.get("/health", async () => ({
@@ -199,6 +236,33 @@ server.get<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/exe
   };
 });
 
+server.post<{ Params: { walletAddress: string }; Body: { proof: z.infer<typeof signedActionSchema> } }>(
+  "/portfolio/:walletAddress/session",
+  async (request, reply) => {
+    const parsed = signedMutationSchema.safeParse(request.body ?? {});
+    if (!parsed.success) {
+      reply.code(400);
+      return { error: "invalid_payload" };
+    }
+
+    try {
+      await requireSignedAction(request.params.walletAddress, parsed.data.proof);
+    } catch (error) {
+      reply.code(403);
+      return { error: error instanceof Error ? error.message : "forbidden" };
+    }
+
+    const sessionToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    await createWalletSession(request.params.walletAddress, sessionToken, expiresAt);
+    return {
+      ok: true,
+      sessionToken,
+      expiresAt,
+    };
+  },
+);
+
 server.post<{ Params: { walletAddress: string; executionId: string } }>(
   "/portfolio/:walletAddress/executions/:executionId/reconcile",
   async (request, reply) => {
@@ -216,48 +280,61 @@ server.post<{ Params: { walletAddress: string; executionId: string } }>(
 );
 
 server.post<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/switch-to-safety", async (request, reply) => {
-  const parsed = signedMutationSchema.safeParse(request.body ?? {});
+  const parsed = sessionMutationSchema.safeParse(request.body ?? {});
   if (!parsed.success) {
     reply.code(400);
     return { error: "invalid_payload" };
   }
   try {
-    await requireSignedAction(request.params.walletAddress, parsed.data.proof);
+    const auth = await requireWalletAuthorization(request.params.walletAddress, parsed.data);
+    const result = await applySwitchToSafety(request.params.walletAddress);
+    if (!result) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+
+    return {
+      ...result,
+      sessionToken: auth.sessionToken,
+      sessionExpiresAt: auth.expiresAt,
+    };
   } catch (error) {
     reply.code(403);
     return { error: error instanceof Error ? error.message : "forbidden" };
   }
-  const result = await applySwitchToSafety(request.params.walletAddress);
-  if (!result) {
-    reply.code(404);
-    return { error: "not_found" };
-  }
-
-  return result;
 });
 
 server.post<{ Params: { walletAddress: string }; Body: { amountTon?: number } }>(
   "/portfolio/:walletAddress/withdraw",
   async (request, reply) => {
-    const parsed = withdrawBodySchema.safeParse(request.body ?? {});
+    const parsed = z
+      .object({
+        amountTon: z.number().finite().positive().max(1_000_000).optional(),
+        sessionToken: z.string().min(16).optional(),
+        proof: signedActionSchema.optional(),
+      })
+      .safeParse(request.body ?? {});
     if (!parsed.success) {
       reply.code(400);
       return { error: "invalid_payload" };
     }
     try {
-      await requireSignedAction(request.params.walletAddress, parsed.data.proof);
+      const auth = await requireWalletAuthorization(request.params.walletAddress, parsed.data);
+      const result = await applyWithdraw(request.params.walletAddress, parsed.data.amountTon);
+      if (!result) {
+        reply.code(404);
+        return { error: "not_found" };
+      }
+
+      return {
+        ...result,
+        sessionToken: auth.sessionToken,
+        sessionExpiresAt: auth.expiresAt,
+      };
     } catch (error) {
       reply.code(403);
       return { error: error instanceof Error ? error.message : "forbidden" };
     }
-
-    const result = await applyWithdraw(request.params.walletAddress, parsed.data.amountTon);
-  if (!result) {
-    reply.code(404);
-    return { error: "not_found" };
-  }
-
-  return result;
   },
 );
 

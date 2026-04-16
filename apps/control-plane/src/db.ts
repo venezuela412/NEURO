@@ -32,6 +32,13 @@ async function createDb() {
       created_at TEXT NOT NULL,
       PRIMARY KEY (wallet_address, nonce)
     );
+
+    CREATE TABLE IF NOT EXISTS wallet_action_sessions (
+      session_id TEXT PRIMARY KEY,
+      wallet_address TEXT NOT NULL,
+      issued_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
   `);
 
   return db;

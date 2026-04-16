@@ -156,3 +156,9 @@ export interface SignedActionProof {
   signature: string;
   payload: SignedActionPayload;
 }
+
+export interface WalletSession {
+  token: string;
+  walletAddress: string;
+  expiresAt: string;
+}

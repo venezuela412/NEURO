@@ -22,7 +22,7 @@ function buildActivityFromReceipt(receipt: ExecutionReceipt): ActivityEvent {
 
 export function usePortfolioActions() {
   const wallet = useNeuroWallet();
-  const { signAction } = useWalletActionAuth();
+  const { signAction, ensureSession, session } = useWalletActionAuth();
   const setPortfolio = useAppStore((state) => state.setPortfolio);
   const setExecutionReceipt = useAppStore((state) => state.setExecutionReceipt);
   const appendActivityEvent = useAppStore((state) => state.appendActivityEvent);
@@ -43,7 +43,8 @@ export function usePortfolioActions() {
 
       setExecutionStatus("confirming");
       const auth = await signAction("move-to-safety", wallet.address);
-      return movePortfolioToSafety(wallet.address, auth);
+      const activeSession = session ?? (await ensureSession(auth));
+      return movePortfolioToSafety(wallet.address, auth, activeSession);
     },
     onSuccess: ({ portfolio, executionReceipt }) => {
       applyMutationResult(portfolio, executionReceipt);
@@ -58,7 +59,8 @@ export function usePortfolioActions() {
 
       setExecutionStatus("confirming");
       const auth = await signAction("withdraw", `${wallet.address}:${amountTon ?? "all"}`);
-      return withdrawPortfolio(wallet.address, auth, amountTon);
+      const activeSession = session ?? (await ensureSession(auth));
+      return withdrawPortfolio(wallet.address, auth, activeSession, amountTon);
     },
     onSuccess: ({ portfolio, executionReceipt }) => {
       applyMutationResult(portfolio, executionReceipt);

@@ -21,6 +21,13 @@ interface ConsumedNonceRow {
   nonce: string;
 }
 
+interface WalletSessionRow {
+  session_id: string;
+  wallet_address: string;
+  issued_at: string;
+  expires_at: string;
+}
+
 function normalizeWalletAddress(walletAddress: string) {
   return walletAddress.trim();
 }
@@ -113,6 +120,53 @@ export async function consumeNonce(walletAddress: string, nonce: string) {
       ON CONFLICT (wallet_address, nonce) DO NOTHING
     `,
     [normalized, nonce],
+  );
+}
+
+export async function createWalletSession(walletAddress: string, sessionId: string, expiresAt: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const issuedAt = new Date().toISOString();
+  await db.query(
+    `
+      INSERT INTO wallet_sessions (session_id, wallet_address, issued_at, expires_at)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (session_id)
+      DO UPDATE SET wallet_address = EXCLUDED.wallet_address, issued_at = EXCLUDED.issued_at, expires_at = EXCLUDED.expires_at
+    `,
+    [sessionId, normalized, issuedAt, expiresAt],
+  );
+}
+
+export async function getWalletSession(walletAddress: string, sessionId: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const result = await db.query<WalletSessionRow>(
+    `
+      SELECT session_id, wallet_address, issued_at, expires_at
+      FROM wallet_sessions
+      WHERE wallet_address = $1 AND session_id = $2
+      LIMIT 1
+    `,
+    [normalized, sessionId],
+  );
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  return result.rows[0];
+}
+
+export async function deleteWalletSession(walletAddress: string, sessionId: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  await db.query(
+    `
+      DELETE FROM wallet_sessions
+      WHERE wallet_address = $1 AND session_id = $2
+    `,
+    [normalized, sessionId],
   );
 }
 

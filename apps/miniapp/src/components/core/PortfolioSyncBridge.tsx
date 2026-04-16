@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { PersistedPortfolioState, SignedActionProof } from "@neuro/shared";
+import type { PersistedPortfolioState, SignedActionProof, WalletSession } from "@neuro/shared";
 import {
   fetchPersistedPortfolioState,
   savePersistedPortfolioStateAuthenticated,
@@ -16,6 +16,7 @@ function serializeState(state: PersistedPortfolioState) {
 interface PersistPortfolioPayload {
   state: PersistedPortfolioState;
   proof: SignedActionProof;
+  session?: WalletSession | null;
 }
 
 export function PortfolioSyncBridge() {
@@ -28,7 +29,7 @@ export function PortfolioSyncBridge() {
   const routeQualityScore = useAppStore((state) => state.routeQualityScore);
   const applyPersistedPortfolioState = useAppStore((state) => state.applyPersistedPortfolioState);
   const setPortfolioHydrating = useAppStore((state) => state.setPortfolioHydrating);
-  const { signAction } = useWalletActionAuth();
+  const { ensureSession, signAction } = useWalletActionAuth();
 
   const lastSerializedRef = useRef<string>("");
 
@@ -40,8 +41,8 @@ export function PortfolioSyncBridge() {
   });
 
   const persistMutation = useMutation({
-    mutationFn: async ({ state, proof }: PersistPortfolioPayload) =>
-      savePersistedPortfolioStateAuthenticated(state, proof),
+    mutationFn: async ({ state, proof, session }: PersistPortfolioPayload) =>
+      savePersistedPortfolioStateAuthenticated(state, proof, session),
   });
 
   useEffect(() => {
@@ -98,10 +99,12 @@ export function PortfolioSyncBridge() {
       void (async () => {
         try {
           const proof = await signAction("persist-state", serialized);
+          const session = await ensureSession(proof);
           lastSerializedRef.current = serialized;
           await persistMutation.mutateAsync({
             state: currentState,
             proof,
+            session,
           });
         } catch {
           lastSerializedRef.current = "";
@@ -110,7 +113,7 @@ export function PortfolioSyncBridge() {
     }, 350);
 
     return () => window.clearTimeout(handle);
-  }, [currentState, persistMutation, signAction]);
+  }, [currentState, ensureSession, persistMutation, signAction]);
 
   return null;
 }
