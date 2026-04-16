@@ -1,8 +1,12 @@
+import type { ActivityEvent } from "@neuro/shared";
 import { ActivityFeed } from "../components/activity/ActivityFeed";
 import { useAppStore } from "../store/appStore";
 
+/** Stable fallback — `?? []` in a selector returns a new array every render and triggers infinite updates (React #185). */
+const EMPTY_ACTIVITY: ActivityEvent[] = [];
+
 export function ActivityScreen() {
-  const activity = useAppStore((state) => state.portfolio?.activity ?? []);
+  const activity = useAppStore((state) => state.portfolio?.activity ?? EMPTY_ACTIVITY);
   const isPortfolioHydrating = useAppStore((state) => state.isPortfolioHydrating);
 
   if (isPortfolioHydrating) {
