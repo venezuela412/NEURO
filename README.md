@@ -70,6 +70,34 @@ The novelty is the combination of:
    - signed mutation proofs now protect control-plane write actions
    - architecture is prepared for deeper Tonstakers and STON.fi execution adapters through thin integration seams
 
+## Wallet support
+
+NEURO uses **TonConnect** for wallet connection.
+
+That means the app supports **TonConnect-compatible TON wallets** surfaced by the connection modal.
+
+In practice, this typically includes wallets such as:
+
+- **Tonkeeper**
+- **TON Space**
+- other TonConnect-compatible TON wallets supported by the user's environment
+
+The product does not hardcode a single wallet vendor. It supports the TonConnect wallet ecosystem.
+
+## What someone can demo right now
+
+This repository already supports a meaningful hackathon demo flow:
+
+1. Open the Mini App
+2. Choose **Protect**, **Earn**, or **Grow**
+3. Generate a recommended plan
+4. See live Safe Income or STON route-quality context where available
+5. Connect a TonConnect-compatible wallet
+6. Approve a plan
+7. View the active plan, execution receipt, and activity trail
+
+The product is honest about what is fully live versus what is staged for deeper execution.
+
 ## What is implemented right now
 
 This branch contains the foundation checkpoint for NEURO:
