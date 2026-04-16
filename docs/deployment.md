@@ -248,6 +248,39 @@ Good options:
 - Render
 - a container host on a VPS
 
+### Beginner path: control plane on Railway or Render
+
+Both have free tiers and can run a Docker image. **Railway** is often faster to click through; **Render** is very similar. Pick one.
+
+**What you deploy:** use the Dockerfile at `apps/control-plane/Dockerfile`. The image listens on **`PORT`** (Render/Railway inject this automatically).
+
+**Environment variables** (minimum for NEURO miniapp + signed actions from your Vercel domain):
+
+| Variable | Example |
+|----------|---------|
+| `PORT` | Usually set by the platform (often `10000` on Render); do not hardcode unless the platform requires it. |
+| `ALLOWED_SIGN_DOMAINS` | Your Vercel host only, no scheme: `neuroton-lime.vercel.app` (comma-separate if you add more). |
+| `TON_RPC_ENDPOINT` | `https://toncenter.com/api/v2/jsonRPC` (or your preferred TON HTTP API). |
+| `DATABASE_URL` | Optional: omit for embedded PGlite on disk inside the container (data resets if the instance restarts). For persistence, attach the platform’s Postgres and paste its URL here. |
+
+**Railway (outline):**
+
+1. [railway.app](https://railway.app) → New Project → **Deploy from GitHub repo** → select `NEURO`.
+2. Add a service → **Dockerfile** path: `apps/control-plane/Dockerfile` (or empty root and set Dockerfile path in service settings).
+3. **Variables** tab → add the table above.
+4. **Settings → Networking → Generate Domain** → copy the public URL (e.g. `https://neuro-api.up.railway.app`).
+5. In **Vercel** (miniapp project) set `VITE_CONTROL_PLANE_URL` to that URL (no trailing slash) → **Redeploy** the frontend.
+
+**Render (outline):**
+
+1. [render.com](https://render.com) → **New +** → **Web Service** → connect GitHub repo `NEURO`.
+2. Environment: **Docker**; Dockerfile path: `apps/control-plane/Dockerfile`.
+3. Add the same env vars as the table.
+4. Create service; when live, copy the **HTTPS** URL (e.g. `https://neuro-api.onrender.com`).
+5. Set `VITE_CONTROL_PLANE_URL` on Vercel to that URL → **Redeploy** the miniapp.
+
+**CORS:** the control plane currently allows all origins (`origin: true`). For production you should restrict to your Vercel URL later.
+
 ## Recommended first public test setup
 
 For the first public test, use:

@@ -41,11 +41,17 @@ Set these on **Vercel** (or your static host) for **Production** builds, then **
 | Variable | Purpose |
 |----------|---------|
 | `VITE_APP_URL` | Exact public origin of the app (e.g. `https://your-project.vercel.app`). Used when generating `tonconnect-manifest.json` at build time. |
-| `VITE_CONTROL_PLANE_URL` | Public URL of your control-plane API (omit only if you are not using persistence from the deployed site). |
+| `VITE_CONTROL_PLANE_URL` | Public URL of your control-plane API. **Optional for a first UI-only test:** if unset, the app falls back to `http://localhost:8787` (fine on your PC with `pnpm dev:control-plane`, not from a phone or Telegram until you deploy the API). |
 | `VITE_TELEGRAM_BOT_USERNAME` | Bot username **without** `@`, for copy or deep links in the app if referenced. |
 | `VITE_TON_NETWORK` | `mainnet` or `testnet` as you prefer for the demo. |
 
 After changing variables, trigger a new deployment so the manifest rebuilds.
+
+### Blank screen on Vercel?
+
+1. Open the site in **desktop Chrome** (not only Telegram), press **F12** → **Console** and note any red errors.
+2. Confirm the address is **HTTPS** and matches `VITE_APP_URL` after you set it (then **Redeploy**).
+3. A missing API alone should **not** blank the home page; if you still see white, check the console or redeploy after pulling the latest repo (includes a root error boundary for clearer failures).
 
 ## 5. Control plane: signed actions and CORS
 
