@@ -262,6 +262,7 @@ Both have free tiers and can run a Docker image. **Railway** is often faster to 
 | `ALLOWED_SIGN_DOMAINS` | Your Vercel host only, no scheme: `neuroton-lime.vercel.app` (comma-separate if you add more). |
 | `TON_RPC_ENDPOINT` | `https://toncenter.com/api/v2/jsonRPC` (or your preferred TON HTTP API). |
 | `DATABASE_URL` | Optional: omit for embedded PGlite on disk inside the container (data resets if the instance restarts). For persistence, attach the platform’s Postgres and paste its URL here. |
+| `NEURO_ADMIN_TOKEN` | Optional secret. If set, `GET /admin/summary` returns JSON with wallet summaries and recent execution receipts (see below). |
 
 **Railway (outline):**
 
@@ -278,6 +279,40 @@ Both have free tiers and can run a Docker image. **Railway** is often faster to 
 3. Add the same env vars as the table.
 4. Create service; when live, copy the **HTTPS** URL (e.g. `https://neuro-api.onrender.com`).
 5. Set `VITE_CONTROL_PLANE_URL` on Vercel to that URL → **Redeploy** the miniapp.
+
+### Point the Vercel miniapp at the control plane
+
+1. Vercel → your **NEURO** (miniapp) project → **Settings** → **Environment Variables**.
+2. Add **`VITE_CONTROL_PLANE_URL`** = your public API base URL, e.g. `https://neuro-api.up.railway.app` (no trailing slash).
+3. **Deployments** → **Redeploy** so the built bundle embeds that URL.
+
+Without this variable, the browser build still defaults to `http://localhost:8787`, which only works on your PC with a local server.
+
+### See “users”, activity, and fee estimates (admin JSON)
+
+There is **no full admin UI** in the repo yet. For a quick operational view:
+
+1. On the control plane host, set **`NEURO_ADMIN_TOKEN`** to a long random string (generate in a password manager).
+2. After deploy, open in a browser or `curl`:
+
+```text
+GET https://YOUR-API-HOST/admin/summary
+Header: X-Neuro-Admin-Token: YOUR_SECRET
+```
+
+Or: `Authorization: Bearer YOUR_SECRET`
+
+Response includes:
+
+- `portfolioCount` — rows in `portfolio_state` (one per wallet that saved state).
+- `portfolios[]` — `walletAddress`, `updatedAt`, and from persisted state when present: `principalTon`, `estimatedFeeTon` (MVP **estimate** from the app engine, not on-chain collected revenue), `activePlanId`.
+- `recentExecutions[]` — latest `execution_receipts` with plan/status/mode.
+
+If `NEURO_ADMIN_TOKEN` is unset, the endpoint returns **503** with a hint (so accidental public exposure of summaries does not happen).
+
+### Where do platform fees “go”?
+
+Today, **fee amounts in the app are estimates** (`estimatedFeeTon`, `calculateFeePreview` in `@neuro/domain`). **No TON is automatically sent to a NEURO treasury** in this MVP: there is no custodial collection contract wired in. Real monetization would require an agreed settlement path (invoice, partner share, on-chain treasury contract, etc.) and is **out of scope** of the current open-source control plane tables.
 
 **CORS:** the control plane currently allows all origins (`origin: true`). For production you should restrict to your Vercel URL later.
 

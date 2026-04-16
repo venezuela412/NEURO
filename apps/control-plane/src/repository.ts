@@ -407,3 +407,104 @@ export async function reconcilePersistedExecution(walletAddress: string, receipt
     executionStatus: nextState.executionStatus,
   };
 }
+
+export interface AdminPortfolioRow {
+  walletAddress: string;
+  updatedAt: string;
+  principalTon: number | null;
+  estimatedFeeTon: number | null;
+  activePlanId: string | null;
+}
+
+export interface AdminExecutionRow {
+  walletAddress: string;
+  receiptId: string;
+  createdAt: string;
+  planId: string | null;
+  status: string | null;
+  mode: string | null;
+}
+
+export async function listPortfolioSummariesForAdmin(limit = 200): Promise<AdminPortfolioRow[]> {
+  const db = await getDb();
+  const cap = Math.min(Math.max(limit, 1), 500);
+  const result = await db.query<{ wallet_address: string; state_json: string; updated_at: string }>(
+    "SELECT wallet_address, state_json, updated_at FROM portfolio_state ORDER BY updated_at DESC LIMIT $1",
+    [cap],
+  );
+
+  return result.rows.map((row) => {
+    let principalTon: number | null = null;
+    let estimatedFeeTon: number | null = null;
+    let activePlanId: string | null = null;
+    try {
+      const state = JSON.parse(row.state_json) as PersistedPortfolioState;
+      if (state.portfolio) {
+        principalTon = state.portfolio.principalTon;
+        estimatedFeeTon = state.portfolio.estimatedFeeTon;
+        activePlanId = state.portfolio.activePlanId;
+      }
+    } catch {
+      // ignore parse errors for admin read
+    }
+
+    return {
+      walletAddress: row.wallet_address,
+      updatedAt: row.updated_at,
+      principalTon,
+      estimatedFeeTon,
+      activePlanId,
+    };
+  });
+}
+
+export async function listRecentExecutionReceiptsForAdmin(limit = 100): Promise<AdminExecutionRow[]> {
+  const db = await getDb();
+  const cap = Math.min(Math.max(limit, 1), 500);
+  const result = await db.query<{ wallet_address: string; receipt_json: string; created_at: string }>(
+    `
+      SELECT wallet_address, receipt_json, created_at
+      FROM execution_receipts
+      ORDER BY created_at DESC
+      LIMIT $1
+    `,
+    [cap],
+  );
+
+  return result.rows.map((row) => {
+    let planId: string | null = null;
+    let status: string | null = null;
+    let mode: string | null = null;
+    let receiptId = "";
+    try {
+      const receipt = JSON.parse(row.receipt_json) as ExecutionReceipt;
+      receiptId = receipt.id;
+      planId = receipt.planId;
+      status = receipt.status;
+      mode = receipt.mode;
+    } catch {
+      receiptId = "parse-error";
+    }
+
+    return {
+      walletAddress: row.wallet_address,
+      receiptId,
+      createdAt: row.created_at,
+      planId,
+      status,
+      mode,
+    };
+  });
+}
+
+export async function countPortfolioRows(): Promise<number> {
+  const db = await getDb();
+  const result = await db.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM portfolio_state");
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+export async function countExecutionReceiptRows(): Promise<number> {
+  const db = await getDb();
+  const result = await db.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM execution_receipts");
+  return Number(result.rows[0]?.count ?? 0);
+}

@@ -14,12 +14,16 @@ import {
   addExecutionReceipt,
   applySwitchToSafety,
   applyWithdraw,
+  countExecutionReceiptRows,
+  countPortfolioRows,
   createWalletSession,
   getWalletSession,
   consumeNonce,
   getPersistedPortfolioState,
   isNonceConsumed,
   listExecutionReceipts,
+  listPortfolioSummariesForAdmin,
+  listRecentExecutionReceiptsForAdmin,
   reconcilePersistedExecution,
   savePersistedPortfolioState,
 } from "./repository";
@@ -161,6 +165,65 @@ server.get("/health", async () => ({
 }));
 
 server.get("/overview", async () => getNeuroOverview());
+
+function requireAdminToken(request: { headers: Record<string, string | string[] | undefined> }) {
+  const configured = process.env.NEURO_ADMIN_TOKEN?.trim();
+  if (!configured) {
+    return { ok: false as const, reason: "not_configured" as const };
+  }
+
+  const header =
+    (typeof request.headers["x-neuro-admin-token"] === "string"
+      ? request.headers["x-neuro-admin-token"]
+      : Array.isArray(request.headers["x-neuro-admin-token"])
+        ? request.headers["x-neuro-admin-token"][0]
+        : undefined) ?? "";
+
+  const auth =
+    typeof request.headers.authorization === "string"
+      ? request.headers.authorization
+      : Array.isArray(request.headers.authorization)
+        ? request.headers.authorization[0]
+        : "";
+
+  const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+
+  if (header === configured || bearer === configured) {
+    return { ok: true as const };
+  }
+
+  return { ok: false as const, reason: "forbidden" as const };
+}
+
+server.get("/admin/summary", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    if (auth.reason === "not_configured") {
+      reply.code(503);
+      return {
+        error: "admin_not_configured",
+        hint: "Set NEURO_ADMIN_TOKEN on the control plane, then call GET /admin/summary with header X-Neuro-Admin-Token or Authorization: Bearer <token>.",
+      };
+    }
+    reply.code(403);
+    return { error: "forbidden" };
+  }
+
+  const [portfolioCount, executionCount, portfolios, executions] = await Promise.all([
+    countPortfolioRows(),
+    countExecutionReceiptRows(),
+    listPortfolioSummariesForAdmin(200),
+    listRecentExecutionReceiptsForAdmin(100),
+  ]);
+
+  return {
+    portfolioCount,
+    executionReceiptCount: executionCount,
+    portfolios,
+    recentExecutions: executions,
+    note: "Fees shown are MVP estimates from persisted portfolio state (estimatedFeeTon), not settled on-chain to a treasury yet.",
+  };
+});
 
 server.get<{ Querystring: { amount?: string } }>("/portfolio/demo", async (request) => {
   const amount = Number(request.query.amount ?? 100);
