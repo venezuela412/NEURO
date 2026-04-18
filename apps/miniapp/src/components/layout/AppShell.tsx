@@ -38,56 +38,58 @@ export function AppShell({ children }: PropsWithChildren) {
   }, [setHasWallet, wallet.connected]);
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div className="app-header-left">
-          {canGoBack ? (
-            <button
-              type="button"
-              className="icon-button"
-              aria-label="Go back"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={18} />
-            </button>
-          ) : (
-            <div className={`brand-badge ${isTestnet ? 'bg-amber-600' : ''}`} aria-hidden="true">
-              N
+    <div className={location.pathname === "/" ? "w-full h-full min-h-screen" : "app-shell"}>
+      {location.pathname !== "/" && (
+        <header className="app-header">
+          <div className="app-header-left">
+            {canGoBack ? (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Go back"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft size={18} />
+              </button>
+            ) : (
+              <div className={`brand-badge ${isTestnet ? 'bg-amber-600' : ''}`} aria-hidden="true">
+                N
+              </div>
+            )}
+
+            <div className="brand-text">
+              <Link to="/" className="brand-link flex items-center gap-2">
+                {APP_NAME}
+                {isTestnet && <span className="text-[10px] bg-amber-600/20 text-amber-500 px-1.5 py-0.5 rounded uppercase font-bold">Testnet</span>}
+              </Link>
+              {location.pathname !== "/" ? (
+                <p className="header-subtitle">
+                  {titles[location.pathname] ?? "Put your TON to work"}{" "}
+                  · <span className="header-env">{telegramEnv.platform}</span>
+                </p>
+              ) : null}
             </div>
-          )}
-
-          <div className="brand-text">
-            <Link to="/" className="brand-link flex items-center gap-2">
-              {APP_NAME}
-              {isTestnet && <span className="text-[10px] bg-amber-600/20 text-amber-500 px-1.5 py-0.5 rounded uppercase font-bold">Testnet</span>}
-            </Link>
-            {location.pathname !== "/" ? (
-              <p className="header-subtitle">
-                {titles[location.pathname] ?? "Put your TON to work"}{" "}
-                · <span className="header-env">{telegramEnv.platform}</span>
-              </p>
-            ) : null}
           </div>
-        </div>
 
-        <div className="app-header-right">
-          <button 
-            type="button" 
-            className={`icon-button ${isTestnet ? 'text-amber-500' : 'icon-button-muted'}`} 
-            aria-label="Toggle Testnet"
-            onClick={() => setIsTestnet(!isTestnet)}
-          >
-            <FlaskConical size={18} />
-          </button>
-          <button type="button" className="icon-button icon-button-muted" aria-label="Alerts">
-            <BellDot size={18} />
-          </button>
-          <div className="wallet-slot">
-            {wallet.connected ? <span className="wallet-pill">{wallet.walletName}</span> : null}
-            <TonConnectButton className="wallet-button" />
+          <div className="app-header-right">
+            <button 
+              type="button" 
+              className={`icon-button ${isTestnet ? 'text-amber-500' : 'icon-button-muted'}`} 
+              aria-label="Toggle Testnet"
+              onClick={() => setIsTestnet(!isTestnet)}
+            >
+              <FlaskConical size={18} />
+            </button>
+            <button type="button" className="icon-button icon-button-muted" aria-label="Alerts">
+              <BellDot size={18} />
+            </button>
+            <div className="wallet-slot">
+              {wallet.connected ? <span className="wallet-pill">{wallet.walletName}</span> : null}
+              <TonConnectButton className="wallet-button" />
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <main className="screen-frame">{children}</main>
 

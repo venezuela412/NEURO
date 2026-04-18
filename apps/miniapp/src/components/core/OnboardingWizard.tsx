@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Database, Zap, ShieldCheck } from 'lucide-react';
+import { Network, Database, Zap, ShieldCheck, Languages } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SLIDES = [
   {
-    title: "NeuroTON Protocol",
-    subtitle: "The Vanguard of TON DeFi",
-    description: "Welcome to the first autonomous Omni-Chain Intent Vault on The Open Network. Advanced algorithms manage your yield so you don't have to.",
+    title: "NeuroTON",
+    subtitle: "Select your Reality",
+    description: "Choose your preferred language / Selecciona tu idioma de preferencia.",
+    icon: Languages,
+    neonColor: "shadow-white/20",
+    isLangSelect: true
+  },
+  {
+    title: "The Vanguard of TON",
+    subtitle: "Autonomous Intelligence",
+    description: "Welcome to the first Omni-Chain Intent Vault on The Open Network. Elite AI manages your yield so you don't have to.",
     icon: Network,
     neonColor: "shadow-blue-500/50"
   },
@@ -21,13 +29,13 @@ const SLIDES = [
   {
     title: "nTON Liquidity",
     subtitle: "The Ultimate Standard",
-    description: "Receive the Liquid Staking Token (nTON) mirroring your Vault share. Composable natively with EVAA and STON.fi ecosystems.",
+    description: "Receive the Liquid Staking Token (nTON) mirroring your Vault share. Natively composable with EVAA and STON.fi ecosystems.",
     icon: Database,
     neonColor: "shadow-neon-teal/50"
   },
   {
-    title: "Autonomous Intents",
-    subtitle: "Market Neutral Execution",
+    title: "Market Neutral Execution",
+    subtitle: "Autonomous Intents",
     description: "Select your risk trajectory. Our solvers automatically track, loop, and harvest maximum yield across DeDust and external chains.",
     icon: Zap,
     neonColor: "shadow-orange-500/50"
@@ -36,11 +44,11 @@ const SLIDES = [
 
 export const OnboardingWizard: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [lang, setLang] = useState<'EN'|'ES'>('EN');
   const navigate = useNavigate();
 
   const handleNext = () => {
     if (currentSlide === SLIDES.length - 1) {
-      // Setup complete flag can be saved to localStorage
       localStorage.setItem('neuro_onboarding_complete', 'true');
       navigate('/plans');
     } else {
@@ -48,7 +56,8 @@ export const OnboardingWizard: React.FC = () => {
     }
   };
 
-  const Icon = SLIDES[currentSlide].icon;
+  const current = SLIDES[currentSlide];
+  const Icon = current.icon;
 
   return (
     <div className="min-h-screen bg-bg relative flex flex-col items-center justify-center overflow-hidden">
@@ -68,19 +77,38 @@ export const OnboardingWizard: React.FC = () => {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex flex-col items-center text-center w-full"
           >
-            <div className={`p-6 mb-8 rounded-full border border-white/10 bg-surface backdrop-blur-md shadow-2xl ${SLIDES[currentSlide].neonColor}`}>
+            <div className={`p-6 mb-8 rounded-full border border-white/10 bg-surface backdrop-blur-md shadow-2xl ${current.neonColor}`}>
               <Icon className="w-16 h-16 text-white" strokeWidth={1.5} />
             </div>
 
             <h1 className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-              {SLIDES[currentSlide].title}
+              {current.title}
             </h1>
             <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-accent-2 mb-6">
-              {SLIDES[currentSlide].subtitle}
+              {current.subtitle}
             </h2>
             
+            {current.isLangSelect ? (
+              <div className="flex gap-4 w-full justify-center mb-8">
+                <button 
+                  onClick={() => setLang('EN')}
+                  className={`flex flex-col items-center justify-center p-6 rounded-2xl w-32 border transition-all ${lang === 'EN' ? 'border-accent-2 bg-accent-2/10 shadow-[0_0_20px_rgba(38,211,199,0.3)]' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100 hover:border-white/20'}`}
+                >
+                  <span className="text-3xl mb-2">🇺🇸</span>
+                  <span className={`font-bold ${lang === 'EN' ? 'text-accent-2' : 'text-gray-400'}`}>EN</span>
+                </button>
+                <button 
+                  onClick={() => setLang('ES')}
+                  className={`flex flex-col items-center justify-center p-6 rounded-2xl w-32 border transition-all ${lang === 'ES' ? 'border-accent bg-accent/10 shadow-[0_0_20px_rgba(143,115,255,0.3)]' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100 hover:border-white/20'}`}
+                >
+                  <span className="text-3xl mb-2">🇪🇸</span>
+                  <span className={`font-bold ${lang === 'ES' ? 'text-accent' : 'text-gray-400'}`}>ES</span>
+                </button>
+              </div>
+            ) : null}
+
             <p className="text-gray-400 leading-relaxed text-lg px-2">
-              {SLIDES[currentSlide].description}
+              {current.description}
             </p>
           </motion.div>
         </AnimatePresence>
