@@ -6,11 +6,11 @@ import { useAppStore } from "../store/appStore";
 import { createTonstakersAdapter } from "@neuro/adapters";
 
 function getTonNetwork() {
-  return import.meta.env.VITE_TON_NETWORK === "testnet" ? "-3" : "-239";
+  return useAppStore.getState().isTestnet ? "-3" : "-239";
 }
 
 interface PlanExecutionController {
-  activateWithWallet: (recommendation: PlanRecommendation, quoteData?: any) => Promise<void>;
+  activateWithWallet: (recommendation: PlanRecommendation, quoteData?: unknown) => Promise<void>;
 }
 
 function buildExecutionEvent(title: string, description: string, tone: ActivityEvent["tone"]): ActivityEvent {
@@ -37,7 +37,7 @@ export function usePlanExecution(): PlanExecutionController {
 
   async function activateWithWallet(
     recommendation: PlanRecommendation,
-    quoteData?: any, // optional quote from useStonQuote
+    quoteData?: unknown, // optional quote from useStonQuote
   ) {
     setExecutionStatus("waiting-for-wallet");
     setExecutionReceipt(null);

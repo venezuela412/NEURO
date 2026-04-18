@@ -18,6 +18,7 @@ import { buildPortfolioSnapshot, calculateFeePreview, recommendPlan } from "@neu
 type RiskPreference = "low" | "medium" | "high";
 
 interface AppState {
+  isTestnet: boolean;
   amountTon: number;
   goal: Goal;
   wantsFlexibility: boolean;
@@ -31,6 +32,7 @@ interface AppState {
   executionStatus: ExecutionStatus;
   executionReceipt: ExecutionReceipt | null;
   isPortfolioHydrating: boolean;
+  setIsTestnet: (value: boolean) => void;
   setAmountTon: (amount: number) => void;
   setGoal: (goal: Goal) => void;
   setWantsFlexibility: (value: boolean) => void;
@@ -56,6 +58,7 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+  isTestnet: import.meta.env.VITE_TON_NETWORK === "testnet",
   amountTon: 100,
   goal: "earn",
   wantsFlexibility: true,
@@ -69,6 +72,7 @@ export const useAppStore = create<AppState>()(
   executionStatus: "idle",
   executionReceipt: null,
   isPortfolioHydrating: false,
+  setIsTestnet: (isTestnet) => set({ isTestnet }),
   setAmountTon: (amountTon) =>
     set({
       amountTon,
@@ -195,6 +199,7 @@ export const useAppStore = create<AppState>()(
     {
       name: "neuro-app-store",
       partialize: (state) => ({
+        isTestnet: state.isTestnet,
         amountTon: state.amountTon,
         goal: state.goal,
         wantsFlexibility: state.wantsFlexibility,

@@ -20,7 +20,7 @@ function toCssVarName(value: string) {
 
 export function TelegramBridge() {
   const navigate = useNavigate();
-  const selectGoal = useAppStore((state) => state.selectGoal);
+  const setGoal = useAppStore((state) => state.setGoal);
   const isInitialized = useRef(false);
 
   useEffect(() => {
@@ -32,9 +32,9 @@ export function TelegramBridge() {
       const testParam = params.get("tgWebAppStartParam");
       if (testParam && !isInitialized.current) {
         isInitialized.current = true;
-        if (testParam === "plan_safe") selectGoal("protect");
-        else if (testParam === "plan_balanced") selectGoal("earn");
-        else if (testParam === "plan_growth") selectGoal("grow");
+        if (testParam === "plan_safe") setGoal("protect");
+        else if (testParam === "plan_balanced") setGoal("earn");
+        else if (testParam === "plan_growth") setGoal("grow");
         navigate("/plans");
       }
       return;
@@ -53,14 +53,14 @@ export function TelegramBridge() {
     if (webApp.initDataUnsafe?.start_param && !isInitialized.current) {
       isInitialized.current = true;
       const param = webApp.initDataUnsafe.start_param;
-      if (param === "plan_safe") selectGoal("protect");
-      else if (param === "plan_balanced") selectGoal("earn");
-      else if (param === "plan_growth") selectGoal("grow");
+      if (param === "plan_safe") setGoal("protect");
+      else if (param === "plan_balanced") setGoal("earn");
+      else if (param === "plan_growth") setGoal("grow");
       
       // Auto redirect to plans explicitly since they chose a deep link
       navigate("/plans");
     }
-  }, [navigate, selectGoal]);
+  }, [navigate, setGoal]);
 
   return null;
 }

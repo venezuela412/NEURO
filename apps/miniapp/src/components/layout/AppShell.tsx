@@ -1,4 +1,4 @@
-import { ArrowLeft, BellDot } from "lucide-react";
+import { ArrowLeft, BellDot, FlaskConical } from "lucide-react";
 import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
@@ -28,6 +28,8 @@ export function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
   const wallet = useNeuroWallet();
   const telegramEnv = useTelegramEnv();
+  const isTestnet = useAppStore((state) => state.isTestnet);
+  const setIsTestnet = useAppStore((state) => state.setIsTestnet);
   const setHasWallet = useAppStore((state) => state.setHasWallet);
   const canGoBack = location.pathname !== "/";
 
@@ -49,14 +51,15 @@ export function AppShell({ children }: PropsWithChildren) {
               <ArrowLeft size={18} />
             </button>
           ) : (
-            <div className="brand-badge" aria-hidden="true">
+            <div className={`brand-badge ${isTestnet ? 'bg-amber-600' : ''}`} aria-hidden="true">
               N
             </div>
           )}
 
           <div className="brand-text">
-            <Link to="/" className="brand-link">
+            <Link to="/" className="brand-link flex items-center gap-2">
               {APP_NAME}
+              {isTestnet && <span className="text-[10px] bg-amber-600/20 text-amber-500 px-1.5 py-0.5 rounded uppercase font-bold">Testnet</span>}
             </Link>
             {location.pathname !== "/" ? (
               <p className="header-subtitle">
@@ -68,6 +71,14 @@ export function AppShell({ children }: PropsWithChildren) {
         </div>
 
         <div className="app-header-right">
+          <button 
+            type="button" 
+            className={`icon-button ${isTestnet ? 'text-amber-500' : 'icon-button-muted'}`} 
+            aria-label="Toggle Testnet"
+            onClick={() => setIsTestnet(!isTestnet)}
+          >
+            <FlaskConical size={18} />
+          </button>
           <button type="button" className="icon-button icon-button-muted" aria-label="Alerts">
             <BellDot size={18} />
           </button>

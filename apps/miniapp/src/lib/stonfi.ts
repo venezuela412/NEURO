@@ -1,11 +1,12 @@
 import { Omniston } from "@ston-fi/omniston-sdk-react";
+import { useAppStore } from "../store/appStore";
 
 function getOmnistonUrl() {
   if (import.meta.env.VITE_STONFI_API_URL) {
     return import.meta.env.VITE_STONFI_API_URL;
   }
 
-  return import.meta.env.VITE_TON_NETWORK === "testnet"
+  return useAppStore.getState().isTestnet
     ? "wss://omni-ws-sandbox.ston.fi"
     : "wss://omni-ws.ston.fi";
 }
