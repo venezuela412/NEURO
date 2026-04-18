@@ -2,13 +2,13 @@
   "name": "@neuro/contracts",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
     "build": "tact --config tact.config.json",
     "test": "jest",
-    "lint": "tsc --noEmit -p tsconfig.json"
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "deploy-custom": "node customDeploy.js"
   },
   "devDependencies": {
     "@tact-lang/compiler": "^1.6.13",

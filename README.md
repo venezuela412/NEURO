@@ -4,94 +4,53 @@
 
 # NEURO Protocol
 
-Put your TON to work. Simply.
+**Put your TON to work. Simply.**
 
-NEURO is a Telegram-native DeFi Yield Optimizer designed for the TON blockchain. Instead of demanding users to understand liquidity pools, impermanent loss, routing algorithms, or complex staking choices, NEURO distills TON-native yield opportunities into automated, guided portfolios:
+NEURO is a Telegram-native DeFi Yield Optimizer designed specifically for the TON blockchain. By abstracting away the complexity of liquidity pools, impermanent loss, routing algorithms, and staging decisions, NEURO distills advanced TON-native yield opportunities into automated, guided portfolios:
 
-- **Protect:** Low-volatility stable yields.
-- **Earn:** Balanced risk/reward liquidity provisioning.
-- **Grow:** High-upside algorithmic strategies.
+- 🛡️ **Protect:** Low-volatility stable yields for capital preservation.
+- ✨ **Earn:** Balanced risk/reward liquidity provisioning for passive income.
+- 🚀 **Grow:** High-upside algorithmic strategies for aggressive growth.
 
-The protocol abstracts away the complexity of base-layer protocols (STON.fi, Tonstakers) behind a calm, high-conversion interface, while our forthcoming **Smart Vaults (Automation Contracts)** handle autocompounding safely and transparently.
+The protocol cleanly abstracts base-layer complexities (like STON.fi V2 and Tonstakers) behind an ultra-premium, high-conversion interface. Under the hood, **Neuro Yield Vaults (Tact)** handle auto-compounding and asset tracking transparently and autonomously.
 
 ## The Vision
 
-NEURO is built to become the ultimate yield aggregation layer for TON. The core value proposition is:
-1. **Aggregated Yields:** One-click deployment of capital to the highest-yielding strategies across TON.
-2. **Auto-Compounding (WIP):** Smart Vaults automatically harvest rewards and reinvest them to scale balances exponentially without active user management.
-3. **Transparent Alignments:** We only make money if you make money. A strict performance-fee logic (High-Water Mark) ensures zero hidden fees on principal or losses.
-4. **Contextual Security:** Replay protections, signed mutation proofs, and strictly audited message paths guarantee user funds remain protected.
+NEURO is actively bridging the gap between non-technical Telegram users and sophisticated decentralized finance via:
+1. **Aggregated Yields:** One-click capital deployment to the highest-yielding strategies across TON.
+2. **ExecDelegate Smart Vaults:** Complete, non-custodial execution proxies programmed in Tact. Users maintain absolute ownership, while the Control Plane asynchronously sequences complex DeFi actions (farming, staking) safely via verified metadata payloads.
+3. **Transparent Alignment:** Mathematical alignment via High-Water Mark tracking. A rigorous hard-coded Performance Fee (20% default) only applies to generated yields, never the principal.
+4. **Contextual Security:** Replay protections, bounded operations, and isolated execution domains ensure capital is strictly shielded from flash-loans or re-entrancy vectors.
 
-## Features
+## Technical Architecture
 
-- **Telegram-Native Integration:** Deep links and embedded MiniApp optimized for mobile consumption.
-- **Goal-First Routing:** Deterministic plan generation mapping your goal to multi-protocol assets.
-- **Control-Plane Reconciler:** A dedicated off-chain engine ensuring TonAPI transaction tracking to secure state mapping before any fee accrual.
-- **Testnet Support:** Full functional mock-ups against STON.fi Sandbox for zero-risk integration testing.
-- **Zero-Custody (Phase 1):** You sign your execution paths. Our vault architecture (Phase 2) will fully abstract routing through audited Tact Auto-Compounders.
-
-## Architecture
-
-NEURO uses a decoupled architecture allowing massive scalability on the frontend while deeply isolating execution domains.
+NEURO uses a decoupled, hybrid architecture allowing massive scalability on the frontend while deeply isolating execution operations on-chain.
 
 ```text
 apps/
-  miniapp/        Telegram-native frontend (Vite/React/Tailwind)
-  control-plane/  Off-chain portfolio and reconciliation service (Node/Fastify)
+  miniapp/           Telegram-native frontend (Vite/React/Vanilla CSS System)
+  control-plane/     Off-chain reconciliation & proxy transaction engine (Fastify)
 
 packages/
-  shared/         Contract and domain types
-  domain/         Recommendation engine, fee logic
-  adapters/       Protocol integration layer (STON, Tonstakers)
-  contracts/      [In Development] Tact Automation Contracts (Yield Vaults)
+  shared/            Core domain types and protocol definitions
+  domain/            Recommendation engine, pricing, and fee accounting
+  adapters/          Integration layer (STON.fi V2, Tonstakers)
+  contracts/         Tact Smart Contracts (NeuroVault & Proxy Patterns)
 ```
 
-## Quick Start
+## Functional Highlights
 
-### Requirements
-- Node.js 22+
-- pnpm 10+
+- **Telegram-Native Wizard:** Embedded MiniApp with native transitions, optimized strictly for mobile UX constraints.
+- **Goal-First Routing:** Deterministic plan generation mapping abstract user goals directly to multi-protocol asset executions.
+- **Control-Plane Reconciler:** A dedicated backend orchestrator executing deterministic off-chain tracking before delegating on-chain paths securely.
+- **Live Testnet Integration:** Seamless sandbox onboarding. Users can connect to the testnet, generate test TON, and execute fully mocked payload routes with zero financial risk.
 
-### Setup
+## Smart Vault Automations (Live)
 
-```bash
-pnpm install
-```
-
-### Running Locally
-
-Run both the MiniApp and the local Control Plane:
-
-```bash
-pnpm dev
-pnpm dev:control-plane
-```
-
-To run a fully isolated Docker stack:
-
-```bash
-docker compose up --build
-```
-
-### Accessing the Testnet
-
-You can test NEURO without risking real funds:
-1. Access the dApp in your browser via `http://localhost:5173`.
-2. Click the **Flask** (🔬) icon in the top right to enable **Testnet Mode**. 
-3. Connect your wallet (in Testnet mode) to sign sandbox payload routes. Read our [Testnet manual](docs/testnet-manual.md) for more info.
-
-## Smart Vault Strategy (Automation)
-
-Work is currently underway in `packages/contracts` to migrate Phase 1's non-custodial manual execution into absolute "set-and-forget" automation via **Smart Yield Vaults**. These Vaults, built in Tact, will securely hold LP shares, automatically index multi-protocol rewards (like STON tokens), swap them through cross-chain DEX paths, and auto-compound them securely into the user's underlying TON representation. 
-
-This phase will undergo rigorous third-party auditing to protect against flash loans and re-entrancy vectors on the TVM.
-
-## Security & Monetization
-
-NEURO utilizes a rigorous fee model modeled around global DeFi standards (similar to Beefy). 
-- We employ a standard performance fee (e.g. 10% - 20%) **uniquely attached to harvested yields**.
-- No fees on principal.
-- Protection models against flash drops and routing sandwich attacks are embedded within our quote aggregation layer.
+Phase 2 sets NEURO firmly into the "Set-and-Forget" era. `NeuroVault`, our core Tact smart contract architecture, is fully implemented and operational on Testnet:
+- Utilizes the advanced **ExecDelegate proxy pattern**, safely authenticating operations sent from the Control Plane to execute STON.fi liquidity bounds.
+- Auto-compounds yield independently of user intervention.
+- Ensures absolute protocol safety, natively discarding bounced errors via built-in asynchronous handlers to ensure funds never get stuck during cross-chain DEX paths.
 
 ---
-*Disclaimer: NEURO is operating in beta access. Decentralized finance involves risks. None of the strategies presented are risk-free or guaranteed.*
+*Disclaimer: NEURO is currently operating in beta access. Decentralized finance involves inherent risks. None of the strategies or vaults presented are risk-free or guaranteed.*

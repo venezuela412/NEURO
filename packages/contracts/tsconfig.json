@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "./",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "module": "CommonJS",
+    "moduleResolution": "Node"
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "build/**/*.ts"]
 }
