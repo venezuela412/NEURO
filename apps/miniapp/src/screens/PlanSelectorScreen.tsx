@@ -67,8 +67,18 @@ export function PlanSelectorScreen() {
 
         <AmountInput value={amountTon} onChange={setAmountTon} />
         <GoalSelector value={goal} onChange={setGoal} />
-        <FlexibilitySelector value={wantsFlexibility} onChange={setWantsFlexibility} />
-        <RiskSelector value={riskPreference} onChange={setRiskPreference} />
+        
+        {/* Only show complexity when the user actively asks for more yield */}
+        {goal !== "protect" && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }} 
+            animate={{ opacity: 1, height: "auto" }} 
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <FlexibilitySelector value={wantsFlexibility} onChange={setWantsFlexibility} />
+            <RiskSelector value={riskPreference} onChange={setRiskPreference} />
+          </motion.div>
+        )}
 
         <div className="card muted-surface">
           <p className="eyebrow">What you will see next</p>
