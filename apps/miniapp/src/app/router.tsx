@@ -3,9 +3,12 @@ import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "../components/layout/AppShell";
 import { RouterErrorPage } from "./RouterErrorPage";
 
+import { TelegramBridge } from "../components/telegram/TelegramBridge";
+
 function ShellLayout() {
   return (
     <AppShell>
+      <TelegramBridge />
       <Outlet />
     </AppShell>
   );
@@ -57,6 +60,20 @@ export const appRouter = createBrowserRouter([
         lazy: async () => {
           const { ActivityScreen } = await import("../screens/ActivityScreen");
           return { Component: ActivityScreen };
+        },
+      },
+      {
+        path: "terms",
+        lazy: async () => {
+          const { TermsScreen } = await import("../screens/TermsScreen");
+          return { Component: TermsScreen };
+        },
+      },
+      {
+        path: "privacy",
+        lazy: async () => {
+          const { PrivacyScreen } = await import("../screens/PrivacyScreen");
+          return { Component: PrivacyScreen };
         },
       },
       {

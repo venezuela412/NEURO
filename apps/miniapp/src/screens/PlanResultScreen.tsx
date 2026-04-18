@@ -170,12 +170,19 @@ export function PlanResultScreen() {
       >
         <div className="inline-icon-row">
           <ShieldCheck size={18} />
-          <span>Risk acknowledgment</span>
+          <span>Risk & Integrity Acknowledgment</span>
         </div>
-        <p className="muted">
-          This is not guaranteed income. Returns can move with network and market
-          conditions. NEURO keeps a safer fallback ready when supported paths
-          weaken.
+        <p className="muted text-sm mt-2">
+          <strong>Non-Custodial:</strong> NEURO is an independent interface. We do not hold,
+          custody, or control your funds or keys at any time.
+          <br className="my-1" />
+          <strong>Variable Returns:</strong> All Projected APYs depend entirely on the underlying DeFi protocols (e.g., STON.fi, Tonstakers). Returns can fluctuate with network and market conditions. Past performance is not a guarantee.
+        </p>
+        <p className="muted text-xs mt-4">
+          By connecting your wallet and deploying capital, you agree to our{" "}
+          <a href="/terms" target="_blank" className="underline">Terms of Service</a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" className="underline">Privacy Policy</a>.
         </p>
       </motion.section>
 

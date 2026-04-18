@@ -27,7 +27,6 @@ export function AppProviders({ children }: PropsWithChildren) {
       analytics={{ mode: "off" }}
     >
       <QueryClientProvider client={queryClient}>
-        <TelegramBridge />
         <PortfolioSyncBridge />
         {children}
       </QueryClientProvider>
