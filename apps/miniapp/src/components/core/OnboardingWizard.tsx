@@ -7,7 +7,7 @@ const SLIDES = [
   {
     title: "NeuroTON",
     subtitle: "Select your Reality",
-    description: "Choose your preferred language / Selecciona tu idioma de preferencia.",
+    description: "",
     icon: Languages,
     neonColor: "shadow-white/20",
     isLangSelect: true
@@ -107,9 +107,11 @@ export const OnboardingWizard: React.FC = () => {
               </div>
             ) : null}
 
-            <p className="text-gray-400 leading-relaxed text-base md:text-xl px-2 sm:px-4 md:px-8 font-medium">
-              {current.description}
-            </p>
+            {current.description && (
+              <p className="text-gray-400 leading-relaxed text-base md:text-xl px-2 sm:px-4 md:px-8 font-medium">
+                {current.description}
+              </p>
+            )}
           </motion.div>
         </AnimatePresence>
 
