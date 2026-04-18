@@ -75,53 +75,53 @@ export const OnboardingWizard: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-col items-center text-center w-full"
+            className="flex flex-col items-center text-center w-full px-4"
           >
-            <div className={`p-6 mb-8 rounded-full border border-white/10 bg-surface backdrop-blur-md shadow-2xl ${current.neonColor}`}>
+            <div className={`p-6 mb-10 rounded-full border border-white/10 bg-surface backdrop-blur-md shadow-2xl ${current.neonColor}`}>
               <Icon className="w-16 h-16 text-white" strokeWidth={1.5} />
             </div>
 
-            <h1 className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+            <h1 className="text-4xl md:text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">
               {current.title}
             </h1>
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-accent-2 mb-6">
+            <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.3em] text-accent-2 mb-10 opacity-90">
               {current.subtitle}
             </h2>
             
             {current.isLangSelect ? (
-              <div className="flex gap-4 w-full justify-center mb-8">
+              <div className="flex gap-6 w-full justify-center mb-10">
                 <button 
                   onClick={() => setLang('EN')}
-                  className={`flex flex-col items-center justify-center p-6 rounded-2xl w-32 border transition-all ${lang === 'EN' ? 'border-accent-2 bg-accent-2/10 shadow-[0_0_20px_rgba(38,211,199,0.3)]' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100 hover:border-white/20'}`}
+                  className={`flex flex-col items-center justify-center p-8 rounded-3xl w-36 border transition-all duration-300 ${lang === 'EN' ? 'border-accent-2 bg-accent-2/10 shadow-[0_0_30px_rgba(38,211,199,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-50 hover:opacity-100 hover:border-white/20'}`}
                 >
-                  <span className="text-3xl mb-2">🇺🇸</span>
-                  <span className={`font-bold ${lang === 'EN' ? 'text-accent-2' : 'text-gray-400'}`}>EN</span>
+                  <span className="text-4xl mb-4 drop-shadow-md">🇺🇸</span>
+                  <span className={`font-black tracking-widest ${lang === 'EN' ? 'text-accent-2' : 'text-gray-400'}`}>EN</span>
                 </button>
                 <button 
                   onClick={() => setLang('ES')}
-                  className={`flex flex-col items-center justify-center p-6 rounded-2xl w-32 border transition-all ${lang === 'ES' ? 'border-accent bg-accent/10 shadow-[0_0_20px_rgba(143,115,255,0.3)]' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100 hover:border-white/20'}`}
+                  className={`flex flex-col items-center justify-center p-8 rounded-3xl w-36 border transition-all duration-300 ${lang === 'ES' ? 'border-accent bg-accent/10 shadow-[0_0_30px_rgba(143,115,255,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-50 hover:opacity-100 hover:border-white/20'}`}
                 >
-                  <span className="text-3xl mb-2">🇪🇸</span>
-                  <span className={`font-bold ${lang === 'ES' ? 'text-accent' : 'text-gray-400'}`}>ES</span>
+                  <span className="text-4xl mb-4 drop-shadow-md">🇪🇸</span>
+                  <span className={`font-black tracking-widest ${lang === 'ES' ? 'text-accent' : 'text-gray-400'}`}>ES</span>
                 </button>
               </div>
             ) : null}
 
-            <p className="text-gray-400 leading-relaxed text-lg px-2">
+            <p className="text-gray-400 leading-relaxed text-lg md:text-xl px-4 md:px-8 font-medium">
               {current.description}
             </p>
           </motion.div>
         </AnimatePresence>
 
         {/* Navigation & Dots */}
-        <div className="mt-14 w-full flex flex-col items-center gap-8">
-          <div className="flex gap-3">
+        <div className="mt-16 w-full flex flex-col items-center gap-10">
+          <div className="flex gap-4">
             {SLIDES.map((_, idx) => (
               <div 
                 key={idx} 
                 className={`transition-all duration-500 rounded-full ${
                   idx === currentSlide 
-                    ? "w-8 h-2 bg-white shadow-[0_0_10px_rgba(255,255,255,0.7)]" 
+                    ? "w-10 h-2 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
                     : "w-2 h-2 bg-white/20"
                 }`}
               />
@@ -130,10 +130,10 @@ export const OnboardingWizard: React.FC = () => {
 
           <button 
             onClick={handleNext}
-            className="w-full relative group overflow-hidden rounded-full p-[1px]"
+            className="w-full relative group overflow-hidden rounded-full p-[1px] mt-4"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-accent to-accent-2 opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative bg-black rounded-full px-8 py-4 font-bold text-white tracking-wide flex items-center justify-center gap-2 transition-all group-hover:bg-opacity-80">
+            <div className="relative bg-black rounded-full px-8 py-5 font-bold text-white tracking-[0.15em] text-sm md:text-base flex items-center justify-center gap-3 transition-all group-hover:bg-opacity-80">
               {currentSlide === SLIDES.length - 1 ? 'INITIALIZE PROTOCOL' : 'CONTINUE'}
               <motion.span
                 animate={{ x: [0, 4, 0] }}
