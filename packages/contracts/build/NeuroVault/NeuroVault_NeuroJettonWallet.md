@@ -1,6 +1,6 @@
 # Tact compilation report
-Contract: NeuroVault
-BoC Size: 3402 bytes
+Contract: NeuroJettonWallet
+BoC Size: 1210 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 35
@@ -146,21 +146,9 @@ TL-B: `_ totalSupply:int257 mintable:bool owner:address content:^cell walletCode
 Signature: `JettonData{totalSupply:int257,mintable:bool,owner:address,content:^cell,walletCode:^cell}`
 
 ## Get methods
-Total get methods: 5
+Total get methods: 1
 
-## get_jetton_data
-No arguments
-
-## get_wallet_address
-Argument: owner
-
-## tvl
-No arguments
-
-## operator
-No arguments
-
-## owner
+## get_wallet_data
 No arguments
 
 ## Exit codes
@@ -219,21 +207,13 @@ No arguments
 
 ```mermaid
 graph TD
-NeuroVault
-NeuroVault --> BaseTrait
-NeuroVault --> Deployable
-Deployable --> BaseTrait
-NeuroVault --> OwnableTransferable
-OwnableTransferable --> Ownable
-Ownable --> BaseTrait
-OwnableTransferable --> BaseTrait
-NeuroVault --> Ownable
+NeuroJettonWallet
+NeuroJettonWallet --> BaseTrait
 ```
 
 ## Contract dependency diagram
 
 ```mermaid
 graph TD
-NeuroVault
-NeuroVault --> NeuroJettonWallet
+NeuroJettonWallet
 ```

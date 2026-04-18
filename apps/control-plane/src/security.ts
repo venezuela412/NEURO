@@ -94,25 +94,21 @@ export async function verifySignedAction(
     }
 
     const parsedAddress = Address.parse(proof.walletAddress);
-    let publicKey: Uint8Array | null = proof.publicKey
-      ? new Uint8Array(Buffer.from(proof.publicKey, "hex"))
-      : null;
-
-    if (!publicKey) {
-      const parsedKey = tryParsePublicKeyFromStateInit(proof.walletStateInit);
-      publicKey = parsedKey ? new Uint8Array(parsedKey) : null;
+    if (!proof.walletStateInit) {
+      return false; // Crucial: Reject unverified keys if state init is missing
     }
+
+    const stateInit = loadStateInit(Cell.fromBase64(proof.walletStateInit).beginParse());
+    const calculated = contractAddress(parsedAddress.workChain, stateInit);
+    if (!calculated.equals(parsedAddress)) {
+      return false; // Spoofed address check fails!
+    }
+
+    const parsedKey = tryParsePublicKeyFromStateInit(proof.walletStateInit);
+    const publicKey = parsedKey ? new Uint8Array(parsedKey) : null;
 
     if (!publicKey) {
       return false;
-    }
-
-    if (proof.walletStateInit) {
-      const stateInit = loadStateInit(Cell.fromBase64(proof.walletStateInit).beginParse());
-      const calculated = contractAddress(parsedAddress.workChain, stateInit);
-      if (!calculated.equals(parsedAddress)) {
-        return false;
-      }
     }
 
     const hash = await createTextHash(proof, parsedAddress);

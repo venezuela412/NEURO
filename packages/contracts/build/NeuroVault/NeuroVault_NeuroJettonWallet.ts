@@ -2119,30 +2119,30 @@ export function dictValueParserJettonData(): DictionaryValue<JettonData> {
     }
 }
 
- type NeuroVault_init_args = {
-    $$type: 'NeuroVault_init_args';
+ type NeuroJettonWallet_init_args = {
+    $$type: 'NeuroJettonWallet_init_args';
+    master: Address;
     owner: Address;
-    content: Cell;
 }
 
-function initNeuroVault_init_args(src: NeuroVault_init_args) {
+function initNeuroJettonWallet_init_args(src: NeuroJettonWallet_init_args) {
     return (builder: Builder) => {
         const b_0 = builder;
+        b_0.storeAddress(src.master);
         b_0.storeAddress(src.owner);
-        b_0.storeRef(src.content);
     };
 }
 
-async function NeuroVault_init(owner: Address, content: Cell) {
-    const __code = Cell.fromHex('b5ee9c7241023601000d3e000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010f02027102070201200305017bb8b1ded44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c81804000224017bb851ded44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c81806000227020120080d020166090b017fadbcf6a268690000c709fd207d207d007d006987fd006a69002ab8360c470cfd206a2c81688090b82a081889c083e8410859682f002c01bff12a83ed9e3640c00a0164f82801db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d01c017baf16f6a268690000c709fd207d207d007d006987fd006a69002ab8360c470cfd206a2c81688090b82a081889c083e8410859682f002c01bff16d9e3642c00c0118f82828db3c30546620546a501c017bbbb68ed44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c8180e00022603dc30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe209925f09e07028d74920c21fe30001c00001c121b0e3023806f90110343504fe3108d31f2182108ea64828ba8ff15b37f8416f2430328142015323bef2f4175068151443308200d2460adb3c5290bc1bf2f4550609db3c1aa125c000917f9324c000e29120965305a825a904e25055a05154a010791068071056551321db3cc87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3111111612000a820afaf08004eee02182107bdd97debae302218210e9e7e01cba8f59313807fa003010671056104510344138db3c813fd529c200f2f45183a8812710a90425a824a9045155a027507918105610451034401321db3cc87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e02182104afe4ba2ba1319161803fc313807d33f31fa00fa40d72c01916d93fa4001e231f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0018200efbe02c705f2f481698d5373bef2f45325a827a9045073a15152a1266eb3973105206ef2d0809136e27270881c14150032000000005769746864726177616c205375636365737366756c00c0103410246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010571046403514c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3102f68137d624f2f4f8285003db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0820afaf080727070f828218b081035104a1023102bc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec94016504405031c17006810465522c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002fe8efc313807fa40fa00d307f4043010795e351048103948abdb3c5148a1103948ab5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010374650134440c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e0191a0034f8416f2410235f0381231b5319c70592317f945118c705e2f2f404ea2182102c76b973bae302218210bb6eac71ba8e4431333701d30f30810e96f84227c705f2f48200e3e221810bb8bbf2f41057104610354143c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e021821061f2e5d4bae302218210946a98b6bae302218210819dbe99ba1b30313202fe313807d33ffa40d20030f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d06d039232129133e2705043804003c855208210d17354005004cb1f12cb3fce01206e9430cf84809201cee2c95a6d6d40037fc8cf8580ca00cf84401c2f011688c87001ca005a02cecec91d022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d91e20014fa65ec0bb51343480006760404075c03e903e9015481b04e6be903e901640b4405c00b8b6cf1b0d201f01145301db3c3054633052302604ba01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019d810101d700fa40fa4055206c139afa40fa405902d1017002e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba2122252c00c2028020d7217021d749c21f9430d31f01de208210178d4519ba8e1d30d33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e082107bdd97deba8e1cd33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e05f0402e231d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f2481114d533cc705f2f454732123fa40fa0071d721fa00fa00306c6170f83a44305244fa40fa0071d721fa00fa00306c6170f83aa08209c9c38001a023813ebb02a012bcf2f45164a18200f5fc21c2fff2f45284db3c5c262301fe705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076708040702c4813507cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910561057103440130710465522c8cf8580ca00cf8440ce01fa028069cf40025c6e240060016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5403fe31d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb53c7db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a08200f5fc21c2fff2f440bc2bdb3c10344dcbfa40fa0071d721fa00fa00306c61702627280018f82ac87001ca005a02cecec9002cf8276f1021a1820898968066b608a18208989680a0a102fcf83a23c2008e605183a15008a1167150657008c8553082107362d09c5005cb1f13cb3f01fa02cecec928441403506610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00599530365b6c21e2206eb39322c2009170e2923031e30d59292b0186206ef2d0807088102310247250346d036d5520c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb002a00180000000045786365737365730026c87f01ca0055205023810101cf00cecec9ed54010ee3025f04f2c0822d01fcd33ffa00d72c01916d93fa4001e231f8416f2481114d5339c705f2f45175a18200f5fc21c2fff2f443305238fa40fa0071d721fa00fa00306c6170f83a8200a99e018209312d00a08208989680a012bcf2f47080405414367f04c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c92655302e009610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed540096ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010575514c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31007031363704fa4030810e96f84227c705f2f410570610354403c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3100c4313807d33f30c8018210aff90f5758cb1fcb3fc91068105710461035443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3101de8eeb313807d33ffa40305089db3c375178c8598210327b2b4a5003cb1fcb3fcec9105710461035443012f8427f705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e009330010f84228c705f2e084006237f8416f24135f0313a0105710461035504403c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed5400b082f064d5198fe48e1c880304d52b76150cdde129b8cb2bcb68ddccc9782e271972d9ba8e2d8138c6f84226c705f2f41046551370c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54e05f07f2c082c65d380a');
+async function NeuroJettonWallet_init(master: Address, owner: Address) {
+    const __code = Cell.fromHex('b5ee9c72410212010004ae00022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90103014fa65ec0bb51343480006760404075c03e903e9015481b04e6be903e901640b4405c00b8b6cf1b0d200201145301db3c3054633052300904ba01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019d810101d700fa40fa4055206c139afa40fa405902d1017002e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba0405080f00c2028020d7217021d749c21f9430d31f01de208210178d4519ba8e1d30d33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e082107bdd97deba8e1cd33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e05f0402e231d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f2481114d533cc705f2f454732123fa40fa0071d721fa00fa00306c6170f83a44305244fa40fa0071d721fa00fa00306c6170f83aa08209c9c38001a023813ebb02a012bcf2f45164a18200f5fc21c2fff2f45284db3c5c090601fe705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076708040702c4813507cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910561057103440130710465522c8cf8580ca00cf8440ce01fa028069cf40025c6e070060016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5403fe31d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb53c7db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a08200f5fc21c2fff2f440bc2bdb3c10344dcbfa40fa0071d721fa00fa00306c6170090a0b0018f82ac87001ca005a02cecec9002cf8276f1021a1820898968066b608a18208989680a0a102fcf83a23c2008e605183a15008a1167150657008c8553082107362d09c5005cb1f13cb3f01fa02cecec928441403506610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00599530365b6c21e2206eb39322c2009170e2923031e30d590c0e0186206ef2d0807088102310247250346d036d5520c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000d00180000000045786365737365730026c87f01ca0055205023810101cf00cecec9ed54010ee3025f04f2c0821001fcd33ffa00d72c01916d93fa4001e231f8416f2481114d5339c705f2f45175a18200f5fc21c2fff2f443305238fa40fa0071d721fa00fa00306c6170f83a8200a99e018209312d00a08208989680a012bcf2f47080405414367f04c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926553011009610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed54a5504b9e');
     const builder = beginCell();
     builder.storeUint(0, 1);
-    initNeuroVault_init_args({ $$type: 'NeuroVault_init_args', owner, content })(builder);
+    initNeuroJettonWallet_init_args({ $$type: 'NeuroJettonWallet_init_args', master, owner })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
 
-export const NeuroVault_errors = {
+export const NeuroJettonWallet_errors = {
     2: { message: "Stack underflow" },
     3: { message: "Stack overflow" },
     4: { message: "Integer overflow" },
@@ -2195,7 +2195,7 @@ export const NeuroVault_errors = {
     62972: { message: "Invalid balance" },
 } as const
 
-export const NeuroVault_errors_backward = {
+export const NeuroJettonWallet_errors_backward = {
     "Stack underflow": 2,
     "Stack overflow": 3,
     "Integer overflow": 4,
@@ -2248,7 +2248,7 @@ export const NeuroVault_errors_backward = {
     "Invalid balance": 62972,
 } as const
 
-const NeuroVault_types: ABIType[] = [
+const NeuroJettonWallet_types: ABIType[] = [
     {"name":"DataSize","header":null,"fields":[{"name":"cells","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"bits","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"refs","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
     {"name":"SignedBundle","header":null,"fields":[{"name":"signature","type":{"kind":"simple","type":"fixed-bytes","optional":false,"format":64}},{"name":"signedData","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"StateInit","header":null,"fields":[{"name":"code","type":{"kind":"simple","type":"cell","optional":false}},{"name":"data","type":{"kind":"simple","type":"cell","optional":false}}]},
@@ -2286,7 +2286,7 @@ const NeuroVault_types: ABIType[] = [
     {"name":"JettonData","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
 ]
 
-const NeuroVault_opcodes = {
+const NeuroJettonWallet_opcodes = {
     "Deploy": 2490013878,
     "DeployOk": 2952335191,
     "FactoryDeploy": 1829761339,
@@ -2309,66 +2309,50 @@ const NeuroVault_opcodes = {
     "StonfiProvideLiquidity": 3351079513,
 }
 
-const NeuroVault_getters: ABIGetter[] = [
-    {"name":"get_jetton_data","methodId":106029,"arguments":[],"returnType":{"kind":"simple","type":"JettonData","optional":false}},
-    {"name":"get_wallet_address","methodId":103289,"arguments":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
-    {"name":"tvl","methodId":68381,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
-    {"name":"operator","methodId":129896,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
-    {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
+const NeuroJettonWallet_getters: ABIGetter[] = [
+    {"name":"get_wallet_data","methodId":97026,"arguments":[],"returnType":{"kind":"simple","type":"JettonWalletData","optional":false}},
 ]
 
-export const NeuroVault_getterMapping: { [key: string]: string } = {
-    'get_jetton_data': 'getGetJettonData',
-    'get_wallet_address': 'getGetWalletAddress',
-    'tvl': 'getTvl',
-    'operator': 'getOperator',
-    'owner': 'getOwner',
+export const NeuroJettonWallet_getterMapping: { [key: string]: string } = {
+    'get_wallet_data': 'getGetWalletData',
 }
 
-const NeuroVault_receivers: ABIReceiver[] = [
-    {"receiver":"internal","message":{"kind":"typed","type":"Deposit"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"TokenBurnNotification"}},
-    {"receiver":"internal","message":{"kind":"empty"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"AutoCompound"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"ExecDelegate"}},
-    {"receiver":"internal","message":{"kind":"text","text":"StopMint"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"ProvideWalletAddress"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"UpdateFee"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"UpdateOperator"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"ChangeOwner"}},
+const NeuroJettonWallet_receivers: ABIReceiver[] = [
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenTransfer"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenTransferInternal"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenBurn"}},
 ]
 
 
-export class NeuroVault implements Contract {
+export class NeuroJettonWallet implements Contract {
     
     public static readonly minTonsForStorage = 10000000n;
     public static readonly gasConsumption = 10000000n;
     public static readonly storageReserve = 0n;
-    public static readonly errors = NeuroVault_errors_backward;
-    public static readonly opcodes = NeuroVault_opcodes;
+    public static readonly errors = NeuroJettonWallet_errors_backward;
+    public static readonly opcodes = NeuroJettonWallet_opcodes;
     
-    static async init(owner: Address, content: Cell) {
-        return await NeuroVault_init(owner, content);
+    static async init(master: Address, owner: Address) {
+        return await NeuroJettonWallet_init(master, owner);
     }
     
-    static async fromInit(owner: Address, content: Cell) {
-        const __gen_init = await NeuroVault_init(owner, content);
+    static async fromInit(master: Address, owner: Address) {
+        const __gen_init = await NeuroJettonWallet_init(master, owner);
         const address = contractAddress(0, __gen_init);
-        return new NeuroVault(address, __gen_init);
+        return new NeuroJettonWallet(address, __gen_init);
     }
     
     static fromAddress(address: Address) {
-        return new NeuroVault(address);
+        return new NeuroJettonWallet(address);
     }
     
     readonly address: Address; 
     readonly init?: { code: Cell, data: Cell };
     readonly abi: ContractABI = {
-        types:  NeuroVault_types,
-        getters: NeuroVault_getters,
-        receivers: NeuroVault_receivers,
-        errors: NeuroVault_errors,
+        types:  NeuroJettonWallet_types,
+        getters: NeuroJettonWallet_getters,
+        receivers: NeuroJettonWallet_receivers,
+        errors: NeuroJettonWallet_errors,
     };
     
     constructor(address: Address, init?: { code: Cell, data: Cell }) {
@@ -2376,41 +2360,17 @@ export class NeuroVault implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Deposit | TokenBurnNotification | null | AutoCompound | ExecDelegate | "StopMint" | ProvideWalletAddress | UpdateFee | UpdateOperator | Deploy | ChangeOwner) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: TokenTransfer | TokenTransferInternal | TokenBurn) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deposit') {
-            body = beginCell().store(storeDeposit(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenTransfer') {
+            body = beginCell().store(storeTokenTransfer(message)).endCell();
         }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenBurnNotification') {
-            body = beginCell().store(storeTokenBurnNotification(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenTransferInternal') {
+            body = beginCell().store(storeTokenTransferInternal(message)).endCell();
         }
-        if (message === null) {
-            body = new Cell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'AutoCompound') {
-            body = beginCell().store(storeAutoCompound(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ExecDelegate') {
-            body = beginCell().store(storeExecDelegate(message)).endCell();
-        }
-        if (message === "StopMint") {
-            body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ProvideWalletAddress') {
-            body = beginCell().store(storeProvideWalletAddress(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateFee') {
-            body = beginCell().store(storeUpdateFee(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateOperator') {
-            body = beginCell().store(storeUpdateOperator(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
-            body = beginCell().store(storeDeploy(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ChangeOwner') {
-            body = beginCell().store(storeChangeOwner(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenBurn') {
+            body = beginCell().store(storeTokenBurn(message)).endCell();
         }
         if (body === null) { throw new Error('Invalid message type'); }
         
@@ -2418,39 +2378,10 @@ export class NeuroVault implements Contract {
         
     }
     
-    async getGetJettonData(provider: ContractProvider) {
+    async getGetWalletData(provider: ContractProvider) {
         const builder = new TupleBuilder();
-        const source = (await provider.get('get_jetton_data', builder.build())).stack;
-        const result = loadGetterTupleJettonData(source);
-        return result;
-    }
-    
-    async getGetWalletAddress(provider: ContractProvider, owner: Address) {
-        const builder = new TupleBuilder();
-        builder.writeAddress(owner);
-        const source = (await provider.get('get_wallet_address', builder.build())).stack;
-        const result = source.readAddress();
-        return result;
-    }
-    
-    async getTvl(provider: ContractProvider) {
-        const builder = new TupleBuilder();
-        const source = (await provider.get('tvl', builder.build())).stack;
-        const result = source.readBigNumber();
-        return result;
-    }
-    
-    async getOperator(provider: ContractProvider) {
-        const builder = new TupleBuilder();
-        const source = (await provider.get('operator', builder.build())).stack;
-        const result = source.readAddress();
-        return result;
-    }
-    
-    async getOwner(provider: ContractProvider) {
-        const builder = new TupleBuilder();
-        const source = (await provider.get('owner', builder.build())).stack;
-        const result = source.readAddress();
+        const source = (await provider.get('get_wallet_data', builder.build())).stack;
+        const result = loadGetterTupleJettonWalletData(source);
         return result;
     }
     

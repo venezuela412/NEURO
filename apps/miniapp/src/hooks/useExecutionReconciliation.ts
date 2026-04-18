@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { reconcileExecutionReceipt } from "../lib/controlPlane";
 import { useNeuroWallet } from "./useTonWallet";
 import { useAppStore } from "../store/appStore";
+import { useWalletActionAuth } from "./useWalletActionAuth";
 
 export function useExecutionReconciliation() {
   const wallet = useNeuroWallet();
@@ -9,6 +10,7 @@ export function useExecutionReconciliation() {
   const setExecutionReceipt = useAppStore((state) => state.setExecutionReceipt);
   const setExecutionStatus = useAppStore((state) => state.setExecutionStatus);
   const appendActivityEvent = useAppStore((state) => state.appendActivityEvent);
+  const { ensureSession } = useWalletActionAuth();
 
   return useMutation({
     mutationFn: async (executionId: string) => {
@@ -16,7 +18,8 @@ export function useExecutionReconciliation() {
         throw new Error("Wallet address is required");
       }
 
-      return reconcileExecutionReceipt(wallet.address, executionId);
+      const session = await ensureSession();
+      return reconcileExecutionReceipt(wallet.address, executionId, session);
     },
     onSuccess: ({ portfolio, executionReceipt, executionStatus }) => {
       if (portfolio) {

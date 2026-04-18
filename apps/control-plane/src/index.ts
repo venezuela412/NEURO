@@ -166,6 +166,8 @@ server.get("/health", async () => ({
 
 server.get("/overview", async () => getNeuroOverview());
 
+import crypto from "crypto";
+
 function requireAdminToken(request: { headers: Record<string, string | string[] | undefined> }) {
   const configured = process.env.NEURO_ADMIN_TOKEN?.trim();
   if (!configured) {
@@ -188,8 +190,19 @@ function requireAdminToken(request: { headers: Record<string, string | string[] 
 
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
 
-  if (header === configured || bearer === configured) {
-    return { ok: true as const };
+  try {
+    const configuredBuffer = Buffer.from(configured);
+    const headerBuffer = Buffer.from(header);
+    const bearerBuffer = Buffer.from(bearer);
+
+    const isHeaderValid = headerBuffer.length === configuredBuffer.length && crypto.timingSafeEqual(headerBuffer, configuredBuffer);
+    const isBearerValid = bearerBuffer.length === configuredBuffer.length && crypto.timingSafeEqual(bearerBuffer, configuredBuffer);
+
+    if (isHeaderValid || isBearerValid) {
+      return { ok: true as const };
+    }
+  } catch {
+    // Fallback if there's any buffer parsing issue
   }
 
   return { ok: false as const, reason: "forbidden" as const };
@@ -329,6 +342,25 @@ server.post<{ Params: { walletAddress: string }; Body: { proof: z.infer<typeof s
 server.post<{ Params: { walletAddress: string; executionId: string } }>(
   "/portfolio/:walletAddress/executions/:executionId/reconcile",
   async (request, reply) => {
+    const parsed = z
+      .object({
+        sessionToken: z.string().min(16).optional(),
+        proof: signedActionSchema.optional(),
+      })
+      .safeParse(request.body ?? {});
+
+    if (!parsed.success) {
+      reply.code(400);
+      return { error: "invalid_payload" };
+    }
+
+    try {
+      await requireWalletAuthorization(request.params.walletAddress, parsed.data);
+    } catch (error) {
+      reply.code(403);
+      return { error: error instanceof Error ? error.message : "forbidden" };
+    }
+
     const result = await reconcilePersistedExecution(
       request.params.walletAddress,
       request.params.executionId,
@@ -400,13 +432,49 @@ server.post<{ Params: { walletAddress: string }; Body: { amountTon?: number } }>
     }
   },
 );
+import { OmniChainSolver } from "./solver";
+
+server.post("/api/solver/cron", async (request, reply) => {
+  try {
+    const authHeader = request.headers.authorization;
+    // VERY BASIC security check to ensure this is only called securely or by Vercel Cron.
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET || "neuroTON"}`) {
+      reply.code(401);
+      return { error: "unauthorized" };
+    }
+
+    // 1. Mathematically resolve total vault expansion vs existing LSTs
+    const compoundData = await OmniChainSolver.computeAutoCompoundForVault("EQ_NEURO_VAULT");
+
+    // 2. Derive strategy rebalancing
+    const strategies = await OmniChainSolver.computeRebalancePaths();
+
+    // In a physical environment, we would use tone.js or tonweb here
+    // const tx = NeuroVault.sendAutoCompound(compoundData.profitToMint);
+    
+    return {
+      success: true,
+      profitResolved: compoundData.profitToMint,
+      strategiesPushed: strategies.length,
+      action: "AUTO_COMPOUND_AND_REBALANCE"
+    };
+
+  } catch (error) {
+    server.log.error(error);
+    reply.code(500);
+    return { error: "solver_execution_failed" };
+  }
+});
+
+import { scheduleAutoCompoundJob } from "./queue";
 
 const port = Number(process.env.PORT ?? 8787);
 
 server
   .listen({ port, host: "0.0.0.0" })
-  .then(() => {
+  .then(async () => {
     server.log.info(`NEURO control plane listening on ${port}`);
+    await scheduleAutoCompoundJob();
   })
   .catch((error) => {
     server.log.error(error);

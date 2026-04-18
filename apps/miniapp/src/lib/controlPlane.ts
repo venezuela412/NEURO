@@ -113,11 +113,19 @@ export async function fetchExecutionReceipts(walletAddress: string) {
   }
 }
 
-export async function reconcileExecutionReceipt(walletAddress: string, executionId: string) {
+export async function reconcileExecutionReceipt(
+  walletAddress: string,
+  executionId: string,
+  session?: WalletSession | null,
+) {
   const response = await fetch(
     `${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/executions/${encodeURIComponent(executionId)}/reconcile`,
     {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...buildSessionHeaders(session),
+      },
     },
   );
 

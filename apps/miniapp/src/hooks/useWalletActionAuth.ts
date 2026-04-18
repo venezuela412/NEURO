@@ -62,6 +62,8 @@ export function useWalletActionAuth(): WalletActionAuthController {
         action,
         nonce,
         walletAddress: result.address,
+        publicKey: tonConnectUI.account?.publicKey,
+        walletStateInit: tonConnectUI.account?.walletStateInit,
         timestamp: result.timestamp,
         domain: result.domain,
         signature: result.signature,

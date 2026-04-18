@@ -23,8 +23,8 @@ export const appRouter = createBrowserRouter([
       {
         index: true,
         lazy: async () => {
-          const { LandingScreen } = await import("../screens/LandingScreen");
-          return { Component: LandingScreen };
+          const { OnboardingWizard } = await import("../components/core/OnboardingWizard");
+          return { Component: OnboardingWizard };
         },
       },
       {
@@ -74,6 +74,13 @@ export const appRouter = createBrowserRouter([
         lazy: async () => {
           const { PrivacyScreen } = await import("../screens/PrivacyScreen");
           return { Component: PrivacyScreen };
+        },
+      },
+      {
+        path: "admin",
+        lazy: async () => {
+          const { AdminScreen } = await import("../screens/AdminScreen");
+          return { Component: AdminScreen };
         },
       },
       {

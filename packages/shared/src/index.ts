@@ -1,6 +1,6 @@
-export const APP_NAME = "NEURO";
+export const APP_NAME = "NeuroTON";
 
-export const APP_TAGLINE = "Put your TON to work. Simply.";
+export const APP_TAGLINE = "A Premium Yield Vault. Powered by TON.";
 
 export const PLATFORM_FEE_NOTICE = "Only charged on profit.";
 

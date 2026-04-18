@@ -8,8 +8,8 @@ async function deploy() {
     const mnemonics = "steel duck polar omit unable seed profit awful spell blame arrest north degree siren skull hawk gun math turtle wide iron useless upset exhaust".split(" ");
     const keyPair = await mnemonicToPrivateKey(mnemonics);
     
-    // Testnet Ton Access endpoint
-    const endpoint = await getHttpEndpoint({ network: "testnet" });
+    // Mainnet Ton Access endpoint
+    const endpoint = await getHttpEndpoint({ network: "mainnet" });
     const client = new TonClient({ endpoint });
     console.log("Using endpoint:", endpoint);
 
