@@ -91,12 +91,13 @@ export function PlanSelectorScreen() {
             animate="center"
             exit="exit"
             transition={{ type: "tween", duration: 0.3 }}
-            className="w-full space-y-6"
+            className="page-stack"
+            style={{ width: "100%", padding: "0 10px" }}
           >
-            <div className="text-center mb-6">
-              <span className="eyebrow inline-block mb-2">Step 1 of {goal === "protect" ? "2" : "3"}</span>
-              <h1 className="headline">How much TON?</h1>
-              <p className="muted mt-2">Enter the amount you'd like to put to work safely.</p>
+            <div className="center-stack stack-xs" style={{ marginBottom: "20px" }}>
+              <span className="eyebrow" style={{ display: "inline-block", marginBottom: "4px" }}>Step 1 of {goal === "protect" ? "2" : "3"}</span>
+              <h1 className="headline-sm">How much TON?</h1>
+              <p className="muted" style={{ marginTop: "4px" }}>Enter the amount you'd like to put to work safely.</p>
             </div>
             <AmountInput value={amountTon} onChange={setAmountTon} />
           </motion.div>
@@ -111,12 +112,13 @@ export function PlanSelectorScreen() {
             animate="center"
             exit="exit"
             transition={{ type: "tween", duration: 0.3 }}
-            className="w-full space-y-6"
+            className="page-stack"
+            style={{ width: "100%", padding: "0 10px" }}
           >
-            <div className="text-center mb-6">
-              <span className="eyebrow inline-block mb-2">Step 2 of {goal === "protect" ? "2" : "3"}</span>
-              <h1 className="headline">Choose your goal</h1>
-              <p className="muted mt-2">Protect keeps it safe. Earn & Grow explore higher yields.</p>
+            <div className="center-stack stack-xs" style={{ marginBottom: "20px" }}>
+              <span className="eyebrow" style={{ display: "inline-block", marginBottom: "4px" }}>Step 2 of {goal === "protect" ? "2" : "3"}</span>
+              <h1 className="headline-sm">Choose your goal</h1>
+              <p className="muted" style={{ marginTop: "4px" }}>Protect keeps it safe. Earn & Grow explore higher yields.</p>
             </div>
             <GoalSelector value={goal} onChange={setGoal} />
           </motion.div>
@@ -131,20 +133,21 @@ export function PlanSelectorScreen() {
             animate="center"
             exit="exit"
             transition={{ type: "tween", duration: 0.3 }}
-            className="w-full space-y-6"
+            className="page-stack"
+            style={{ width: "100%", padding: "0 10px" }}
           >
-            <div className="text-center mb-6">
-              <span className="eyebrow inline-block mb-2">Step 3 of 3</span>
-              <h1 className="headline">Tailor your strategy</h1>
-              <p className="muted mt-2">Adjust risk and flexibility for your growth targets.</p>
+            <div className="center-stack stack-xs" style={{ marginBottom: "20px" }}>
+              <span className="eyebrow" style={{ display: "inline-block", marginBottom: "4px" }}>Step 3 of 3</span>
+              <h1 className="headline-sm">Tailor your strategy</h1>
+              <p className="muted" style={{ marginTop: "4px" }}>Adjust risk and flexibility for your growth targets.</p>
             </div>
             <FlexibilitySelector value={wantsFlexibility} onChange={setWantsFlexibility} />
             <RiskSelector value={riskPreference} onChange={setRiskPreference} />
             
             {stonQuote.isLoading ? (
-              <p className="muted mt-4 text-center text-sm">Checking live route quality...</p>
+              <p className="muted center-stack" style={{ marginTop: "16px", fontSize: "0.85rem" }}>Checking live route quality...</p>
             ) : stonQuote.routeQualityScore !== null ? (
-              <p className="muted mt-4 text-center text-sm text-green-400">
+              <p className="center-stack" style={{ marginTop: "16px", fontSize: "0.85rem", color: "var(--success)" }}>
                 STON.fi Route Quality: {(stonQuote.routeQualityScore * 100).toFixed(0)}/100
               </p>
             ) : null}
@@ -158,8 +161,8 @@ export function PlanSelectorScreen() {
   const isFinalStep = (step === 1 && goal === "protect") || step === 2;
 
   return (
-    <div className="flex flex-col min-h-[75vh] justify-center pt-8">
-      <div className="relative w-full overflow-hidden px-4">
+    <div className="screen-frame" style={{ justifyContent: "center", paddingTop: "24px" }}>
+      <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
         <AnimatePresence mode="wait" custom={direction}>
           {renderStep()}
         </AnimatePresence>

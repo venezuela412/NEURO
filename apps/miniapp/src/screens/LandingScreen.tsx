@@ -9,14 +9,14 @@ export function LandingScreen() {
   const isTestnet = useAppStore((state) => state.isTestnet);
 
   return (
-    <section className="landing-enhanced flex flex-col items-center justify-center min-h-[70vh] px-4 space-y-8" aria-labelledby="landing-title">
+    <section className="page-stack center-stack" style={{ justifyContent: "center", minHeight: "75vh" }}>
       
       {/* Floating Hero Icons */}
-      <div className="relative w-full max-w-xs h-32 flex items-center justify-center mb-4">
+      <div style={{ position: "relative", width: "100%", maxWidth: "300px", height: "140px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
         <motion.div
            animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-           className="absolute left-[10%] top-[10%] text-accent p-3 bg-accent/10 rounded-full"
+           style={{ position: "absolute", left: "10%", top: "10%", color: "var(--accent)", padding: "12px", background: "rgba(143, 115, 255, 0.1)", borderRadius: "50%" }}
         >
           <Bot size={32} />
         </motion.div>
@@ -24,7 +24,8 @@ export function LandingScreen() {
         <motion.div
            animate={{ y: [0, 15, 0], scale: [1, 1.1, 1] }}
            transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.5 }}
-           className="absolute z-10 text-brand p-4 bg-brand/10 rounded-2xl shadow-xl"
+           style={{ position: "absolute", zIndex: 10, color: "var(--accent-2)", padding: "16px", background: "rgba(38, 211, 199, 0.1)", borderRadius: "22px", boxShadow: "var(--shadow)" }}
+           className="brand-mark"
         >
           <Coins size={48} />
         </motion.div>
@@ -32,23 +33,24 @@ export function LandingScreen() {
         <motion.div
            animate={{ y: [0, -12, 0], rotate: [0, -10, 10, 0] }}
            transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 1 }}
-           className="absolute right-[10%] top-[20%] text-green-500 p-3 bg-green-500/10 rounded-full"
+           style={{ position: "absolute", right: "10%", top: "20%", color: "var(--success)", padding: "12px", background: "rgba(58, 210, 136, 0.1)", borderRadius: "50%" }}
         >
           <ShieldCheck size={32} />
         </motion.div>
       </div>
 
-      <div className="text-center space-y-3">
-        <h1 id="landing-title" className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">
+      <div className="center-stack stack-sm" style={{ marginBottom: "24px" }}>
+        <h1 className="headline-sm">
           {APP_TAGLINE}
         </h1>
-        <p className="text-gray-400 text-base">Simple, automated income plans for your TON.</p>
+        <p className="lead-copy">Simple, automated income plans for your TON.</p>
       </div>
 
-      <div className="w-full max-w-xs space-y-4">
+      <div className="stack-sm" style={{ width: "100%", maxWidth: "300px" }}>
         <button 
           type="button" 
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-accent text-white font-semibold text-lg shadow-lg hover:bg-accent/90 transition-colors" 
+          className="button button-primary"
+          style={{ width: "100%", padding: "16px", fontSize: "1.05rem" }}
           onClick={() => navigate("/plans")}
         >
           <Zap size={20} />
@@ -59,15 +61,17 @@ export function LandingScreen() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center"
+            className="card quote-warning center-stack stack-sm"
+            style={{ padding: "16px", border: "1px solid var(--warning)", background: "rgba(246, 196, 107, 0.1)" }}
           >
-            <p className="text-sm text-amber-500 font-medium mb-2">Testnet is Active</p>
-            <p className="text-xs text-gray-400 mb-3">You need Testnet TON to try NEURO safely without real funds.</p>
+            <p style={{ color: "var(--warning)", fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>TESTNET IS ACTIVE</p>
+            <p className="muted" style={{ fontSize: "0.85rem" }}>You need Testnet TON to try NEURO safely without real funds.</p>
             <a 
               href="https://t.me/testgiver_ton_bot" 
               target="_blank" 
               rel="noreferrer"
-              className="inline-block px-4 py-2 bg-amber-500 text-black font-semibold text-sm rounded-lg hover:bg-amber-400 transition-colors"
+              className="button button-secondary"
+              style={{ padding: "8px 16px", fontSize: "0.85rem", marginTop: "4px" }}
             >
               Claim Testnet TON
             </a>
@@ -75,13 +79,13 @@ export function LandingScreen() {
         )}
       </div>
 
-      <div className="flex w-full max-w-xs justify-between items-center px-2 mt-4 pt-4 border-t border-white/5">
-        <div className="flex items-center gap-2 text-gray-400 text-sm cursor-pointer hover:text-white transition-colors">
+      <div style={{ display: "flex", width: "100%", maxWidth: "300px", justifyContent: "space-between", alignItems: "center", marginTop: "32px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-soft)", fontSize: "0.85rem", cursor: "pointer" }}>
           <Languages size={16} />
           <span>English</span>
         </div>
         
-        <Link to="/onboarding" className="text-accent text-sm font-medium hover:underline">
+        <Link to="/onboarding" style={{ color: "var(--accent)", fontSize: "0.85rem", fontWeight: 600 }}>
           New to TON?
         </Link>
       </div>
