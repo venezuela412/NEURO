@@ -99,7 +99,7 @@ export async function reconcileTonExternalMessage(
 }
 
 export async function reconcileExecutionReceipt(receipt: ExecutionReceipt) {
-  if (receipt.mode !== "tonstakers-stake") {
+  if (receipt.mode !== "tonstakers-stake" && receipt.mode !== "stonfi-swap") {
     return {
       receipt: {
         ...receipt,

@@ -103,7 +103,7 @@ export function ActivePlanScreen() {
                 Status: {executionReceipt.status}
                 {executionReceipt.transactionHash ? ` · Tx: ${executionReceipt.transactionHash.slice(0, 16)}...` : ""}
               </p>
-              {executionReceipt.mode === "tonstakers-stake" &&
+              {(executionReceipt.mode === "tonstakers-stake" || executionReceipt.mode === "stonfi-swap") &&
               (executionReceipt.status === "submitted" || executionReceipt.status === "reconciling") ? (
                 <button
                   type="button"

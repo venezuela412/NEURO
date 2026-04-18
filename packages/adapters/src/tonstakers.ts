@@ -1,5 +1,6 @@
 import { fromNano, toNano } from "@ton/core";
 import type { TonConnectUI } from "@tonconnect/ui";
+import type { ExecutionProvider } from "./execution";
 
 export interface TonstakersPoolSnapshot {
   currentApy: number | null;
@@ -146,3 +147,26 @@ export function buildSafeIncomeExecutionPreview(amountTon: number): SafeIncomeEx
     approvalMode: "wallet-transaction",
   };
 }
+
+export class TonstakersExecutionProvider implements ExecutionProvider<SafeIncomeExecutionPreview> {
+  id = "tonstakers";
+
+  constructor(
+    private connector: TonConnectUI,
+    private options?: {
+      partnerCode?: number;
+      tonApiKey?: string;
+    }
+  ) {}
+
+  async quote(amountTon: number): Promise<SafeIncomeExecutionPreview> {
+    return buildSafeIncomeExecutionPreview(amountTon);
+  }
+
+  async execute(quote: SafeIncomeExecutionPreview): Promise<{ hash?: string; boc?: string }> {
+    const client = await createTonstakersAdapter(this.connector, this.options);
+    const result = await client.stake(quote.amountNano);
+    return { boc: result.boc };
+  }
+}
+

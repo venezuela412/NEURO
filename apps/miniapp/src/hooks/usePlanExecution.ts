@@ -10,7 +10,7 @@ function getTonNetwork() {
 }
 
 interface PlanExecutionController {
-  activateWithWallet: (recommendation: PlanRecommendation) => Promise<void>;
+  activateWithWallet: (recommendation: PlanRecommendation, quoteData?: any) => Promise<void>;
 }
 
 function buildExecutionEvent(title: string, description: string, tone: ActivityEvent["tone"]): ActivityEvent {
@@ -35,72 +35,111 @@ export function usePlanExecution(): PlanExecutionController {
   const setExecutionReceipt = useAppStore((state) => state.setExecutionReceipt);
   const appendActivityEvent = useAppStore((state) => state.appendActivityEvent);
 
-  async function activateWithWallet(recommendation: PlanRecommendation) {
+  async function activateWithWallet(
+    recommendation: PlanRecommendation,
+    quoteData?: any, // optional quote from useStonQuote
+  ) {
     setExecutionStatus("waiting-for-wallet");
     setExecutionReceipt(null);
 
     let receipt: ExecutionReceipt;
 
-    if (recommendation.plan.id === "safe-income") {
-      const tonstakers = await createTonstakersAdapter(tonConnectUI, {
-        partnerCode: import.meta.env.VITE_TONSTAKERS_PARTNER_CODE
-          ? Number(import.meta.env.VITE_TONSTAKERS_PARTNER_CODE)
-          : undefined,
-        tonApiKey: import.meta.env.VITE_TONAPI_KEY,
-      });
-      const result = await tonstakers.stake(toNano(amountTon.toFixed(3)));
-      receipt = {
-        id: buildReceiptId(),
-        planId: recommendation.plan.id,
-        mode: "tonstakers-stake",
-        status: "submitted",
-        reference: result.boc,
-        summary: `Tonstakers staking request prepared for ${amountTon.toFixed(2)} TON.`,
-        createdAt: new Date().toISOString(),
-      };
-    } else {
-      const result = await tonConnectUI.signData({
-        type: "text",
-        text: [
-          "NEURO plan approval",
-          `Plan: ${recommendation.plan.title}`,
-          `Amount: ${amountTon.toFixed(2)} TON`,
-          `Risk: ${recommendation.riskLabel}`,
-          `Fallback: ${recommendation.fallbackLabel}`,
-        ].join("\n"),
-        network: getTonNetwork(),
-      });
+    try {
+      if (recommendation.plan.id === "safe-income") {
+        const tonstakers = await createTonstakersAdapter(tonConnectUI, {
+          partnerCode: import.meta.env.VITE_TONSTAKERS_PARTNER_CODE
+            ? Number(import.meta.env.VITE_TONSTAKERS_PARTNER_CODE)
+            : undefined,
+          tonApiKey: import.meta.env.VITE_TONAPI_KEY,
+        });
+        const result = await tonstakers.stake(toNano(amountTon.toFixed(3)));
+        receipt = {
+          id: buildReceiptId(),
+          planId: recommendation.plan.id,
+          mode: "tonstakers-stake",
+          status: "submitted",
+          reference: result.boc,
+          amountTon,
+          summary: `Tonstakers staking request prepared for ${amountTon.toFixed(2)} TON.`,
+          createdAt: new Date().toISOString(),
+        };
+      } else if (recommendation.plan.id === "balanced-income" || recommendation.plan.id === "growth-income") {
+        // Here we use STON.fi provider for balanced and growth
+        const { StonfiExecutionProvider } = await import("@neuro/adapters");
+        const { createOmnistonClient } = await import("../lib/stonfi");
+        const omnistonClient = createOmnistonClient();
+        
+        const stonProvider = new StonfiExecutionProvider(tonConnectUI, omnistonClient);
+        const preview = await stonProvider.quote(amountTon);
+        // Inject the real quote if available
+        if (quoteData && typeof quoteData === "object" && "quote" in quoteData) {
+          preview.quoteResult = quoteData;
+        }
 
-      receipt = {
-        id: buildReceiptId(),
-        planId: recommendation.plan.id,
-        mode: "wallet-approval",
-        status: "captured",
-        reference: result.signature,
-        summary: `Wallet approval captured for ${recommendation.plan.title}.`,
-        address: result.address,
-        createdAt: new Date(result.timestamp * 1000).toISOString(),
-      };
+        const result = await stonProvider.execute(preview);
+        
+        receipt = {
+          id: buildReceiptId(),
+          planId: recommendation.plan.id,
+          mode: "stonfi-swap",
+          status: "submitted",
+          reference: result.boc ?? "failed-boc",
+          amountTon,
+          summary: `STON.fi token swap requested for ${amountTon.toFixed(2)} TON.`,
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        const result = await tonConnectUI.signData({
+          type: "text",
+          text: [
+            "NEURO plan approval",
+            `Plan: ${recommendation.plan.title}`,
+            `Amount: ${amountTon.toFixed(2)} TON`,
+            `Risk: ${recommendation.riskLabel}`,
+            `Fallback: ${recommendation.fallbackLabel}`,
+          ].join("\n"),
+          network: getTonNetwork(),
+        });
+
+        receipt = {
+          id: buildReceiptId(),
+          planId: recommendation.plan.id,
+          mode: "wallet-approval",
+          status: "captured",
+          reference: result.signature,
+          amountTon,
+          summary: `Wallet approval captured for ${recommendation.plan.title}.`,
+          address: result.address,
+          createdAt: new Date(result.timestamp * 1000).toISOString(),
+        };
+      }
+
+      setExecutionStatus("confirming");
+      setPortfolio(buildPortfolioSnapshot(recommendation, amountTon));
+      setExecutionReceipt(receipt);
+      appendActivityEvent(
+        buildExecutionEvent(
+          recommendation.plan.id === "safe-income"
+            ? "Safe Income request signed"
+            : recommendation.plan.id === "balanced-income" || recommendation.plan.id === "growth-income"
+              ? "Growth Swap transaction signed"
+              : "Wallet approval captured",
+          receipt.summary,
+          "positive",
+        ),
+      );
+      appendActivityEvent(
+        buildExecutionEvent(
+          "Execution staged",
+          "NEURO moved the plan into confirmation state and updated your active plan summary.",
+          "calm",
+        ),
+      );
+      setExecutionStatus("success");
+    } catch (error) {
+      setExecutionStatus("failed-safely");
+      throw error;
     }
-
-    setExecutionStatus("confirming");
-    setPortfolio(buildPortfolioSnapshot(recommendation, amountTon));
-    setExecutionReceipt(receipt);
-    appendActivityEvent(
-      buildExecutionEvent(
-        recommendation.plan.id === "safe-income" ? "Safe Income request signed" : "Wallet approval captured",
-        receipt.summary,
-        "positive",
-      ),
-    );
-    appendActivityEvent(
-      buildExecutionEvent(
-        "Execution staged",
-        "NEURO moved the plan into confirmation state and updated your active plan summary.",
-        "calm",
-      ),
-    );
-    setExecutionStatus("success");
   }
 
   return {

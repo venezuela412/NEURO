@@ -47,6 +47,16 @@ const schemaSql = `
     issued_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS fee_accrual (
+    id TEXT PRIMARY KEY,
+    wallet_address TEXT NOT NULL,
+    execution_receipt_id TEXT NOT NULL,
+    plan_id TEXT NOT NULL,
+    amount_accrued_nano TEXT NOT NULL,
+    status TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
 `;
 
 async function createPGliteDb(): Promise<DbClient> {

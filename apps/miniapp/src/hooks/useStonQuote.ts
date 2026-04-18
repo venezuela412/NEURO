@@ -104,5 +104,6 @@ export function useStonQuote(options: UseStonQuoteOptions = {}) {
     routeEventType,
     rfqId,
     hasLiveQuote: routeQualityScore !== null,
+    quoteData: quote.data,
   };
 }

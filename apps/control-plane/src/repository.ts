@@ -78,6 +78,21 @@ export async function addExecutionReceipt(walletAddress: string, receipt: Execut
   );
 }
 
+export async function addFeeAccrual(walletAddress: string, eventType: string, txHash: string, amountTon: number) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  
+  await db.query(
+    `
+      INSERT INTO fee_accrual (wallet_address, event_type, tx_hash, amount_ton)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT DO NOTHING
+    `,
+    [normalized, eventType, txHash, amountTon]
+  );
+}
+
+
 export async function listExecutionReceipts(walletAddress: string) {
   const db = await getDb();
   const normalized = normalizeWalletAddress(walletAddress);
@@ -400,6 +415,14 @@ export async function reconcilePersistedExecution(walletAddress: string, receipt
 
   nextState = appendServerActivity(nextState, activity);
   await savePersistedPortfolioState(nextState);
+
+  // If newly confirmed, we accrue the fee based on the snapshot values.
+  if (current.executionStatus !== "success" && updatedReceipt.status === "confirmed" && current.portfolio) {
+    const feeAmount = current.portfolio.estimatedFeeTon || 0;
+    if (feeAmount > 0) {
+      await addFeeAccrual(walletAddress, updatedReceipt.mode, updatedReceipt.transactionHash || "", feeAmount);
+    }
+  }
 
   return {
     portfolio: nextState.portfolio,

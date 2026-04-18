@@ -38,7 +38,7 @@ export function PlanResultScreen() {
     }
 
     try {
-      await activateWithWallet(recommendation);
+      await activateWithWallet(recommendation, stonQuote.quoteData);
     } catch {
       setExecutionStatus("failed-safely");
       return;
