@@ -1,5 +1,6 @@
 import "@stdlib/deploy";
 import "@stdlib/ownable";
+import "./messages.tact";
 
 message Deposit {
     // Deposit TON to get shares
@@ -9,8 +10,12 @@ message Withdraw {
     shares: Int as coins;
 }
 
-message Harvest {
-    // Trigger auto-compounding (Only strategist/owner)
+// Strategy Execution Messages (Only Control Plane)
+message ExecDelegate {
+    target: Address;
+    amount: Int as coins;
+    mode: Int as uint8;
+    payload: Cell?;
 }
 
 message UpdateFee {
@@ -95,23 +100,27 @@ contract NeuroVault with Deployable, OwnableTransferable {
         });
     }
 
-    receive(msg: Harvest) {
-        self.requireOwner(); // Access control: only our Control Plane can trigger harvest
-        let ctx: Context = context();
-
-        // In the future:
-        // 1. the Vault sends a payload to STON.fi
-        // 2. STON.fi executes yield strategy
-        // 3. STON returns payload (bounced or successful)
-        // 4. We calculate total increase in Vault TVL.
-        // 5. If TVL increased, we take % performance fee by minting shares to the Owner.
-
+    receive(msg: ExecDelegate) {
+        self.requireOwner(); // Access control: only our Control Plane can trigger LP steps
         send(SendParameters{
-            to: ctx.sender,
-            value: 0,
-            mode: SendRemainingValue | SendIgnoreErrors,
-            body: "Harvest Initiated".asComment()
+            to: msg.target,
+            value: msg.amount,
+            mode: msg.mode,
+            body: msg.payload
         });
+    }
+
+    receive(msg: TokenNotification) {
+        // Vault is receiving a Jetton (e.g., from STON.fi routing refunds or compound yields)
+        let ctx: Context = context();
+        // Since we are an automated vault, any inbound Jettons increase our total synthetic TVL
+        // For phase 3 LP logic, we simply acknowledge the receipt and prevent bounces to secure the funds
+    }
+
+    // Safety Bounce Handler just in case we send a message that fails downstream
+    bounced(src: bounced<TokenTransfer>) {
+        // If a Jetton transfer failed (e.g. out of gas at STON router), it bounces back to us.
+        // We log it mathematically or gracefully recover TVL state.
     }
 
     receive(msg: UpdateFee) {

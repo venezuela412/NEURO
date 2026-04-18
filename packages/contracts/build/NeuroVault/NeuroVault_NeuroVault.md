@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: NeuroVault
-BoC Size: 1256 bytes
+BoC Size: 1329 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 20
+Total structures: 25
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -65,6 +65,26 @@ Signature: `ChangeOwner{queryId:uint64,newOwner:address}`
 TL-B: `change_owner_ok#327b2b4a queryId:uint64 newOwner:address = ChangeOwnerOk`
 Signature: `ChangeOwnerOk{queryId:uint64,newOwner:address}`
 
+### TokenTransfer
+TL-B: `token_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer`
+Signature: `TokenTransfer{queryId:uint64,amount:coins,destination:address,response_destination:address,custom_payload:Maybe ^cell,forward_ton_amount:coins,forward_payload:remainder<slice>}`
+
+### TokenNotification
+TL-B: `token_notification#7362d09c queryId:uint64 amount:coins from:address forward_payload:remainder<slice> = TokenNotification`
+Signature: `TokenNotification{queryId:uint64,amount:coins,from:address,forward_payload:remainder<slice>}`
+
+### SwapAdditionalData
+TL-B: `_ minOut:coins receiverAddress:address fwdGas:coins customPayload:Maybe ^cell = SwapAdditionalData`
+Signature: `SwapAdditionalData{minOut:coins,receiverAddress:address,fwdGas:coins,customPayload:Maybe ^cell}`
+
+### StonfiSwap
+TL-B: `stonfi_swap#6664de2a otherTokenWallet:address refundAddress:address excessesAddress:address deadline:uint64 additionalData:SwapAdditionalData{minOut:coins,receiverAddress:address,fwdGas:coins,customPayload:Maybe ^cell} = StonfiSwap`
+Signature: `StonfiSwap{otherTokenWallet:address,refundAddress:address,excessesAddress:address,deadline:uint64,additionalData:SwapAdditionalData{minOut:coins,receiverAddress:address,fwdGas:coins,customPayload:Maybe ^cell}}`
+
+### StonfiProvideLiquidity
+TL-B: `stonfi_provide_liquidity#c7bd6a59 otherTokenWallet:address refundAddress:address excessesAddress:address deadline:uint64 minLpOut:coins = StonfiProvideLiquidity`
+Signature: `StonfiProvideLiquidity{otherTokenWallet:address,refundAddress:address,excessesAddress:address,deadline:uint64,minLpOut:coins}`
+
 ### Deposit
 TL-B: `deposit#4a25ce37  = Deposit`
 Signature: `Deposit{}`
@@ -73,9 +93,9 @@ Signature: `Deposit{}`
 TL-B: `withdraw#aad9382d shares:coins = Withdraw`
 Signature: `Withdraw{shares:coins}`
 
-### Harvest
-TL-B: `harvest#98e81252  = Harvest`
-Signature: `Harvest{}`
+### ExecDelegate
+TL-B: `exec_delegate#4afe4ba2 target:address amount:coins mode:uint8 payload:Maybe ^cell = ExecDelegate`
+Signature: `ExecDelegate{target:address,amount:coins,mode:uint8,payload:Maybe ^cell}`
 
 ### UpdateFee
 TL-B: `update_fee#bb6eac71 performanceFeePrecise:uint16 = UpdateFee`

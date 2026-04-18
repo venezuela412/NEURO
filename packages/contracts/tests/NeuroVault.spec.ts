@@ -95,11 +95,44 @@ describe('NeuroVault Core Tests', () => {
         expect(tvl).toBe(toNano('2.5')); // Remaining TVL in Contract accounting
     });
 
-    it('should reject non-owners attempting to harvest', async () => {
+    it('should allow owner to execute arbitrary yields via ExecDelegate proxy', async () => {
+        // Assume STON MINTER is some address and we are wrapping pTON
+        const pTonMinter = await blockchain.treasury('pTonMinter');
+        const proxyValue = toNano('1.0');
+
+        const result = await vault.send(
+            owner.getSender(),
+            { value: toNano('1.05') },
+            { 
+                $$type: 'ExecDelegate',
+                target: pTonMinter.address,
+                amount: proxyValue,
+                mode: 2n, // SendIgnoreErrors
+                payload: null // Empty cell representation
+            }
+        );
+
+        // Vault should have executed a transaction OUT to the pTonMinter
+        expect(result.transactions).toHaveTransaction({
+            from: vault.address,
+            to: pTonMinter.address,
+            success: true
+        });
+    });
+
+    it('should reject non-owners attempting to execute a proxy interaction', async () => {
+        const hackerWallet = await blockchain.treasury('hacker');
+
         const result = await vault.send(
             user1.getSender(),
             { value: toNano('0.05') },
-            { $$type: 'Harvest' }
+            { 
+                $$type: 'ExecDelegate',
+                target: hackerWallet.address,
+                amount: toNano('1.0'),
+                mode: 2n,
+                payload: null
+            }
         );
 
         // Transaction should fail due to requireOwner() trap

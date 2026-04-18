@@ -35,6 +35,9 @@ builder $ChangeOwnerOk$_store(builder build_0, (int, slice) v) inline;
 ;; $ChangeOwnerOk$_store_cell
 cell $ChangeOwnerOk$_store_cell((int, slice) v, builder b) inline;
 
+;; $TokenTransfer$_load_bounced
+(slice, ((int, int))) $TokenTransfer$_load_bounced(slice sc_0) inline;
+
 ;; $NeuroVault$_store
 builder $NeuroVault$_store(builder build_0, (slice, int, int, cell, int) v) inline;
 
@@ -291,11 +294,6 @@ cell __gen_cell_cell_cd59fca2cdc29a9dbf46f2d496e4f92567460f0153a92a74b954cd50ef5
     B{b5ee9c7241010101001b000032000000005769746864726177616c205375636365737366756ceb69329a} B>boc PUSHREF
 """;
 
-;; Cell D3LYw8Ab9i3X373ediM7YVpGYXjylsLvdMQpwJjBk9s=
-cell __gen_cell_cell_0f72d8c3c01bf62dd7dfbdde76233b615a466178f296c2ef74c429c098c193db() asm """
-    B{b5ee9c7241010101001700002a000000004861727665737420496e69746961746564d6b5307a} B>boc PUSHREF
-""";
-
 ;; NeuroVault_NeuroVault.storage.fc
 ;;
 ;; Type: Context
@@ -366,6 +364,18 @@ cell $ChangeOwnerOk$_store_cell((int, slice) v, builder b) inline {
 
 ((int, slice)) $ChangeOwnerOk$_constructor_queryId_newOwner(int $queryId, slice $newOwner) inline {
     return ($queryId, $newOwner);
+}
+
+;;
+;; Type: TokenTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: token_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer
+;;
+
+(slice, ((int, int))) $TokenTransfer$_load_bounced(slice sc_0) inline {
+    var v'queryId = sc_0~load_uint(64);
+    var v'amount = sc_0~load_varuint16();
+    return (sc_0, (v'queryId, v'amount));
 }
 
 ;;
@@ -492,7 +502,22 @@ _ %owner() method_id(83229) {
     var ($self'owner, $self'totalAssets, $self'totalShares, $self'sharesMap, $self'performanceFeePrecise) = $NeuroVault$_contract_load();
     
     ;; Handle bounced messages
-    if (msg_bounced) { return (); }
+    if (msg_bounced) {
+        ;; Skip 0xFFFFFFFF prefix of a bounced message
+        in_msg~skip_bits(32);
+        int op = 0;
+        if (slice_bits(in_msg) >= 32) {
+            op = in_msg~load_uint(32);
+        }
+        ;; Bounced handler for TokenTransfer message
+        if (op == 0xf8a7ea5) {
+            var ($src'queryId, $src'amount) = in_msg~$TokenTransfer$_load_bounced();
+            $NeuroVault$_contract_store(($self'owner, $self'totalAssets, $self'totalShares, $self'sharesMap, $self'performanceFeePrecise));
+            return ();
+        }
+        
+        return ();
+    }
     var op = in_msg~load_opcode_internal();
     ;; Receive Deposit message
     if (op == 1243991607) {
@@ -538,12 +563,25 @@ _ %owner() method_id(83229) {
         return ();
     }
     
-    ;; Receive Harvest message
-    if (op == 2565345874) {
-        var $msg = empty_tuple();
+    ;; Receive ExecDelegate message
+    if (op == 1258179490) {
+        var $msg'target = in_msg~load_msg_addr();
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'mode = in_msg~load_uint(8);
+        var $msg'payload = in_msg~load_maybe_ref();
         ($self'owner, $self'totalAssets, $self'totalShares, $self'sharesMap, $self'performanceFeePrecise)~$NeuroVault$_fun_requireOwner();
+        $global_send($SendParameters$_constructor_to_value_mode_body($msg'target, $msg'amount, $msg'mode, $msg'payload));
+        $NeuroVault$_contract_store(($self'owner, $self'totalAssets, $self'totalShares, $self'sharesMap, $self'performanceFeePrecise));
+        return ();
+    }
+    
+    ;; Receive TokenNotification message
+    if (op == 0x7362d09c) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'from = in_msg~load_msg_addr();
+        var $msg'forward_payload = in_msg;
         var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        $global_send($SendParameters$_constructor_to_value_mode_body($ctx'sender, 0, 66, __gen_cell_cell_0f72d8c3c01bf62dd7dfbdde76233b615a466178f296c2ef74c429c098c193db()));
         $NeuroVault$_contract_store(($self'owner, $self'totalAssets, $self'totalShares, $self'sharesMap, $self'performanceFeePrecise));
         return ();
     }
