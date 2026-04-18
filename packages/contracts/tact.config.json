@@ -1,0 +1,12 @@
+{
+  "projects": [
+    {
+      "name": "NeuroVault",
+      "path": "./contracts/neuro_vault.tact",
+      "output": "./build/NeuroVault",
+      "options": {
+        "debug": true
+      }
+    }
+  ]
+}
