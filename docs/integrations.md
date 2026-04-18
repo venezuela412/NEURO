@@ -1,39 +1,28 @@
 # NEURO Third-Party Integrations
 
-NEURO leverages standard decentralized protocols on the TON blockchain to execute operations seamlessly on behalf of users in a completely non-custodial manner.
+NEURO leverages standard decentralized protocols on the TON blockchain but orchestrates them safely through the **NeuroVault** Tact smart contract. This provides "Set-and-Forget" yield farming through automated compound routing.
 
-Currently, the default interface aggregates two primary providers depending on the selected Plan.
+## 1. STON.fi (Liquidity Provisioning - Option B)
+**Objective**: Advanced Liquidity Provisioning (LP) using STON.fi V2 for our `Earn` and `Grow` Vaults.
 
-## 1. Tonstakers (Safe Income)
+### Architecture Workflow (The 5-Hop Asynchronous Lifecycle)
+STON.fi operations natively require consecutive contract bounces. To prevent user funds from getting stuck, NEURO uses a Proxy Pattern:
+1. **Deposit**: User deposits TON into the `NeuroVault`.
+2. **Signal Sync (Control Plane)**: The off-chain API monitors pool capacities and queries live route quality (Omniston).
+3. **Execution Delegate (`ExecDelegate`)**: The Control Plane packages a precise `StonfiSwap` and `ProvideLiquidity` payload mapping TEP-74 Jetton standards and sends it to the Vault.
+4. **Proxy Route**: The Vault performs the `Wrap (pTON) -> Swap (Token B) -> LP Stake` directly on STON.fi routers.
+5. **Yield Harvest**: LP Jettons return to the Vault via `TokenNotification`. Safe generic "bounced" handlers ensure no funds lock if STON.fi liquidity drops mid-transaction.
 
-**Objective**: Provide baseline liquid staking yields (~3-5% APY depending on the network validation cycles) using `$tsTON`.
+## 2. Tonstakers (Safe Income)
+**Objective**: Baseline liquid staking yields (~3-5% APY) using `tsTON` for the `Protect` goal.
 
-### Workflow
-1. **Selection**: When the user selects `Protect` (Safe Income), the app chooses `Tonstakers` as the provider.
-2. **Read-Side Adapter**: The app leverages `tonstakers-sdk` to read the current `tsTON` price and the Liquid Staking APY.
-3. **Execution Payload**: The application calculates the stake payload and requests the user's connected wallet (via `TonConnect`) to sign the staking transaction targeting the Tonstakers smart contract.  
-4. **Result**: The user deposits `TON` and receives `tsTON` directly in their wallet. NEURO records this execution locally inside the Control-Plane using public blockchain receipts.
+### Architecture Workflow
+1. **Delegation**: Instead of the user signing directly on Tonstakers, the `NeuroVault` routes pooled TON directly to Tonstakers minters based on backend oracle triggers.
+2. **Minting**: `tsTON` is minted to the `NeuroVault` address.
+3. **Internal Accounting**: Users hold generic NEURO vault shares representing their weighted fraction of the underlying `tsTON` balance.
 
-### Dependencies
-- `tonstakers-sdk`
-
----
-
-## 2. STON.fi (Balanced / Growth Income)
-
-**Objective**: Provide liquidity provision (LP) and asset swaps using TON's leading decentralized exchange, STON.fi.
-Currently used for the `Earn` (Balanced) and `Grow` (Growth) goals.
-
-### Workflow
-1. **Selection**: Depending on the specific token pair for the plan (e.g., `TON/USDT` or altcoins), NEURO fetches a real-time signal.
-2. **Quote Signal (Omniston)**: We use the `@ston-fi/omniston-sdk-react` Request for Quote (RFQ) endpoint. Using `buildSwapStonfiPayload` (inside our adapters), NEURO requests a quote from STON.fi's Router to get the best slippage and rate estimates.
-3. **Execution Payload**: After receiving the quote, the `messages` array returned by STON.fi is parsed and forwarded to the user's `TonConnect` provider. 
-4. **Slippage**: Slippage is dynamically encoded alongside the message so the user ensures fair exchange. 
-
-### Dependencies
-- `@ston-fi/omniston-sdk-react`
-
----
-
-## Non-Custodial Nature
-In both integration paths, NEURO *never* directly handles or custodies funds. The application prepares the standard Binary Object Container (BOC) and passes it directly to the wallet for signing.
+## Non-Custodial Verification
+The Vault is completely immutable and math-based:
+- Only the user can deposit or withdraw their underlying shares.
+- The Owner API (Control Plane) can *only* invoke predefined DeFi yields via `ExecDelegate`. It cannot sweep funds to private addresses (enforced by `requireOwner` and hardcoded destination guards).
+- This guarantees algorithmic, non-custodial delegation: **Users get the complexity of an automated Hedge Fund, but retain cryptographic finality over their capital.**

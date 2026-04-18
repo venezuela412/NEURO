@@ -34,18 +34,20 @@ Fetches a list of all historical and pending executions.
 
 ## 2. Execution & Mutation Endpoints
 
-### `POST /plan/preview`
-Receives current balances and user intents. Returns projected estimations and required payloads to send to `TonConnect`.
-**Payload Required:** Token balances map and target `planId`.
+### `POST /vault/preview`
+Receives current balances and user intents. Returns projected estimations, simulated Vault fees, and the calculated internal routing path (STON.fi or Tonstakers).
 
-### `POST /portfolio/:walletAddress/switch-to-safety`
-Initiates a plan migration to the "Safe Income" (Tonstakers fallback) option recording the state internally before prompting wallet signature.
+### `POST /vault/:walletAddress/deposit`
+Initiates the first step of the Vault lifecycle. Returns the payload for the user directly depositing TON into the `NeuroVault` to receive Shares.
 
-### `POST /portfolio/:walletAddress/withdraw`
-Signals standard withdrawal initiation.
+### `POST /vault/:walletAddress/delegate`
+(Admin/Control-Plane Only) Constructs the highly complex `ExecDelegate` Payload. The Control Plane uses this to instruct the Vault to wrap, swap, and LP on STON.fi. This endpoint executes off-chain routing logic via Omniston to find the optimal path.
 
-### `POST /portfolio/:walletAddress/executions/:executionId/reconcile`
-Crucial synchronization endpoint. Used asynchronously by the Mini App or recurring cron workers to test a specified `executionId` receipt against the TON public chain to declare it `completed` or `failed`.
+### `POST /vault/:walletAddress/withdraw`
+Signals standard withdrawal initiation. The payload instructs the user to send their shares back to the Vault, triggering the internal 20% Performance Fee deduction mathematically.
+
+### `POST /vault/executions/:executionId/reconcile`
+Crucial synchronization endpoint. Used asynchronously by recurring cron workers to test a specified `executionId` receipt against the TON public chain to declare it `completed` (Yield Harvested) or `failed` (Funds Bounced safely to Vault).
 
 ## Internal Nonce Mechanism (Signed Mutation)
-Any endpoint that alters state (`switch-to-safety`, `withdraw`) must verify a cryptographic signature produced by the wallet and consume the internal nonce to guarantee the request effectively maps to the actual Tonkeeper/Wallet owner preventing intercept spoofing.
+Any endpoint that alters state (`deposit`, `withdraw`) must verify a cryptographic signature produced by the wallet and consume the internal nonce to guarantee the request effectively maps to the actual Tonkeeper/Wallet owner preventing intercept spoofing.
