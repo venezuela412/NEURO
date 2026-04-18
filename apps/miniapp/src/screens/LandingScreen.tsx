@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Coins, Languages, ShieldCheck, Zap } from "lucide-react";
+import { Languages, Zap } from "lucide-react";
 import { APP_TAGLINE } from "@neuro/shared";
 import { useAppStore } from "../store/appStore";
 
