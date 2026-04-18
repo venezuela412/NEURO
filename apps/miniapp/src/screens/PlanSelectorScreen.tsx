@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { AmountInput } from "../components/core/AmountInput";
 import { GoalSelector } from "../components/core/GoalSelector";
 import { FlexibilitySelector } from "../components/core/FlexibilitySelector";
@@ -9,8 +10,27 @@ import { usePlanPreview } from "../hooks/usePlanPreview";
 import { useStonQuote } from "../hooks/useStonQuote";
 import { useAppStore } from "../store/appStore";
 
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 50 : -50,
+    opacity: 0,
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction < 0 ? 50 : -50,
+    opacity: 0,
+  }),
+};
+
 export function PlanSelectorScreen() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(0);
   const {
     amountTon,
     goal,
@@ -25,12 +45,23 @@ export function PlanSelectorScreen() {
     setExecutionStatus,
     setRouteQualityScore,
   } = useAppStore();
+  
   const previewMutation = usePlanPreview();
   const stonQuote = useStonQuote({
     amountTon,
     goal,
     enabled: goal !== "protect" && amountTon > 0,
   });
+
+  const goNext = () => {
+    setDirection(1);
+    setStep((prev) => prev + 1);
+  };
+
+  const goBack = () => {
+    setDirection(-1);
+    setStep((prev) => prev - 1);
+  };
 
   const handleGeneratePlan = async () => {
     setExecutionStatus("preparing");
@@ -48,83 +79,112 @@ export function PlanSelectorScreen() {
     navigate("/result");
   };
 
-  return (
-    <>
-      <motion.section
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="card page-stack"
-      >
-        <div className="section-intro">
-          <span className="eyebrow">Choose your goal</span>
-          <h1 className="headline">Tell NEURO what you want from your TON.</h1>
-          <p className="muted">
-            Keep it simple: add an amount, pick Protect, Earn, or Grow, and let
-            NEURO build a recommended plan around that.
-          </p>
-        </div>
-
-        <AmountInput value={amountTon} onChange={setAmountTon} />
-        <GoalSelector value={goal} onChange={setGoal} />
-        
-        {/* Only show complexity when the user actively asks for more yield */}
-        {goal !== "protect" && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }} 
-            animate={{ opacity: 1, height: "auto" }} 
-            exit={{ opacity: 0, height: 0 }}
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <motion.div
+            key="step0"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "tween", duration: 0.3 }}
+            className="w-full space-y-6"
           >
+            <div className="text-center mb-6">
+              <span className="eyebrow inline-block mb-2">Step 1 of {goal === "protect" ? "2" : "3"}</span>
+              <h1 className="headline">How much TON?</h1>
+              <p className="muted mt-2">Enter the amount you'd like to put to work safely.</p>
+            </div>
+            <AmountInput value={amountTon} onChange={setAmountTon} />
+          </motion.div>
+        );
+      case 1:
+        return (
+          <motion.div
+            key="step1"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "tween", duration: 0.3 }}
+            className="w-full space-y-6"
+          >
+            <div className="text-center mb-6">
+              <span className="eyebrow inline-block mb-2">Step 2 of {goal === "protect" ? "2" : "3"}</span>
+              <h1 className="headline">Choose your goal</h1>
+              <p className="muted mt-2">Protect keeps it safe. Earn & Grow explore higher yields.</p>
+            </div>
+            <GoalSelector value={goal} onChange={setGoal} />
+          </motion.div>
+        );
+      case 2:
+        return (
+          <motion.div
+            key="step2"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "tween", duration: 0.3 }}
+            className="w-full space-y-6"
+          >
+            <div className="text-center mb-6">
+              <span className="eyebrow inline-block mb-2">Step 3 of 3</span>
+              <h1 className="headline">Tailor your strategy</h1>
+              <p className="muted mt-2">Adjust risk and flexibility for your growth targets.</p>
+            </div>
             <FlexibilitySelector value={wantsFlexibility} onChange={setWantsFlexibility} />
             <RiskSelector value={riskPreference} onChange={setRiskPreference} />
-          </motion.div>
-        )}
-
-        <div className="card muted-surface">
-          <p className="eyebrow">What you will see next</p>
-          <ul className="bullet-list muted">
-            <li>A recommended income plan in plain English</li>
-            <li>Estimated annual and monthly outcome ranges</li>
-            <li>What NEURO may do internally and how safety fallback works</li>
-            <li>Estimated platform fee, only if your plan is in profit</li>
-          </ul>
-        </div>
-
-        {goal !== "protect" ? (
-          <div className="card muted-surface">
-            <p className="eyebrow">Live route signal</p>
+            
             {stonQuote.isLoading ? (
-              <p className="muted">
-                Checking live STON.fi route quality for a stronger income path...
-              </p>
+              <p className="muted mt-4 text-center text-sm">Checking live route quality...</p>
             ) : stonQuote.routeQualityScore !== null ? (
-              <p className="muted">
-                Current STON route quality signal:{" "}
-                <strong>{(stonQuote.routeQualityScore * 100).toFixed(0)}/100</strong>.
-                NEURO uses this to stay more conservative when route quality weakens.
+              <p className="muted mt-4 text-center text-sm text-green-400">
+                STON.fi Route Quality: {(stonQuote.routeQualityScore * 100).toFixed(0)}/100
               </p>
-            ) : (
-              <p className="muted">
-                Live route data is not available right now, so NEURO will fall back
-                to conservative rule-based route quality assumptions.
-              </p>
-            )}
-          </div>
-        ) : null}
-      </motion.section>
+            ) : null}
+          </motion.div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const isFinalStep = (step === 1 && goal === "protect") || step === 2;
+
+  return (
+    <div className="flex flex-col min-h-[75vh] justify-center pt-8">
+      <div className="relative w-full overflow-hidden px-4">
+        <AnimatePresence mode="wait" custom={direction}>
+          {renderStep()}
+        </AnimatePresence>
+      </div>
 
       <StickyActionBar
-        primaryLabel={previewMutation.isPending ? "Preparing your plan..." : "Generate my plan"}
-        secondaryLabel="Back"
-        onPrimaryClick={handleGeneratePlan}
-        onSecondaryClick={() => navigate("/")}
-        disabled={previewMutation.isPending || amountTon <= 0}
+        primaryLabel={
+          previewMutation.isPending
+            ? "Preparing..."
+            : isFinalStep
+            ? "Generate my plan"
+            : "Continue"
+        }
+        secondaryLabel={step === 0 ? "Cancel" : "Back"}
+        onPrimaryClick={isFinalStep ? handleGeneratePlan : goNext}
+        onSecondaryClick={step === 0 ? () => navigate("/") : goBack}
+        disabled={previewMutation.isPending || (step === 0 && amountTon <= 0)}
         helper={
           previewMutation.isPending
-            ? "Checking route quality, fee impact, and safer fallback options."
-            : `Preparing a ${goal} recommendation for ${amountTon.toFixed(2)} TON`
+            ? "Checking route quality and limits..."
+            : isFinalStep 
+            ? `Ready to generate ${goal} plan` 
+            : "Review options"
         }
       />
-    </>
+    </div>
   );
 }

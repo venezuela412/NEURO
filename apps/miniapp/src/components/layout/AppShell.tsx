@@ -91,18 +91,20 @@ export function AppShell({ children }: PropsWithChildren) {
 
       <main className="screen-frame">{children}</main>
 
-      <nav className="bottom-nav" aria-label="Primary">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === "/"}
-            className={({ isActive }) => (isActive ? "bottom-nav-item active" : "bottom-nav-item")}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+      {location.pathname !== "/" && (
+        <nav className="bottom-nav" aria-label="Primary">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === "/"}
+              className={({ isActive }) => (isActive ? "bottom-nav-item active" : "bottom-nav-item")}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }
