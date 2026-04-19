@@ -23,6 +23,7 @@ const titles: Record<string, string> = {
   "/onboarding": "Getting Started",
   "/plans": "Choose how to earn",
   "/wallet": "Your wallet",
+  "/deposit": "Deposit TON",
   "/result": "Your recommended plan",
   "/active": "Your active plan",
   "/activity": "Activity log",

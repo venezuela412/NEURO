@@ -156,7 +156,7 @@ export const IntentMenu: React.FC = () => {
     setAmountTon(0); // Reset so user enters fresh amount
 
     // Navigate to the plan wizard amount step
-    navigate('/result');
+    navigate('/deposit');
   };
 
   /** Handle the "GET nTON" tap */
@@ -175,7 +175,7 @@ export const IntentMenu: React.FC = () => {
     setGoal('protect');
     setRiskPreference('low');
     setAmountTon(0);
-    navigate('/result');
+    navigate('/deposit');
   };
 
   return (
