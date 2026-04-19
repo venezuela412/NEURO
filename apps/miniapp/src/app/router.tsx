@@ -84,6 +84,13 @@ export const appRouter = createBrowserRouter([
         },
       },
       {
+        path: "faq",
+        lazy: async () => {
+          const { FAQScreen } = await import("../screens/FAQScreen");
+          return { Component: FAQScreen };
+        },
+      },
+      {
         path: "*",
         lazy: async () => {
           const { NotFoundScreen } = await import("../screens/NotFoundScreen");

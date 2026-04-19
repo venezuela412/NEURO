@@ -1,4 +1,4 @@
-import { ArrowLeft, BellDot } from "lucide-react";
+import { ArrowLeft, Pickaxe, LayoutGrid, Activity, HelpCircle } from "lucide-react";
 import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
@@ -11,18 +11,20 @@ import { useHaptics } from "../../hooks/useHaptics";
 import clsx from "clsx";
 
 const navItems = [
-  { to: "/plans", label: "Build" },
-  { to: "/active", label: "Plan" },
-  { to: "/activity", label: "Activity" },
+  { to: "/plans", label: "Earn", icon: Pickaxe },
+  { to: "/active", label: "My Plan", icon: LayoutGrid },
+  { to: "/activity", label: "Activity", icon: Activity },
+  { to: "/faq", label: "Help", icon: HelpCircle },
 ];
 
 const titles: Record<string, string> = {
-  "/": "Home",
-  "/onboarding": "New to TON?",
-  "/plans": "Choose your goal",
+  "/": "Welcome",
+  "/onboarding": "Getting Started",
+  "/plans": "Choose how to earn",
   "/result": "Your recommended plan",
   "/active": "Your active plan",
-  "/activity": "Activity feed",
+  "/activity": "Activity log",
+  "/faq": "Help & FAQ",
 };
 
 export function AppShell({ children }: PropsWithChildren) {
@@ -97,6 +99,7 @@ export function AppShell({ children }: PropsWithChildren) {
       <nav className="bottom-nav" aria-label="Primary">
         {navItems.map((item) => {
           const isActive = location.pathname === item.to;
+          const Icon = item.icon;
           return (
             <NavLink
               key={item.to}
@@ -106,18 +109,19 @@ export function AppShell({ children }: PropsWithChildren) {
                 if (!isActive) impactLight();
               }}
               className={clsx(
-                "bottom-nav-item relative overflow-hidden",
-                isActive ? "text-white" : "text-[var(--text-muted)] hover:text-white/80"
+                "bottom-nav-item",
+                isActive && "bottom-nav-item--active"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="bottom-nav-active"
-                  className="absolute inset-0 bg-white/10 rounded-[16px]"
+                  className="bottom-nav-pill"
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                 />
               )}
-              <span className="relative z-10">{item.label}</span>
+              <Icon size={18} className="bottom-nav-icon" />
+              <span className="bottom-nav-label">{item.label}</span>
             </NavLink>
           );
         })}

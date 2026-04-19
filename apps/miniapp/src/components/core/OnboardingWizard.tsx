@@ -1,45 +1,53 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Network, Database, Zap, ShieldCheck, Languages } from 'lucide-react';
+import { Languages, Sparkles, ShieldCheck, Coins, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { TonConnectButton } from '@tonconnect/ui-react';
+import { useNeuroWallet } from '../../hooks/useTonWallet';
 
 const SLIDES = [
   {
+    id: 'lang',
     title: "NeuroTON",
-    subtitle: "Select your language",
+    subtitle: "Choose your language",
     description: "",
     icon: Languages,
     color: "rgba(255,255,255,0.15)",
-    isLangSelect: true
+    isLangSelect: true,
   },
   {
-    title: "The Vanguard of TON",
-    subtitle: "Autonomous Intelligence",
-    description: "Welcome to the first Omni-Chain Intent Vault on The Open Network. Elite AI manages your yield so you don't have to.",
-    icon: Network,
-    color: "rgba(59,130,246,0.2)"
+    id: 'intro',
+    title: "Earn While You Sleep",
+    subtitle: "Your money works for you",
+    description: "NeuroTON is the easiest way to grow your TON. Just deposit, pick a goal, and our smart system handles everything automatically — no expertise needed.",
+    icon: Sparkles,
+    color: "rgba(38,211,199,0.2)",
   },
   {
-    title: "Zero-Trust Security",
-    subtitle: "Mathematically Bound",
-    description: "Your capital is secured by Smart Contracts. The execution agent is strictly limited to compound logic without withdrawal power.",
+    id: 'security',
+    title: "Your Funds Are Safe",
+    subtitle: "Protected by code, not people",
+    description: "Your TON is locked in a Smart Contract on the blockchain. Nobody — not even us — can withdraw your funds. Only you control your money.",
     icon: ShieldCheck,
-    color: "rgba(143,115,255,0.2)"
+    color: "rgba(143,115,255,0.2)",
   },
   {
-    title: "nTON Liquidity",
-    subtitle: "The Ultimate Standard",
-    description: "Receive the Liquid Staking Token (nTON) mirroring your Vault share. Natively composable with EVAA and STON.fi ecosystems.",
-    icon: Database,
-    color: "rgba(38,211,199,0.2)"
+    id: 'earn',
+    title: "Pick Your Style",
+    subtitle: "From safe to adventurous",
+    description: "Choose how you want to earn. Start safe with staking for steady returns, or go bolder with higher potential rewards. Change anytime.",
+    icon: Coins,
+    color: "rgba(251,146,60,0.2)",
   },
   {
-    title: "Market Neutral",
-    subtitle: "Autonomous Intents",
-    description: "Select your risk trajectory. Our solvers automatically track, loop, and harvest maximum yield across DeDust and external chains.",
-    icon: Zap,
-    color: "rgba(251,146,60,0.2)"
-  }
+    id: 'wallet',
+    title: "Connect Your Wallet",
+    subtitle: "One tap to get started",
+    description: "Link your TON wallet to start earning. Your wallet stays in your control — we only need permission to show your balance and send transactions you approve.",
+    icon: Wallet,
+    color: "rgba(59,130,246,0.2)",
+    isWalletConnect: true,
+  },
 ];
 
 export const OnboardingWizard: React.FC = () => {
@@ -47,6 +55,7 @@ export const OnboardingWizard: React.FC = () => {
   const [lang, setLang] = useState<'EN' | 'ES'>('EN');
   const [direction, setDirection] = useState(1);
   const navigate = useNavigate();
+  const wallet = useNeuroWallet();
 
   // Skip if already completed
   React.useEffect(() => {
@@ -55,30 +64,45 @@ export const OnboardingWizard: React.FC = () => {
     }
   }, [navigate]);
 
+  const haptic = (type: 'light' | 'medium' | 'heavy' | 'success' = 'light') => {
+    try {
+      const hf = (window as any).Telegram?.WebApp?.HapticFeedback;
+      if (type === 'success') {
+        hf?.notificationOccurred?.("success");
+      } else {
+        hf?.impactOccurred?.(type);
+      }
+    } catch (_) { /* noop */ }
+  };
+
   const handleNext = () => {
     if (currentSlide === SLIDES.length - 1) {
       localStorage.setItem('neuro_onboarding_complete', 'true');
-      // Trigger haptic
-      try {
-        (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.("success");
-      } catch (_) { /* noop */ }
+      haptic('success');
       navigate('/plans', { replace: true });
     } else {
-      try {
-        (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.("light");
-      } catch (_) { /* noop */ }
+      haptic('light');
       setDirection(1);
       setCurrentSlide(s => s + 1);
     }
   };
 
+  const handleBack = () => {
+    if (currentSlide > 0) {
+      haptic('light');
+      setDirection(-1);
+      setCurrentSlide(s => s - 1);
+    }
+  };
+
   const current = SLIDES[currentSlide];
   const Icon = current.icon;
+  const isLastSlide = currentSlide === SLIDES.length - 1;
 
   const slideVariants = {
-    enter: (d: number) => ({ opacity: 0, x: d > 0 ? 60 : -60, scale: 0.96 }),
+    enter: (d: number) => ({ opacity: 0, x: d > 0 ? 80 : -80, scale: 0.95 }),
     center: { opacity: 1, x: 0, scale: 1 },
-    exit: (d: number) => ({ opacity: 0, x: d > 0 ? -60 : 60, scale: 0.96 }),
+    exit: (d: number) => ({ opacity: 0, x: d > 0 ? -80 : 80, scale: 0.95 }),
   };
 
   return (
@@ -97,6 +121,20 @@ export const OnboardingWizard: React.FC = () => {
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         className="onboarding-orb onboarding-orb--bottom"
       />
+
+      {/* Skip button (top-right) */}
+      {!isLastSlide && (
+        <button
+          className="onboarding-skip"
+          onClick={() => {
+            haptic('light');
+            setDirection(1);
+            setCurrentSlide(SLIDES.length - 1);
+          }}
+        >
+          Skip
+        </button>
+      )}
 
       {/* Slide content */}
       <div className="onboarding-content">
@@ -155,19 +193,40 @@ export const OnboardingWizard: React.FC = () => {
                   className={`onboarding-lang-btn ${lang === 'EN' ? 'onboarding-lang-btn--active-teal' : ''}`}
                 >
                   <span className="onboarding-lang-flag">🇺🇸</span>
-                  <span className="onboarding-lang-label">EN</span>
+                  <span className="onboarding-lang-label">English</span>
                 </button>
                 <button
                   onClick={() => { setLang('ES'); try { (window as any).Telegram?.WebApp?.HapticFeedback?.selectionChanged?.(); } catch(_){} }}
                   className={`onboarding-lang-btn ${lang === 'ES' ? 'onboarding-lang-btn--active-accent' : ''}`}
                 >
                   <span className="onboarding-lang-flag">🇪🇸</span>
-                  <span className="onboarding-lang-label">ES</span>
+                  <span className="onboarding-lang-label">Español</span>
                 </button>
               </motion.div>
             )}
 
-            {/* Description on non-lang slides */}
+            {/* Wallet connect on last slide */}
+            {current.isWalletConnect && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, type: "spring" }}
+                className="onboarding-wallet-section"
+              >
+                <TonConnectButton className="onboarding-wallet-btn" />
+                {wallet.connected && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="onboarding-wallet-status"
+                  >
+                    ✓ Wallet connected successfully!
+                  </motion.p>
+                )}
+              </motion.div>
+            )}
+
+            {/* Description */}
             {current.description && (
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -182,7 +241,7 @@ export const OnboardingWizard: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom controls: dots + CTA */}
+      {/* Bottom controls: back + dots + CTA */}
       <div className="onboarding-footer">
         <div className="onboarding-dots">
           {SLIDES.map((_, idx) => (
@@ -193,22 +252,40 @@ export const OnboardingWizard: React.FC = () => {
           ))}
         </div>
 
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={handleNext}
-          className="onboarding-cta"
-        >
-          <span className="onboarding-cta-inner">
-            {currentSlide === SLIDES.length - 1 ? 'GET STARTED' : 'CONTINUE'}
-            <motion.span
-              animate={{ x: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="onboarding-cta-arrow"
+        <div className="onboarding-footer-buttons">
+          {currentSlide > 0 && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={handleBack}
+              className="onboarding-back"
             >
-              →
-            </motion.span>
-          </span>
-        </motion.button>
+              Back
+            </motion.button>
+          )}
+
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={handleNext}
+            className="onboarding-cta"
+          >
+            <span className="onboarding-cta-inner">
+              {isLastSlide
+                ? (wallet.connected ? "LET'S EARN →" : "SKIP FOR NOW →")
+                : "CONTINUE"}
+              {!isLastSlide && (
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="onboarding-cta-arrow"
+                >
+                  →
+                </motion.span>
+              )}
+            </span>
+          </motion.button>
+        </div>
       </div>
     </div>
   );
