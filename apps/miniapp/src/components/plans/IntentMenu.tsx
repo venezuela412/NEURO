@@ -1,8 +1,12 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Zap, TrendingUp, ChevronRight, Coins, Radio } from 'lucide-react';
+import { Shield, Zap, TrendingUp, ChevronRight, Coins, Radio, Wallet, ExternalLink, ArrowRight, X } from 'lucide-react';
+import { useTonConnectUI } from '@tonconnect/ui-react';
+import { useNeuroWallet } from '../../hooks/useTonWallet';
 import { useMarketAPY } from '../../hooks/useMarketAPY';
 import { formatAPYRange } from '../../lib/apyService';
+import { useAppStore } from '../../store/appStore';
 
 type RiskLevel = 'safe' | 'moderate' | 'bold' | null;
 
@@ -18,6 +22,8 @@ interface RiskOption {
   strategyName: string;
   strategyDesc: string;
   howItWorks: string;
+  goal: 'protect' | 'earn' | 'grow';
+  risk: 'low' | 'medium' | 'high';
 }
 
 const BASE_OPTIONS: Omit<RiskOption, 'apy'>[] = [
@@ -32,6 +38,8 @@ const BASE_OPTIONS: Omit<RiskOption, 'apy'>[] = [
     strategyName: 'Safe Savings',
     strategyDesc: 'Your TON earns steady interest through secure staking. No surprises — just reliable, consistent growth over time.',
     howItWorks: 'We stake your TON through Tonstakers, the leading staking provider on TON. Your funds earn native blockchain rewards automatically.',
+    goal: 'protect',
+    risk: 'low',
   },
   {
     id: 'moderate',
@@ -44,6 +52,8 @@ const BASE_OPTIONS: Omit<RiskOption, 'apy'>[] = [
     strategyName: 'Balanced Earner',
     strategyDesc: 'Your TON earns from multiple sources — staking rewards plus trading opportunities. Higher returns with controlled exposure.',
     howItWorks: 'We combine safe staking with selective yield farming across DeDust and STON.fi. The system automatically rebalances to manage risk.',
+    goal: 'earn',
+    risk: 'medium',
   },
   {
     id: 'bold',
@@ -56,6 +66,8 @@ const BASE_OPTIONS: Omit<RiskOption, 'apy'>[] = [
     strategyName: 'Power Boost',
     strategyDesc: 'Your TON is actively managed across multiple protocols and chains for maximum returns. High reward, higher volatility.',
     howItWorks: 'Advanced strategies including leveraged positions, cross-chain yield farming, and automated arbitrage. Our system monitors 24/7 to capture opportunities.',
+    goal: 'grow',
+    risk: 'high',
   },
 ];
 
@@ -66,10 +78,36 @@ const FALLBACK_APY: Record<string, string> = {
   bold: '25–65%',
 };
 
+const WALLET_APPS = [
+  {
+    name: 'Tonkeeper',
+    desc: 'Most popular TON wallet',
+    url: 'https://tonkeeper.com',
+    color: '#45AEF5',
+  },
+  {
+    name: 'MyTonWallet',
+    desc: 'Simple & lightweight',
+    url: 'https://mytonwallet.io',
+    color: '#7B68EE',
+  },
+  {
+    name: 'Tonhub',
+    desc: 'Advanced features',
+    url: 'https://tonhub.com',
+    color: '#3CC28A',
+  },
+];
+
 export const IntentMenu: React.FC = () => {
+  const navigate = useNavigate();
+  const [tonConnectUI] = useTonConnectUI();
+  const wallet = useNeuroWallet();
   const [selectedRisk, setSelectedRisk] = useState<RiskLevel>(null);
   const [isAdvanced, setIsAdvanced] = useState(false);
+  const [showWalletGuide, setShowWalletGuide] = useState(false);
   const { data: apyData, loading: apyLoading } = useMarketAPY();
+  const { setGoal, setRiskPreference, setAmountTon } = useAppStore();
 
   const haptic = (type: 'light' | 'medium' | 'heavy' = 'light') => {
     try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type); } catch(_){}
@@ -95,6 +133,50 @@ export const IntentMenu: React.FC = () => {
     if (mins === 1) return '1 min ago';
     return `${mins} min ago`;
   }, [apyData]);
+
+  /** Handle the "START EARNING" tap — connect wallet if needed, then navigate */
+  const handleStartEarning = async () => {
+    haptic('heavy');
+
+    if (!wallet.connected) {
+      // Open TonConnect modal to connect wallet
+      try {
+        await tonConnectUI.openModal();
+      } catch {
+        // User cancelled — do nothing
+      }
+      return;
+    }
+
+    if (!selected) return;
+
+    // Map IntentMenu selection → appStore
+    setGoal(selected.goal);
+    setRiskPreference(selected.risk);
+    setAmountTon(0); // Reset so user enters fresh amount
+
+    // Navigate to the plan wizard amount step
+    navigate('/result');
+  };
+
+  /** Handle the "GET nTON" tap */
+  const handleGetNton = async () => {
+    haptic('heavy');
+
+    if (!wallet.connected) {
+      try {
+        await tonConnectUI.openModal();
+      } catch {
+        // User cancelled
+      }
+      return;
+    }
+
+    setGoal('protect');
+    setRiskPreference('low');
+    setAmountTon(0);
+    navigate('/result');
+  };
 
   return (
     <div className="intent-menu">
@@ -128,45 +210,39 @@ export const IntentMenu: React.FC = () => {
             {/* Header */}
             <div className="intent-header">
               <h2 className="intent-title">
-                {selectedRisk ? selected!.strategyName : 'How much risk is OK?'}
+                {selected ? selected.strategyName : 'Choose Your Strategy'}
               </h2>
               <p className="intent-desc">
-                {selectedRisk
-                  ? selected!.strategyDesc
-                  : 'Choose your comfort level. You can change this anytime.'}
+                {selected ? selected.strategyDesc : 'Select a risk level that matches your comfort. NEURO handles the rest automatically.'}
               </p>
+              {apyData && (
+                <div className="intent-live-badge">
+                  <Radio size={10} className="intent-live-dot" />
+                  <span>Estimated rates · {lastUpdated}</span>
+                </div>
+              )}
             </div>
 
-            {/* Live APY badge */}
-            {apyData && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="apy-live-badge"
-              >
-                <Radio size={12} className={`apy-live-dot ${apyData.isLive ? 'apy-live-dot--live' : ''}`} />
-                <span className="apy-live-text">
-                  {apyData.isLive ? 'Live rates' : 'Estimated rates'}
-                  {lastUpdated && ` · ${lastUpdated}`}
-                </span>
-              </motion.div>
-            )}
-
-            {/* Risk selector */}
-            <div className="risk-selector">
+            {/* Risk Options */}
+            <div className="risk-cards">
               {riskOptions.map((option) => {
-                const Icon = option.icon;
                 const isSelected = selectedRisk === option.id;
+                const Icon = option.icon;
+
                 return (
                   <motion.button
                     key={option.id}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => { setSelectedRisk(option.id); haptic('medium'); }}
-                    className={`risk-card ${isSelected ? 'risk-card--active' : ''}`}
+                    onClick={() => {
+                      setSelectedRisk(isSelected ? null : option.id);
+                      haptic('medium');
+                    }}
+                    className={`risk-card ${isSelected ? 'risk-card--selected' : ''}`}
+                    layout
+                    transition={{ layout: { type: 'spring', stiffness: 400, damping: 30 } }}
                     style={{
-                      '--risk-color': option.color,
-                      '--risk-bg': option.bg,
-                      '--risk-border': isSelected ? option.color : 'rgba(255,255,255,0.08)',
+                      '--card-color': option.color,
+                      '--card-bg': option.bg,
+                      '--card-border': isSelected ? option.border : 'transparent',
                     } as React.CSSProperties}
                   >
                     <div className="risk-card-top">
@@ -217,14 +293,82 @@ export const IntentMenu: React.FC = () => {
               >
                 <button
                   className="intent-footer-cta"
-                  onClick={() => {
-                    haptic('heavy');
-                    alert(`Ready to earn! Connect your wallet and deposit at least 3 TON to start with ${selected!.strategyName}.`);
-                  }}
+                  onClick={handleStartEarning}
                 >
-                  START EARNING · {selected!.apy}
+                  {wallet.connected ? (
+                    <>START EARNING · {selected!.apy}</>
+                  ) : (
+                    <>CONNECT WALLET TO START</>
+                  )}
                 </button>
-                <p className="intent-footer-min">Minimum 3 TON to start · Change anytime</p>
+                <p className="intent-footer-min">
+                  {wallet.connected
+                    ? 'Minimum 3 TON to start · Change anytime'
+                    : 'You need a TON wallet to deposit'
+                  }
+                </p>
+
+                {/* Wallet guidance for new users */}
+                {!wallet.connected && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ delay: 0.3, duration: 0.3 }}
+                  >
+                    <button
+                      className="wallet-guide-toggle"
+                      onClick={(e) => { e.stopPropagation(); setShowWalletGuide(!showWalletGuide); haptic('light'); }}
+                    >
+                      <Wallet size={14} />
+                      <span>New to TON? Get a wallet in 2 minutes</span>
+                      <ChevronRight size={14} style={{ transform: showWalletGuide ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
+
+                    <AnimatePresence>
+                      {showWalletGuide && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="wallet-guide-panel"
+                        >
+                          <p className="wallet-guide-desc">
+                            Download any of these free wallets, create an account, and <strong>fund it with at least 3 TON</strong> from an exchange (like Binance, OKX, or Bybit).
+                          </p>
+                          <div className="wallet-guide-apps">
+                            {WALLET_APPS.map((app) => (
+                              <a
+                                key={app.name}
+                                href={app.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="wallet-guide-app"
+                                onClick={() => haptic('light')}
+                              >
+                                <div className="wallet-guide-app-icon" style={{ background: app.color }}>
+                                  <Wallet size={16} />
+                                </div>
+                                <div className="wallet-guide-app-info">
+                                  <strong>{app.name}</strong>
+                                  <span>{app.desc}</span>
+                                </div>
+                                <ExternalLink size={14} className="wallet-guide-app-arrow" />
+                              </a>
+                            ))}
+                          </div>
+                          <div className="wallet-guide-steps">
+                            <p><strong>Quick start:</strong></p>
+                            <p>1. Download the app → Create a wallet</p>
+                            <p>2. Save your recovery phrase safely</p>
+                            <p>3. Buy or transfer TON to your wallet</p>
+                            <p>4. Come back here → tap <strong>Connect Wallet</strong></p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </motion.div>
@@ -305,12 +449,9 @@ export const IntentMenu: React.FC = () => {
             <div className="intent-footer" style={{ marginTop: '8px' }}>
               <button
                 className="intent-footer-cta"
-                onClick={() => {
-                  haptic('heavy');
-                  alert('Connect your wallet to mint nTON directly.');
-                }}
+                onClick={handleGetNton}
               >
-                GET nTON TOKENS
+                {wallet.connected ? 'GET nTON TOKENS' : 'CONNECT WALLET FIRST'}
               </button>
               <p className="intent-footer-min">Minimum 3 TON · Redeemable anytime</p>
             </div>

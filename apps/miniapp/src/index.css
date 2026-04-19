@@ -676,6 +676,112 @@ h1,h2,h3,h4,h5,h6 { margin: 0; line-height: 1.1; }
   margin-top: 10px;
 }
 
+/* ───────────────────── Wallet Guide ───────────────────── */
+.wallet-guide-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms;
+}
+.wallet-guide-toggle:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(38,211,199,0.2);
+}
+.wallet-guide-toggle span { flex: 1; text-align: left; }
+
+.wallet-guide-panel {
+  overflow: hidden;
+  margin-top: 8px;
+  padding: 16px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+}
+.wallet-guide-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.wallet-guide-desc strong { color: var(--accent-2); }
+
+.wallet-guide-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.wallet-guide-app {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 200ms;
+}
+.wallet-guide-app:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+}
+.wallet-guide-app-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+.wallet-guide-app-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.wallet-guide-app-info strong {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+.wallet-guide-app-info span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.wallet-guide-app-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.wallet-guide-steps {
+  padding: 12px 14px;
+  background: rgba(38,211,199,0.05);
+  border: 1px solid rgba(38,211,199,0.1);
+  border-radius: 10px;
+}
+.wallet-guide-steps p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+.wallet-guide-steps strong {
+  color: var(--accent-2);
+}
+
 /* ───────────────────── Live APY Badge ───────────────────── */
 .apy-live-badge {
   display: flex;
