@@ -1,32 +1,39 @@
-import { useHapticFeedback } from "@telegram-apps/sdk-react";
 import { useCallback } from "react";
 
 export function useHaptics() {
-  const haptic = useHapticFeedback(true);
+  const getHaptic = () => {
+    if (typeof window !== "undefined" && (window as any).Telegram?.WebApp?.HapticFeedback) {
+      return (window as any).Telegram.WebApp.HapticFeedback;
+    }
+    return null;
+  };
 
   const impactHeavy = useCallback(() => {
     try {
-      if (haptic && haptic.supports('impact')) haptic.impactOccurred('heavy');
+      const haptic = getHaptic();
+      if (haptic && haptic.impactOccurred) haptic.impactOccurred('heavy');
     } catch (e) {
       // Ignore errors in unsupported environments
     }
-  }, [haptic]);
+  }, []);
 
   const impactLight = useCallback(() => {
     try {
-      if (haptic && haptic.supports('impact')) haptic.impactOccurred('light');
+      const haptic = getHaptic();
+      if (haptic && haptic.impactOccurred) haptic.impactOccurred('light');
     } catch (e) {
       // Ignore errors
     }
-  }, [haptic]);
+  }, []);
 
   const notificationSuccess = useCallback(() => {
     try {
-      if (haptic && haptic.supports('notification')) haptic.notificationOccurred('success');
+      const haptic = getHaptic();
+      if (haptic && haptic.notificationOccurred) haptic.notificationOccurred('success');
     } catch (e) {
       // Ignore errors
     }
-  }, [haptic]);
+  }, []);
 
   return { impactHeavy, impactLight, notificationSuccess };
 }
