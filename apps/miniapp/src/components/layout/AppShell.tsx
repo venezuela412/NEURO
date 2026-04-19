@@ -1,4 +1,4 @@
-import { ArrowLeft, Pickaxe, LayoutGrid, Activity, HelpCircle } from "lucide-react";
+import { ArrowLeft, Pickaxe, LayoutGrid, Activity, HelpCircle, Wallet } from "lucide-react";
 import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
@@ -12,6 +12,7 @@ import clsx from "clsx";
 
 const navItems = [
   { to: "/plans", label: "Earn", icon: Pickaxe },
+  { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/active", label: "My Plan", icon: LayoutGrid },
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/faq", label: "Help", icon: HelpCircle },
@@ -21,6 +22,7 @@ const titles: Record<string, string> = {
   "/": "Welcome",
   "/onboarding": "Getting Started",
   "/plans": "Choose how to earn",
+  "/wallet": "Your wallet",
   "/result": "Your recommended plan",
   "/active": "Your active plan",
   "/activity": "Activity log",

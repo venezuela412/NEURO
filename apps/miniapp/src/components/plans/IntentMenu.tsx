@@ -393,7 +393,7 @@ export const IntentMenu: React.FC = () => {
             <div className="nton-explainer">
               <div className="nton-explainer-header">
                 <div className="nton-icon-wrap">
-                  <Coins size={22} />
+                  <img src="/nton-logo.png" alt="nTON" style={{ width: 28, height: 28, borderRadius: 8 }} />
                 </div>
                 <h3 className="nton-title">What is nTON?</h3>
               </div>

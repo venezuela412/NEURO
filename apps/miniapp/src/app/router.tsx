@@ -42,6 +42,13 @@ export const appRouter = createBrowserRouter([
         },
       },
       {
+        path: "wallet",
+        lazy: async () => {
+          const { WalletScreen } = await import("../screens/WalletScreen");
+          return { Component: WalletScreen };
+        },
+      },
+      {
         path: "result",
         lazy: async () => {
           const { PlanResultRoute } = await import("../screens/PlanResultRoute");
