@@ -31,6 +31,17 @@ function buildSessionHeaders(session?: WalletSession | null): Record<string, str
   };
 }
 
+function buildAuthBody(proof?: SignedActionProof | null, session?: WalletSession | null) {
+  const body: Record<string, unknown> = {};
+  if (session?.token) {
+    body.sessionToken = session.token;
+  }
+  if (proof) {
+    body.proof = proof;
+  }
+  return body;
+}
+
 export async function fetchNeuroOverview(): Promise<NeuroOverview> {
   try {
     const response = await fetch(`${CONTROL_PLANE_URL}/overview`);
@@ -69,18 +80,6 @@ export async function fetchPersistedPortfolioState(walletAddress: string): Promi
   } catch {
     return null;
   }
-}
-
-export async function savePersistedPortfolioState(state: PersistedPortfolioState) {
-  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(state.walletAddress)}/state`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(state),
-  });
-
-  return parseJson<{ ok: true; updatedAt: string }>(response);
 }
 
 export async function savePersistedPortfolioStateAuthenticated(
@@ -126,6 +125,7 @@ export async function reconcileExecutionReceipt(
         "Content-Type": "application/json",
         ...buildSessionHeaders(session),
       },
+      body: JSON.stringify(buildAuthBody(null, session)),
     },
   );
 
@@ -136,8 +136,9 @@ export async function reconcileExecutionReceipt(
   }>(response);
 }
 
-export async function createWalletActionSession(proof: SignedActionProof) {
-  const response = await fetch(`${CONTROL_PLANE_URL}/auth/session`, {
+// Fixed: endpoint was /auth/session but server has /portfolio/:wallet/session
+export async function createWalletActionSession(walletAddress: string, proof: SignedActionProof) {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/session`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -147,29 +148,29 @@ export async function createWalletActionSession(proof: SignedActionProof) {
     }),
   });
 
-  return parseJson<WalletSession>(response);
+  return parseJson<{ ok: true; sessionToken: string; expiresAt: string }>(response);
 }
 
+// Fixed: endpoint was /move-to-safety but server has /switch-to-safety
 export async function movePortfolioToSafety(
   walletAddress: string,
   auth: SignedActionProof,
   session?: WalletSession | null,
 ) {
-  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/move-to-safety`, {
+  const response = await fetch(`${CONTROL_PLANE_URL}/portfolio/${encodeURIComponent(walletAddress)}/switch-to-safety`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...buildSessionHeaders(session),
     },
-    body: JSON.stringify({
-      proof: auth,
-    }),
+    body: JSON.stringify(buildAuthBody(auth, session)),
   });
 
   return parseJson<{
-    ok: true;
     portfolio: PortfolioSnapshot;
     executionReceipt: ExecutionReceipt;
+    sessionToken?: string;
+    sessionExpiresAt?: string;
   }>(response);
 }
 
@@ -186,14 +187,15 @@ export async function withdrawPortfolio(
       ...buildSessionHeaders(session),
     },
     body: JSON.stringify({
-      proof: auth,
+      ...buildAuthBody(auth, session),
       amountTon,
     }),
   });
 
   return parseJson<{
-    ok: true;
     portfolio: PortfolioSnapshot;
     executionReceipt: ExecutionReceipt;
+    sessionToken?: string;
+    sessionExpiresAt?: string;
   }>(response);
 }

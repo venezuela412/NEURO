@@ -6,7 +6,7 @@ import nacl from "tweetnacl";
 const VALID_WINDOW_SECONDS = 15 * 60;
 
 function getAllowedDomains() {
-  return (process.env.ALLOWED_SIGN_DOMAINS ?? "localhost:5173,127.0.0.1:5173,neuro-ton.app")
+  return (process.env.ALLOWED_SIGN_DOMAINS ?? "localhost:5173,127.0.0.1:5173,neuroton-lime.vercel.app,neuro-ton.app")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);

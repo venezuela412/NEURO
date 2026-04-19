@@ -34,14 +34,13 @@ const schemaSql = `
     created_at TEXT NOT NULL
   );
 
-  CREATE TABLE IF NOT EXISTS used_signed_nonces (
+  CREATE TABLE IF NOT EXISTS consumed_action_nonce (
     wallet_address TEXT NOT NULL,
     nonce TEXT NOT NULL,
-    created_at TEXT NOT NULL,
     PRIMARY KEY (wallet_address, nonce)
   );
 
-  CREATE TABLE IF NOT EXISTS wallet_action_sessions (
+  CREATE TABLE IF NOT EXISTS wallet_sessions (
     session_id TEXT PRIMARY KEY,
     wallet_address TEXT NOT NULL,
     issued_at TEXT NOT NULL,
@@ -49,13 +48,22 @@ const schemaSql = `
   );
 
   CREATE TABLE IF NOT EXISTS fee_accrual (
-    id TEXT PRIMARY KEY,
+    id SERIAL,
     wallet_address TEXT NOT NULL,
-    execution_receipt_id TEXT NOT NULL,
-    plan_id TEXT NOT NULL,
-    amount_accrued_nano TEXT NOT NULL,
-    status TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    event_type TEXT NOT NULL,
+    tx_hash TEXT NOT NULL DEFAULT '',
+    amount_ton REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+    PRIMARY KEY (wallet_address, event_type, tx_hash)
+  );
+
+  CREATE TABLE IF NOT EXISTS admin_logs (
+    id SERIAL,
+    level TEXT NOT NULL DEFAULT 'info',
+    category TEXT NOT NULL DEFAULT 'general',
+    message TEXT NOT NULL,
+    metadata TEXT,
+    created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
   );
 `;
 

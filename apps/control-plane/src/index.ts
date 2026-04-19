@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { z } from "zod";
+import crypto from "crypto";
 
 import {
   buildPlanPreviewResponse,
@@ -11,17 +12,22 @@ import {
 } from "@neuro/adapters";
 import type { PersistedPortfolioState, PlanRecommendationInput } from "@neuro/shared";
 import {
+  addAdminLog,
   addExecutionReceipt,
   applySwitchToSafety,
   applyWithdraw,
+  cleanupExpiredSessions,
   countExecutionReceiptRows,
   countPortfolioRows,
   createWalletSession,
   getWalletSession,
   consumeNonce,
   getPersistedPortfolioState,
+  getTotalFeesAccrued,
   isNonceConsumed,
+  listAdminLogs,
   listExecutionReceipts,
+  listFeeAccruals,
   listPortfolioSummariesForAdmin,
   listRecentExecutionReceiptsForAdmin,
   reconcilePersistedExecution,
@@ -159,14 +165,17 @@ async function requireWalletAuthorization(
   };
 }
 
+// ==================== PUBLIC ROUTES ====================
+
 server.get("/health", async () => ({
   ok: true,
   service: "neuro-control-plane",
+  timestamp: new Date().toISOString(),
 }));
 
 server.get("/overview", async () => getNeuroOverview());
 
-import crypto from "crypto";
+// ==================== ADMIN AUTH ====================
 
 function requireAdminToken(request: { headers: Record<string, string | string[] | undefined> }) {
   const configured = process.env.NEURO_ADMIN_TOKEN?.trim();
@@ -208,35 +217,183 @@ function requireAdminToken(request: { headers: Record<string, string | string[] 
   return { ok: false as const, reason: "forbidden" as const };
 }
 
-server.get("/admin/summary", async (request, reply) => {
+function handleAdminAuth(request: { headers: Record<string, string | string[] | undefined> }, reply: any) {
   const auth = requireAdminToken(request);
   if (!auth.ok) {
     if (auth.reason === "not_configured") {
       reply.code(503);
       return {
         error: "admin_not_configured",
-        hint: "Set NEURO_ADMIN_TOKEN on the control plane, then call GET /admin/summary with header X-Neuro-Admin-Token or Authorization: Bearer <token>.",
+        hint: "Set NEURO_ADMIN_TOKEN on the control plane, then call with header X-Neuro-Admin-Token or Authorization: Bearer <token>.",
       };
     }
     reply.code(403);
     return { error: "forbidden" };
   }
+  return null; // Auth OK
+}
 
-  const [portfolioCount, executionCount, portfolios, executions] = await Promise.all([
+// ==================== ADMIN ROUTES ====================
+
+server.get("/admin/summary", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  const [portfolioCount, executionCount, portfolios, executions, totalFees] = await Promise.all([
     countPortfolioRows(),
     countExecutionReceiptRows(),
     listPortfolioSummariesForAdmin(200),
     listRecentExecutionReceiptsForAdmin(100),
+    getTotalFeesAccrued(),
   ]);
 
   return {
     portfolioCount,
     executionReceiptCount: executionCount,
+    totalFeesAccruedTon: totalFees,
     portfolios,
     recentExecutions: executions,
-    note: "Fees shown are MVP estimates from persisted portfolio state (estimatedFeeTon), not settled on-chain to a treasury yet.",
   };
 });
+
+server.get("/admin/fees", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  const [fees, totalFees] = await Promise.all([
+    listFeeAccruals(200),
+    getTotalFeesAccrued(),
+  ]);
+
+  return {
+    totalFeesAccruedTon: totalFees,
+    feeHistory: fees,
+  };
+});
+
+server.get("/admin/logs", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  const logs = await listAdminLogs(500);
+  return { logs };
+});
+
+server.get("/admin/health", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  const [portfolioCount, executionCount] = await Promise.all([
+    countPortfolioRows(),
+    countExecutionReceiptRows(),
+  ]);
+
+  // Check external service connectivity
+  const checks: Record<string, { status: string; latencyMs?: number; error?: string }> = {};
+
+  // Tonstakers API check
+  try {
+    const start = Date.now();
+    const response = await fetch("https://tonapi.io/v2/staking/pools", {
+      signal: AbortSignal.timeout(5000),
+    });
+    checks.tonstakers_api = {
+      status: response.ok ? "healthy" : "degraded",
+      latencyMs: Date.now() - start,
+    };
+  } catch (error) {
+    checks.tonstakers_api = {
+      status: "down",
+      error: error instanceof Error ? error.message : "Unknown",
+    };
+  }
+
+  // STON.fi API check
+  try {
+    const start = Date.now();
+    const response = await fetch("https://api.ston.fi/v1/assets", {
+      signal: AbortSignal.timeout(5000),
+    });
+    checks.stonfi_api = {
+      status: response.ok ? "healthy" : "degraded",
+      latencyMs: Date.now() - start,
+    };
+  } catch (error) {
+    checks.stonfi_api = {
+      status: "down",
+      error: error instanceof Error ? error.message : "Unknown",
+    };
+  }
+
+  // TON RPC check
+  try {
+    const start = Date.now();
+    const endpoint = process.env.TON_RPC_ENDPOINT ?? "https://toncenter.com/api/v2/jsonRPC";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: 1, jsonrpc: "2.0", method: "getMasterchainInfo", params: {} }),
+      signal: AbortSignal.timeout(5000),
+    });
+    checks.ton_rpc = {
+      status: response.ok ? "healthy" : "degraded",
+      latencyMs: Date.now() - start,
+    };
+  } catch (error) {
+    checks.ton_rpc = {
+      status: "down",
+      error: error instanceof Error ? error.message : "Unknown",
+    };
+  }
+
+  return {
+    database: {
+      portfolioCount,
+      executionReceiptCount: executionCount,
+    },
+    protocols: checks,
+    vaultAddress: process.env.NEURO_VAULT_ADDRESS ?? "not_configured",
+    timestamp: new Date().toISOString(),
+  };
+});
+
+server.post("/admin/reconcile-all", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  const executions = await listRecentExecutionReceiptsForAdmin(50);
+  const pending = executions.filter((e) => e.status === "submitted" || e.status === "reconciling");
+
+  let reconciled = 0;
+  let failed = 0;
+
+  for (const exec of pending) {
+    try {
+      await reconcilePersistedExecution(exec.walletAddress, exec.receiptId);
+      reconciled++;
+    } catch {
+      failed++;
+    }
+  }
+
+  await addAdminLog("info", "reconciliation", `Bulk reconcile: ${reconciled} succeeded, ${failed} failed`, {
+    reconciled,
+    failed,
+    totalPending: pending.length,
+  });
+
+  return { reconciled, failed, totalPending: pending.length };
+});
+
+server.post("/admin/cleanup-sessions", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  await cleanupExpiredSessions();
+  return { ok: true, message: "Expired sessions cleaned up" };
+});
+
+// ==================== PORTFOLIO ROUTES ====================
 
 server.get<{ Querystring: { amount?: string } }>("/portfolio/demo", async (request) => {
   const amount = Number(request.query.amount ?? 100);
@@ -298,6 +455,11 @@ server.put<{ Params: { walletAddress: string }; Body: z.infer<typeof persistedSt
     if (state.executionReceipt) {
       await addExecutionReceipt(state.walletAddress, state.executionReceipt);
     }
+
+    await addAdminLog("info", "portfolio", `State updated for ${state.walletAddress}`, {
+      walletAddress: state.walletAddress,
+      executionStatus: state.executionStatus,
+    });
 
     return {
       ok: true,
@@ -388,12 +550,17 @@ server.post<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/sw
       return { error: "not_found" };
     }
 
+    await addAdminLog("info", "portfolio", `Switch to safety for ${request.params.walletAddress}`);
+
     return {
       ...result,
       sessionToken: auth.sessionToken,
       sessionExpiresAt: auth.expiresAt,
     };
   } catch (error) {
+    await addAdminLog("error", "portfolio", `Switch to safety failed: ${error instanceof Error ? error.message : "unknown"}`, {
+      walletAddress: request.params.walletAddress,
+    });
     reply.code(403);
     return { error: error instanceof Error ? error.message : "forbidden" };
   }
@@ -421,50 +588,69 @@ server.post<{ Params: { walletAddress: string }; Body: { amountTon?: number } }>
         return { error: "not_found" };
       }
 
+      await addAdminLog("info", "portfolio", `Withdrawal for ${request.params.walletAddress}: ${parsed.data.amountTon ?? "full"} TON`);
+
       return {
         ...result,
         sessionToken: auth.sessionToken,
         sessionExpiresAt: auth.expiresAt,
       };
     } catch (error) {
+      await addAdminLog("error", "portfolio", `Withdrawal failed: ${error instanceof Error ? error.message : "unknown"}`, {
+        walletAddress: request.params.walletAddress,
+      });
       reply.code(403);
       return { error: error instanceof Error ? error.message : "forbidden" };
     }
   },
 );
+
+// ==================== SOLVER CRON ====================
+
 import { OmniChainSolver } from "./solver";
 
 server.post("/api/solver/cron", async (request, reply) => {
   try {
     const authHeader = request.headers.authorization;
-    // VERY BASIC security check to ensure this is only called securely or by Vercel Cron.
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET || "neuroTON"}`) {
+    const cronSecret = process.env.CRON_SECRET;
+
+    // SECURITY: Require explicit CRON_SECRET — no default fallbacks
+    if (!cronSecret) {
+      reply.code(503);
+      return { error: "cron_not_configured", hint: "Set CRON_SECRET environment variable" };
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
       reply.code(401);
       return { error: "unauthorized" };
     }
 
-    // 1. Mathematically resolve total vault expansion vs existing LSTs
-    const compoundData = await OmniChainSolver.computeAutoCompoundForVault("EQ_NEURO_VAULT");
+    // 1. Compute auto-compound for vault
+    const compoundData = await OmniChainSolver.computeAutoCompoundForVault();
 
     // 2. Derive strategy rebalancing
     const strategies = await OmniChainSolver.computeRebalancePaths();
 
-    // In a physical environment, we would use tone.js or tonweb here
-    // const tx = NeuroVault.sendAutoCompound(compoundData.profitToMint);
-    
+    await addAdminLog("info", "solver", `Auto-compound resolved: profit=${compoundData.profitToMint}, strategies=${strategies.length}`, {
+      profitToMint: compoundData.profitToMint,
+      strategiesCount: strategies.length,
+    });
+
     return {
       success: true,
       profitResolved: compoundData.profitToMint,
       strategiesPushed: strategies.length,
-      action: "AUTO_COMPOUND_AND_REBALANCE"
+      action: "AUTO_COMPOUND_AND_REBALANCE",
     };
-
   } catch (error) {
     server.log.error(error);
+    await addAdminLog("error", "solver", `Solver execution failed: ${error instanceof Error ? error.message : "unknown"}`);
     reply.code(500);
     return { error: "solver_execution_failed" };
   }
 });
+
+// ==================== STARTUP ====================
 
 import { scheduleAutoCompoundJob } from "./queue";
 
@@ -475,6 +661,7 @@ server
   .then(async () => {
     server.log.info(`NEURO control plane listening on ${port}`);
     await scheduleAutoCompoundJob();
+    await addAdminLog("info", "system", `Control plane started on port ${port}`);
   })
   .catch((error) => {
     server.log.error(error);

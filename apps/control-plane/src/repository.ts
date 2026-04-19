@@ -170,7 +170,17 @@ export async function getWalletSession(walletAddress: string, sessionId: string)
     return null;
   }
 
-  return result.rows[0];
+  const session = result.rows[0];
+
+  // SECURITY: Enforce session expiry
+  const expiresAt = new Date(session.expires_at).getTime();
+  if (Number.isNaN(expiresAt) || Date.now() > expiresAt) {
+    // Session expired — clean it up and reject
+    await deleteWalletSession(walletAddress, sessionId);
+    return null;
+  }
+
+  return session;
 }
 
 export async function deleteWalletSession(walletAddress: string, sessionId: string) {
@@ -530,4 +540,72 @@ export async function countExecutionReceiptRows(): Promise<number> {
   const db = await getDb();
   const result = await db.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM execution_receipts");
   return Number(result.rows[0]?.count ?? 0);
+}
+
+// --- ADMIN LOGGING ---
+
+export async function addAdminLog(
+  level: "info" | "warn" | "error",
+  category: string,
+  message: string,
+  metadata?: Record<string, unknown>,
+) {
+  const db = await getDb();
+  await db.query(
+    `
+      INSERT INTO admin_logs (level, category, message, metadata, created_at)
+      VALUES ($1, $2, $3, $4, $5)
+    `,
+    [level, category, message, metadata ? JSON.stringify(metadata) : null, new Date().toISOString()],
+  );
+}
+
+export async function listAdminLogs(limit = 500) {
+  const db = await getDb();
+  const cap = Math.min(Math.max(limit, 1), 1000);
+  const result = await db.query<{
+    id: string;
+    level: string;
+    category: string;
+    message: string;
+    metadata: string | null;
+    created_at: string;
+  }>(
+    "SELECT id, level, category, message, metadata, created_at FROM admin_logs ORDER BY created_at DESC LIMIT $1",
+    [cap],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    metadata: row.metadata ? JSON.parse(row.metadata) : null,
+  }));
+}
+
+export async function listFeeAccruals(limit = 200) {
+  const db = await getDb();
+  const cap = Math.min(Math.max(limit, 1), 500);
+  const result = await db.query<{
+    wallet_address: string;
+    event_type: string;
+    tx_hash: string;
+    amount_ton: number;
+    created_at: string;
+  }>(
+    "SELECT wallet_address, event_type, tx_hash, amount_ton, created_at FROM fee_accrual ORDER BY created_at DESC LIMIT $1",
+    [cap],
+  );
+  return result.rows;
+}
+
+export async function getTotalFeesAccrued(): Promise<number> {
+  const db = await getDb();
+  const result = await db.query<{ total: string }>(
+    "SELECT COALESCE(SUM(amount_ton), 0)::text AS total FROM fee_accrual",
+  );
+  return Number(result.rows[0]?.total ?? 0);
+}
+
+export async function cleanupExpiredSessions() {
+  const db = await getDb();
+  const now = new Date().toISOString();
+  await db.query("DELETE FROM wallet_sessions WHERE expires_at < $1", [now]);
 }

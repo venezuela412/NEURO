@@ -8,7 +8,7 @@ contract NeuroVault with Deployable, OwnableTransferable {
     
     // Core parameters
     owner: Address;
-    operator: Address; // Vercel Agent Backend
+    operator: Address; // Backend Agent
 
     // Math & States for nTON
     totalSupply: Int as coins;
@@ -17,6 +17,15 @@ contract NeuroVault with Deployable, OwnableTransferable {
     // Limits & Security
     performanceFeePrecise: Int as uint16; // e.g. 2000 = 20%
     minDepositAmount: Int as coins; // Minimum 3 TON to prevent gas friction
+    autoCompoundCap: Int as uint16; // Max % of totalAssets allowed as profit in one compound (e.g. 500 = 5%)
+
+    // Protocol Whitelist (up to 5 addresses)
+    whitelistCount: Int as uint8;
+    whitelist1: Address;
+    whitelist2: Address;
+    whitelist3: Address;
+    whitelist4: Address;
+    whitelist5: Address;
 
     // Jetton Metadata
     content: Cell;
@@ -28,14 +37,33 @@ contract NeuroVault with Deployable, OwnableTransferable {
         self.totalSupply = 0;
         self.totalAssets = 0;
         self.performanceFeePrecise = 2000; 
-        self.minDepositAmount = ton("3.0"); // V6 UX Limit Guarantee
+        self.minDepositAmount = ton("3.0");
+        self.autoCompoundCap = 500; // 5% max per compound cycle
         self.content = content;
         self.mintable = true;
+
+        // Initialize whitelist with zero-address placeholders
+        self.whitelistCount = 0;
+        self.whitelist1 = newAddress(0, 0);
+        self.whitelist2 = newAddress(0, 0);
+        self.whitelist3 = newAddress(0, 0);
+        self.whitelist4 = newAddress(0, 0);
+        self.whitelist5 = newAddress(0, 0);
     }
 
     fun requireOwnerOrOperator() {
         let ctx: Context = context();
         require(ctx.sender == self.owner || ctx.sender == self.operator, "Invalid sender: not owner or operator");
+    }
+
+    fun isWhitelisted(target: Address): Bool {
+        if (target == self.owner) { return true; }
+        if (self.whitelistCount >= 1 && target == self.whitelist1) { return true; }
+        if (self.whitelistCount >= 2 && target == self.whitelist2) { return true; }
+        if (self.whitelistCount >= 3 && target == self.whitelist3) { return true; }
+        if (self.whitelistCount >= 4 && target == self.whitelist4) { return true; }
+        if (self.whitelistCount >= 5 && target == self.whitelist5) { return true; }
+        return false;
     }
 
     // 1. ZEN STAKING & ZAPPER INBOUND
@@ -58,28 +86,33 @@ contract NeuroVault with Deployable, OwnableTransferable {
             sharesToMint = (netDeposit * self.totalSupply) / self.totalAssets;
         }
 
+        // Prevent zero-share minting (rounding dust attack)
+        require(sharesToMint > 0, "Deposit too small to mint shares");
+
         self.totalAssets = self.totalAssets + netDeposit;
         self.totalSupply = self.totalSupply + sharesToMint;
 
         // Mint physical Jettons to the user
         self.mintTokens(ctx.sender, sharesToMint, ctx.sender);
-
-        // ZP: We record the Intent (msg.intent) locally or in events so the Omni-Agent knows
-        // Here we just let it sit. The Vercel agent will rebalance it to Tonstakers downstream.
     }
 
     // 2. ADVANCED MODE: LST Burning (Withdrawal)
     receive(msg: TokenBurnNotification) {
         let ctx: Context = context();
         
-        // Very important: Only the legitimate wallet of the sender can trigger this.
+        // Only the legitimate wallet of the sender can trigger this.
         let expectedWalletAddress: Address = contractAddress(initOf NeuroJettonWallet(myAddress(), msg.sender));
         require(ctx.sender == expectedWalletAddress, "Invalid burn notification sender");
 
+        require(msg.amount > 0, "Cannot burn zero tokens");
         require(self.totalSupply >= msg.amount, "Invalid supply state");
 
         // Calculate underlying TON value to unlock
         let tonToRelease: Int = (msg.amount * self.totalAssets) / self.totalSupply;
+        require(tonToRelease > 0, "Withdrawal amount too small");
+
+        // Ensure vault has enough balance after release
+        require(self.totalAssets >= tonToRelease, "Insufficient vault assets");
 
         self.totalSupply = self.totalSupply - msg.amount;
         self.totalAssets = self.totalAssets - tonToRelease;
@@ -94,15 +127,20 @@ contract NeuroVault with Deployable, OwnableTransferable {
             to: dest, 
             value: tonToRelease,
             mode: SendIgnoreErrors,
-            bounce: false,
+            bounce: true, // Changed: bounce on invalid address instead of burning funds
             body: "Withdrawal Successful".asComment()
         });
     }
 
     // Direct Yield Reception from STON.fi or Tonstakers.
-    // Notice that totalAssets goes up while totalSupply stays the same. The LST price increases!
+    // totalAssets goes up while totalSupply stays the same — LST price increases.
+    // SECURITY: Only accept from whitelisted protocols or owner
     receive() {
         let ctx: Context = context();
+        require(
+            self.isWhitelisted(ctx.sender) || ctx.sender == self.operator,
+            "Yield reception only from whitelisted protocols"
+        );
         self.totalAssets = self.totalAssets + ctx.value;
     }
 
@@ -111,12 +149,16 @@ contract NeuroVault with Deployable, OwnableTransferable {
         self.requireOwnerOrOperator();
         require(msg.profitToMint > 0, "No profit to register");
 
-        // The Agent calculates actual profit via Vercel TS and commands the vault to secure fees.
-        // It's capped by performanceFeePrecise.
+        // SECURITY CAP: Profit cannot exceed autoCompoundCap % of totalAssets in one cycle
+        let maxAllowedProfit: Int = (self.totalAssets * self.autoCompoundCap) / 10000;
+        require(msg.profitToMint <= maxAllowedProfit, "Profit exceeds single-cycle cap");
+
+        // The Agent calculates actual profit via backend and commands the vault to secure fees.
         let ownerCutNative: Int = (msg.profitToMint * self.performanceFeePrecise) / 10000;
         
-        // Mint new shares to the treasury. This effectively dilutes the ratio growth by 20%, extracting fee.
+        // Mint new shares to the treasury. This dilutes the ratio growth by fee%, extracting fee.
         let sharesToMint: Int = (ownerCutNative * self.totalSupply) / self.totalAssets;
+        require(sharesToMint > 0, "Fee shares too small to mint");
         
         self.totalSupply = self.totalSupply + sharesToMint;
         
@@ -124,21 +166,49 @@ contract NeuroVault with Deployable, OwnableTransferable {
         self.mintTokens(self.owner, sharesToMint, self.owner);
     }
 
-    // 4. THE APEX REBALANCER: Agent is strictly restricted to Whitelisted Execution Operations
+    // 4. THE APEX REBALANCER: Agent restricted to WHITELISTED protocol addresses only
     receive(msg: ExecDelegate) {
         self.requireOwnerOrOperator();
         
-        // CRITICAL ZERO-TRUST SHIELD: 
-        // Vercel CANNOT send funds to arbitrary addresses. It can only execute whitelisted protocols.
-        // We will enforce that target is a safe protocol later. For now, restricted strictly to owner/operator.
+        // CRITICAL ZERO-TRUST SHIELD: Only whitelisted protocol addresses allowed
+        require(self.isWhitelisted(msg.target), "Target not in protocol whitelist");
+        
+        // Verify vault has enough assets
+        require(self.totalAssets >= msg.amount, "ExecDelegate exceeds available assets");
+        require(msg.amount > 0, "Cannot delegate zero amount");
         
         self.totalAssets = self.totalAssets - msg.amount;
         send(SendParameters{
             to: msg.target,
             value: msg.amount,
             mode: msg.mode,
+            bounce: true, // Bounce on failure instead of losing funds
             body: msg.payload
         });
+    }
+
+    // Bounced ExecDelegate: recover totalAssets accounting
+    receive("ExecDelegateBounced") {
+        // If a delegated execution bounces, we re-add the value to totalAssets
+        let ctx: Context = context();
+        self.totalAssets = self.totalAssets + ctx.value;
+    }
+
+    // --- WHITELIST MANAGEMENT (owner only) ---
+
+    receive(msg: SetWhitelist) {
+        require(context().sender == self.owner, "Not Owner");
+        require(msg.index >= 1 && msg.index <= 5, "Whitelist index must be 1-5");
+        
+        if (msg.index == 1) { self.whitelist1 = msg.target; }
+        if (msg.index == 2) { self.whitelist2 = msg.target; }
+        if (msg.index == 3) { self.whitelist3 = msg.target; }
+        if (msg.index == 4) { self.whitelist4 = msg.target; }
+        if (msg.index == 5) { self.whitelist5 = msg.target; }
+
+        if (msg.index > self.whitelistCount) {
+            self.whitelistCount = msg.index;
+        }
     }
 
     // --- JETTON MASTER COMPLIANCE FUNCTIONS ---
@@ -193,7 +263,7 @@ contract NeuroVault with Deployable, OwnableTransferable {
         });
     }
 
-    // Config adjustments
+    // Config adjustments (owner only)
     receive(msg: UpdateFee) {
         require(context().sender == self.owner, "Not Owner");
         require(msg.performanceFeePrecise <= 3000, "Fee too high! Max 30% allowed");
@@ -203,6 +273,12 @@ contract NeuroVault with Deployable, OwnableTransferable {
     receive(msg: UpdateOperator) {
         require(context().sender == self.owner, "Not Owner");
         self.operator = msg.newOperator;
+    }
+
+    receive(msg: UpdateAutoCompoundCap) {
+        require(context().sender == self.owner, "Not Owner");
+        require(msg.newCap <= 1000, "Cap too high! Max 10% per cycle");
+        self.autoCompoundCap = msg.newCap;
     }
 
     // -- GETTERS (TEP-74 Standard) --
@@ -226,6 +302,10 @@ contract NeuroVault with Deployable, OwnableTransferable {
     get fun tvl(): Int { return self.totalAssets; }
     
     get fun operator(): Address { return self.operator; }
+    
+    get fun autoCompoundCap(): Int { return self.autoCompoundCap; }
+
+    get fun whitelistCount(): Int { return self.whitelistCount; }
 
     fun reserveGas(): Int {
         return ton("0.05");

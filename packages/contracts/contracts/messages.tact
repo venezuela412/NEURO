@@ -79,6 +79,15 @@ message UpdateOperator {
     newOperator: Address;
 }
 
+message SetWhitelist {
+    index: Int as uint8; // 1-5
+    target: Address;
+}
+
+message UpdateAutoCompoundCap {
+    newCap: Int as uint16; // e.g. 500 = 5%
+}
+
 // STON.fi V2 Specific Swap structures
 struct SwapAdditionalData {
     minOut: Int as coins;              
