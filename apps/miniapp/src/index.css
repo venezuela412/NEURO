@@ -44,16 +44,28 @@ html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
-  background: var(--bg);
-  background-image:
-    radial-gradient(ellipse at 15% 0%, rgba(143, 115, 255, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 100%, rgba(38, 211, 199, 0.12) 0%, transparent 50%);
-  background-attachment: fixed;
+  background: #000000;
   color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Ambient glow for desktop background */
+@media (min-width: 500px) {
+  body {
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(143, 115, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 100%, rgba(38, 211, 199, 0.04) 0%, transparent 50%);
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
 }
 
 a {
@@ -73,16 +85,41 @@ button {
 #root {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
 }
 
 .app-shell {
   width: 100%;
-  max-width: 520px;
+  max-width: 100%;
   min-height: 100svh;
   padding: 18px 18px 110px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  background: #000000;
+}
+
+/* Apple-style Titanium Device Frame on Desktop */
+@media (min-width: 500px) {
+  .app-shell {
+    max-width: 430px; /* iPhone 15 Pro Max exact width */
+    min-height: 900px;
+    height: 90vh;
+    border-radius: 44px; /* Native iOS hardware radius */
+    border: 1px solid rgba(255, 255, 255, 0.12); /* Titanium edge */
+    box-shadow: 
+      0 0 0 6px rgba(255, 255, 255, 0.03), /* Outer bezel */
+      0 30px 60px rgba(0, 0, 0, 0.8), /* Drop shadow */
+      inset 0 0 20px rgba(0,0,0,0.5); /* Inner curve depth */
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: auto;
+    position: relative;
+    /* Soft internal glow for screen */
+    background: radial-gradient(circle at top, #09090b, #000000);
+  }
 }
 
 .app-header {
@@ -91,11 +128,15 @@ button {
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: rgba(8, 10, 18, 0.72);
-  backdrop-filter: blur(18px);
-  box-shadow: var(--shadow);
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 0;
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin: -18px -18px 0 -18px;
 }
 
 .app-header-left,
@@ -262,17 +303,19 @@ button {
 
 .card,
 .hero-card {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: var(--radius-xl);
   padding: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  box-shadow: var(--shadow);
+  background: rgba(25, 25, 28, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 
 .hero-card {
   background:
-    radial-gradient(circle at top right, rgba(143, 115, 255, 0.22), transparent 38%),
-    linear-gradient(180deg, rgba(23, 28, 47, 0.94), rgba(10, 12, 22, 0.96));
+    radial-gradient(circle at top right, rgba(143, 115, 255, 0.12), transparent 50%),
+    rgba(25, 25, 28, 0.6);
 }
 
 /* Home: minimal — title, one line, one button, one link */
@@ -323,10 +366,10 @@ button {
 }
 
 .card-emphasis {
-  border-color: var(--border-strong);
+  border-color: rgba(255,255,255,0.1);
   background:
-    radial-gradient(circle at top left, rgba(143, 115, 255, 0.16), transparent 28%),
-    linear-gradient(180deg, rgba(20, 24, 40, 0.98), rgba(10, 12, 22, 0.98));
+    radial-gradient(circle at top left, rgba(143, 115, 255, 0.1), transparent 40%),
+    rgba(25, 25, 30, 0.8);
 }
 
 .muted-surface {
@@ -396,7 +439,7 @@ ul {
 
 .badge-row span,
 .pill {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 999px;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.04);
@@ -441,10 +484,12 @@ ul {
 
 .metrics-grid > div,
 .metric-card {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: var(--radius-md);
   padding: 16px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(25, 25, 28, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -456,10 +501,10 @@ ul {
 }
 
 .quote-signal {
-  border-color: rgba(143, 115, 255, 0.26);
+  border-color: rgba(143, 115, 255, 0.20);
   background:
-    radial-gradient(circle at top right, rgba(143, 115, 255, 0.12), transparent 40%),
-    rgba(255, 255, 255, 0.03);
+    radial-gradient(circle at top right, rgba(143, 115, 255, 0.10), transparent 40%),
+    rgba(255, 255, 255, 0.02);
 }
 
 .quote-warning {
@@ -560,8 +605,9 @@ ul {
   gap: 12px;
   padding: 16px 18px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(20, 20, 24, 0.6);
+  backdrop-filter: blur(12px);
 }
 
 .neuro-amount-input input {
@@ -577,9 +623,11 @@ ul {
 .choice-card {
   width: 100%;
   text-align: left;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(25, 25, 30, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: var(--text);
   transition:
     transform 160ms ease,
@@ -598,8 +646,8 @@ ul {
 .goal-card-active,
 .choice-card.active,
 .choice-card.is-active {
-  border-color: rgba(143, 115, 255, 0.5);
-  background: rgba(143, 115, 255, 0.12);
+  border-color: rgba(143, 115, 255, 0.4);
+  background: rgba(143, 115, 255, 0.15);
 }
 
 .goal-icon {
