@@ -6,7 +6,7 @@ import { useAppStore } from "../store/appStore";
 import { createTonstakersAdapter } from "@neuro/adapters";
 
 function getTonNetwork() {
-  return useAppStore.getState().isTestnet ? "-3" : "-239";
+  return "-239";
 }
 
 interface PlanExecutionController {

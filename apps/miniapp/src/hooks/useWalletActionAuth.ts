@@ -5,7 +5,7 @@ import { createWalletActionSession } from "../lib/controlPlane";
 import { useNeuroWallet } from "./useTonWallet";
 
 function getTonNetwork() {
-  return import.meta.env.VITE_TON_NETWORK === "testnet" ? "-3" : "-239";
+  return "-239";
 }
 
 function getDomain() {

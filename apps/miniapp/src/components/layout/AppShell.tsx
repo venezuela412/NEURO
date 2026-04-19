@@ -1,4 +1,4 @@
-import { ArrowLeft, BellDot, FlaskConical } from "lucide-react";
+import { ArrowLeft, BellDot } from "lucide-react";
 import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
@@ -30,8 +30,6 @@ export function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
   const wallet = useNeuroWallet();
   const telegramEnv = useTelegramEnv();
-  const isTestnet = useAppStore((state) => state.isTestnet);
-  const setIsTestnet = useAppStore((state) => state.setIsTestnet);
   const setHasWallet = useAppStore((state) => state.setHasWallet);
   const { impactLight } = useHaptics();
 
@@ -68,7 +66,7 @@ export function AppShell({ children }: PropsWithChildren) {
               <ArrowLeft size={18} />
             </button>
           ) : (
-            <div className={clsx("brand-badge", isTestnet && "bg-amber-600")} aria-hidden="true">
+            <div className="brand-badge" aria-hidden="true">
               N
             </div>
           )}
@@ -76,7 +74,6 @@ export function AppShell({ children }: PropsWithChildren) {
           <div className="brand-text">
             <Link to="/plans" className="brand-link">
               {APP_NAME}
-              {isTestnet && <span className="testnet-badge">Testnet</span>}
             </Link>
             <p className="header-subtitle">
               {titles[location.pathname] ?? "Put your TON to work"}
@@ -85,14 +82,6 @@ export function AppShell({ children }: PropsWithChildren) {
         </div>
 
         <div className="app-header-right">
-          <button
-            type="button"
-            className={clsx("icon-button", isTestnet ? "text-amber-500" : "icon-button-muted")}
-            aria-label="Toggle Testnet"
-            onClick={() => setIsTestnet(!isTestnet)}
-          >
-            <FlaskConical size={18} />
-          </button>
           <div className="wallet-slot">
             <TonConnectButton className="wallet-button" />
           </div>

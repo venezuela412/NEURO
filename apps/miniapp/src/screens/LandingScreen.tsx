@@ -3,11 +3,9 @@ import { motion } from "framer-motion";
 import { Languages, Zap, BrainCircuit } from "lucide-react";
 import { APP_TAGLINE } from "@neuro/shared";
 import { PageWrapper } from "../components/layout/PageWrapper";
-import { useAppStore } from "../store/appStore";
 
 export function LandingScreen() {
   const navigate = useNavigate();
-  const isTestnet = useAppStore((state) => state.isTestnet);
   
   // Safe init for haptics using native Telegram WebApp object
   const getHaptic = () => {
@@ -83,27 +81,7 @@ export function LandingScreen() {
           Activate Vault
         </motion.button>
 
-        {isTestnet && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="card quote-warning center-stack stack-sm"
-            style={{ padding: "16px", border: "1px solid var(--warning)", background: "rgba(246, 196, 107, 0.1)", borderRadius: "16px", marginTop: "16px" }}
-          >
-            <p style={{ color: "var(--warning)", fontWeight: 700, margin: 0, fontSize: "0.9rem" }}>TESTNET IS ACTIVE</p>
-            <p className="muted" style={{ fontSize: "0.85rem", textAlign: "center" }}>You need Testnet TON to try NeuroTON safely without real funds.</p>
-            <a 
-              href="https://t.me/testgiver_ton_bot" 
-              target="_blank" 
-              rel="noreferrer"
-              className="button button-secondary"
-              style={{ padding: "10px 16px", fontSize: "0.9rem", marginTop: "8px", borderRadius: "100px" }}
-              onClick={() => { const h = getHaptic(); if (h?.impactOccurred) { try { h.impactOccurred("light"); } catch(e){} } }}
-            >
-              Claim Testnet TON
-            </a>
-          </motion.div>
-        )}
+
       </div>
 
       <div style={{ display: "flex", width: "100%", maxWidth: "320px", justifyContent: "space-between", alignItems: "center", marginTop: "40px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)", zIndex: 10 }}>
