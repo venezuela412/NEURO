@@ -4,7 +4,6 @@
   "buildCommand": "pnpm --filter @neuro/miniapp build",
   "outputDirectory": "apps/miniapp/dist",
   "framework": null,
-  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/(.*)",
