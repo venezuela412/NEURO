@@ -90,7 +90,25 @@ export function PortfolioSyncBridge() {
     wallet.connected,
   ]);
 
+  // Track whether the user has made any meaningful interaction
+  const hasUserInteracted = useRef(false);
+
+  // Mark user as having interacted when they actually do something
   useEffect(() => {
+    if (
+      executionStatus !== "idle" ||
+      (portfolio && Object.keys(portfolio).length > 0)
+    ) {
+      hasUserInteracted.current = true;
+    }
+  }, [executionStatus, portfolio]);
+
+  useEffect(() => {
+    // Don't auto-persist on page load — only after user has explicitly interacted
+    if (!hasUserInteracted.current) {
+      return;
+    }
+
     if (!currentState || (!currentState.portfolio && !currentState.recommendation)) {
       return;
     }
