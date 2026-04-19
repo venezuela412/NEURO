@@ -47,10 +47,17 @@ export const OnboardingWizard: React.FC = () => {
   const [lang, setLang] = useState<'EN'|'ES'>('EN');
   const navigate = useNavigate();
 
+  // On mount, skip onboarding if they already completed it
+  React.useEffect(() => {
+    if (localStorage.getItem('neuro_onboarding_complete') === 'true') {
+      navigate('/plans', { replace: true });
+    }
+  }, [navigate]);
+
   const handleNext = () => {
     if (currentSlide === SLIDES.length - 1) {
       localStorage.setItem('neuro_onboarding_complete', 'true');
-      navigate('/plans');
+      navigate('/plans', { replace: true });
     } else {
       setCurrentSlide(s => s + 1);
     }
@@ -60,82 +67,120 @@ export const OnboardingWizard: React.FC = () => {
   const Icon = current.icon;
 
   return (
-    <div className="min-h-screen bg-bg relative flex flex-col items-center justify-center overflow-hidden">
+    <div className="w-full h-full min-h-[100svh] relative flex flex-col items-center justify-center overflow-hidden">
       {/* Background Animated Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#090b13] via-[#111422] to-[#090b13] opacity-90 z-0"></div>
-      <div className="absolute w-[500px] h-[500px] bg-accent/20 blur-[100px] rounded-full top-[-100px] left-[-100px] opacity-30 z-0 pointer-events-none mix-blend-screen" />
-      <div className="absolute w-[400px] h-[400px] bg-accent-2/20 blur-[100px] rounded-full bottom-[-100px] right-[-100px] opacity-30 z-0 pointer-events-none mix-blend-screen" />
       
-      <div className="relative z-10 w-full max-w-md p-8 flex flex-col items-center">
+      {/* Dynamic ambient blur orbs */}
+      <motion.div 
+        animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.3, 0.2] }} 
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute w-[400px] h-[400px] bg-accent/20 blur-[90px] rounded-full top-[-100px] left-[-150px] z-0 pointer-events-none mix-blend-screen" 
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }} 
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute w-[350px] h-[350px] bg-accent-2/20 blur-[100px] rounded-full bottom-[-100px] right-[-100px] z-0 pointer-events-none mix-blend-screen" 
+      />
+      
+      <div className="relative z-10 w-full px-5 py-6 flex flex-col items-center">
         
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-col items-center text-center w-full px-4 md:px-0"
+            exit={{ opacity: 0, y: -30, scale: 0.9, filter: "blur(10px)" }}
+            transition={{ type: "spring", stiffness: 200, damping: 20, mass: 1 }}
+            className="flex flex-col items-center text-center w-full"
           >
-            <div className={`p-5 md:p-6 mb-6 sm:mb-8 md:mb-10 rounded-full border border-white/10 bg-surface backdrop-blur-md shadow-2xl ${current.neonColor}`}>
-              <Icon className="w-12 h-12 md:w-16 md:h-16 text-white" strokeWidth={1.5} />
-            </div>
+            <motion.div 
+              initial={{ scale: 0, rotate: -45 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 150, delay: 0.1 }}
+              className={`p-6 mb-8 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl ${current.neonColor}`}
+            >
+              <Icon className="w-10 h-10 text-white" strokeWidth={1.5} />
+            </motion.div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 md:mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">
+            <motion.h1 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-3xl font-black mb-3 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight"
+            >
               {current.title}
-            </h1>
-            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-accent-2 mb-8 md:mb-10 opacity-90">
+            </motion.h1>
+            
+            <motion.h2 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-xs font-bold uppercase tracking-[0.25em] text-accent-2 mb-8 opacity-90"
+            >
               {current.subtitle}
-            </h2>
+            </motion.h2>
             
             {current.isLangSelect ? (
-              <div className="flex gap-4 md:gap-6 w-full justify-center mb-8 md:mb-10">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+                className="flex gap-4 w-full justify-center mb-10"
+              >
                 <button 
                   onClick={() => setLang('EN')}
-                  className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-3xl w-28 md:w-36 border transition-all duration-300 ${lang === 'EN' ? 'border-accent-2 bg-accent-2/10 shadow-[0_0_30px_rgba(38,211,199,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-50 hover:opacity-100 hover:border-white/20'}`}
+                  className={`flex flex-col items-center justify-center p-5 rounded-3xl w-[110px] border transition-all duration-300 ${lang === 'EN' ? 'border-accent-2 bg-accent-2/10 shadow-[0_0_30px_rgba(38,211,199,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100'}`}
                 >
-                  <span className="text-3xl md:text-4xl mb-3 md:mb-4 drop-shadow-md">🇺🇸</span>
-                  <span className={`font-black tracking-widest text-sm md:text-base ${lang === 'EN' ? 'text-accent-2' : 'text-gray-400'}`}>EN</span>
+                  <span className="text-3xl mb-3 drop-shadow-md">🇺🇸</span>
+                  <span className={`font-black tracking-widest text-sm ${lang === 'EN' ? 'text-accent-2' : 'text-gray-400'}`}>EN</span>
                 </button>
                 <button 
                   onClick={() => setLang('ES')}
-                  className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-3xl w-28 md:w-36 border transition-all duration-300 ${lang === 'ES' ? 'border-accent bg-accent/10 shadow-[0_0_30px_rgba(143,115,255,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-50 hover:opacity-100 hover:border-white/20'}`}
+                  className={`flex flex-col items-center justify-center p-5 rounded-3xl w-[110px] border transition-all duration-300 ${lang === 'ES' ? 'border-accent bg-accent/10 shadow-[0_0_30px_rgba(143,115,255,0.3)] scale-105' : 'border-white/10 bg-white/5 opacity-60 hover:opacity-100'}`}
                 >
-                  <span className="text-3xl md:text-4xl mb-3 md:mb-4 drop-shadow-md">🇪🇸</span>
-                  <span className={`font-black tracking-widest text-sm md:text-base ${lang === 'ES' ? 'text-accent' : 'text-gray-400'}`}>ES</span>
+                  <span className="text-3xl mb-3 drop-shadow-md">🇪🇸</span>
+                  <span className={`font-black tracking-widest text-sm ${lang === 'ES' ? 'text-accent' : 'text-gray-400'}`}>ES</span>
                 </button>
-              </div>
+              </motion.div>
             ) : null}
 
             {current.description && (
-              <p className="text-gray-400 leading-relaxed text-base md:text-xl px-2 sm:px-4 md:px-8 font-medium">
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-gray-400 leading-relaxed text-[15px] px-2 font-medium max-w-[300px]"
+              >
                 {current.description}
-              </p>
+              </motion.p>
             )}
           </motion.div>
         </AnimatePresence>
 
         {/* Navigation & Dots */}
-        <div className="mt-10 sm:mt-12 md:mt-16 w-full flex flex-col items-center gap-6 md:gap-10">
-          <div className="flex gap-3 md:gap-4">
+        <div className="mt-12 w-full flex flex-col items-center gap-8">
+          <div className="flex gap-3">
             {SLIDES.map((_, idx) => (
               <div 
                 key={idx} 
                 className={`transition-all duration-500 rounded-full ${
                   idx === currentSlide 
-                    ? "w-8 md:w-10 h-1.5 md:h-2 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
-                    : "w-1.5 md:w-2 h-1.5 md:h-2 bg-white/20"
+                    ? "w-8 h-1.5 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]" 
+                    : "w-1.5 h-1.5 bg-white/20"
                 }`}
               />
             ))}
           </div>
 
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleNext}
-            className="w-full relative group overflow-hidden rounded-full p-[1px] mt-2 md:mt-4 max-w-[90%] md:max-w-full"
+            className="w-full relative group overflow-hidden rounded-full p-[1px] max-w-[280px]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-accent to-accent-2 opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative bg-black rounded-full px-6 md:px-8 py-4 md:py-5 font-bold text-white tracking-[0.1em] md:tracking-[0.15em] text-xs sm:text-sm md:text-base flex items-center justify-center gap-2 md:gap-3 transition-all group-hover:bg-opacity-80">
+            <div className="absolute inset-0 bg-gradient-to-r from-accent to-accent-2 opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative bg-black rounded-full px-6 py-4 font-bold text-white tracking-[0.1em] text-[13px] flex items-center justify-center gap-2 transition-all">
               {currentSlide === SLIDES.length - 1 ? 'INITIALIZE PROTOCOL' : 'CONTINUE'}
               <motion.span
                 animate={{ x: [0, 4, 0] }}
@@ -144,7 +189,7 @@ export const OnboardingWizard: React.FC = () => {
                 &rarr;
               </motion.span>
             </div>
-          </button>
+          </motion.button>
         </div>
 
       </div>

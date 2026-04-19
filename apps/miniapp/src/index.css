@@ -103,9 +103,9 @@ button {
   position: relative;
 }
 
-/* Apple-style Titanium Device Frame on Desktop */
+/* Apple-style Titanium Device Frame on Desktop (ONLY for external browsers, NOT Telegram) */
 @media (min-width: 500px) {
-  .app-shell {
+  .app-shell.browser-mode {
     max-width: 430px; /* iPhone 15 Pro Max exact width */
     min-height: 900px;
     height: 90vh;

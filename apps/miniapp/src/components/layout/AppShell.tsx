@@ -42,7 +42,7 @@ export function AppShell({ children }: PropsWithChildren) {
   }, [setHasWallet, wallet.connected]);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${!telegramEnv.isTelegram ? 'browser-mode' : ''}`}>
       {location.pathname !== "/" && (
         <header className="app-header">
           <div className="app-header-left">
