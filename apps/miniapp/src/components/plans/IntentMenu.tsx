@@ -13,7 +13,7 @@ const STRATEGIES = [
   },
   {
     id: 2,
-    title: 'Apalancamiento Degen',
+    title: 'Degen Leverage',
     description: 'Autonomous loan loops on EVAA Protocol. Multiplied APY by leveraging staked nTON positions.',
     apy: '25% - 40%',
     risk: 'High' as const,
@@ -21,7 +21,7 @@ const STRATEGIES = [
   },
   {
     id: 3,
-    title: 'Farming Alta Frecuencia',
+    title: 'High Frequency Farming',
     description: 'Agent hops between DeDust & STON.fi liquidity pools tracking the highest yield pairs automatically.',
     apy: '30% - 60%',
     risk: 'Aggressive' as const,
@@ -29,7 +29,7 @@ const STRATEGIES = [
   },
   {
     id: 4,
-    title: 'Escudo Delta-Neutral',
+    title: 'Delta-Neutral Shield',
     description: 'Arbitrage between USDT/TON while hedging exposure. Minimizes crypto market volatility effects.',
     apy: '15% - 25%',
     risk: 'Medium' as const,
@@ -37,7 +37,7 @@ const STRATEGIES = [
   },
   {
     id: 5,
-    title: 'Puerta Estelar (Omni-Chain)',
+    title: 'Stargate (Omni-Chain)',
     description: 'Solvers mirror your capital to Solana & BSC high-yield systems. Rewards are paid back directly in TON.',
     apy: '40% - 80%',
     risk: 'Aggressive' as const,
@@ -45,7 +45,7 @@ const STRATEGIES = [
   },
   {
     id: 6,
-    title: 'Modo Lluvia DCA',
+    title: 'DCA Rain Mode',
     description: 'Agent converts daily TON staking yields into high-momentum tokens like $NOT or USDT automatically.',
     apy: '10% - 15%',
     risk: 'Medium' as const,
@@ -67,13 +67,13 @@ export const IntentMenu: React.FC = () => {
             onClick={() => setIsAdvanced(false)}
             className={`px-6 md:px-8 py-2 md:py-3 rounded-full font-bold tracking-wide transition-all duration-300 text-sm md:text-base ${!isAdvanced ? 'bg-neon-teal text-black shadow-[0_0_20px_rgba(38,211,199,0.4)] scale-105' : 'text-gray-400 hover:text-white'}`}
           >
-            Modo Conserje (1-Click)
+            Concierge Mode (1-Click)
           </button>
           <button 
             onClick={() => setIsAdvanced(true)}
             className={`px-6 md:px-8 py-2 md:py-3 rounded-full font-bold tracking-wide transition-all duration-300 text-sm md:text-base ${isAdvanced ? 'bg-purple-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-105' : 'text-gray-400 hover:text-white'}`}
           >
-            Modo Avanzado (nTON)
+            Advanced Mode (nTON)
           </button>
         </div>
       </div>
