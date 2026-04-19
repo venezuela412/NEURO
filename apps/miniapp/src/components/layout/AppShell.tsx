@@ -42,7 +42,7 @@ export function AppShell({ children }: PropsWithChildren) {
   }, [setHasWallet, wallet.connected]);
 
   return (
-    <div className={location.pathname === "/" ? "w-full h-full min-h-screen" : "app-shell"}>
+    <div className="app-shell">
       {location.pathname !== "/" && (
         <header className="app-header">
           <div className="app-header-left">

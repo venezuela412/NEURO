@@ -94,11 +94,13 @@ button {
   width: 100%;
   max-width: 100%;
   min-height: 100svh;
-  padding: 18px 18px 110px;
+  height: 100svh;
+  padding: 0; /* Remove outer padding */
   display: flex;
   flex-direction: column;
-  gap: 18px;
   background: #000000;
+  overflow: hidden; /* Trap scrolling inside screen-frame */
+  position: relative;
 }
 
 /* Apple-style Titanium Device Frame on Desktop */
@@ -113,10 +115,7 @@ button {
       0 0 0 6px rgba(255, 255, 255, 0.03), /* Outer bezel */
       0 30px 60px rgba(0, 0, 0, 0.8), /* Drop shadow */
       inset 0 0 20px rgba(0,0,0,0.5); /* Inner curve depth */
-    overflow-y: auto;
-    overflow-x: hidden;
     margin: auto;
-    position: relative;
     /* Soft internal glow for screen */
     background: radial-gradient(circle at top, #09090b, #000000);
   }
@@ -127,16 +126,14 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 18px;
   border-bottom: 0.5px solid rgba(255,255,255,0.08);
-  border-radius: 0;
-  background: rgba(10, 10, 12, 0.75);
+  background: rgba(10, 10, 12, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 50;
-  margin: -18px -18px 0 -18px;
+  flex-shrink: 0;
 }
 
 .app-header-left,
@@ -266,6 +263,9 @@ button {
   flex-direction: column;
   gap: 18px;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 18px 110px 18px;
 }
 
 .page-stack,
@@ -791,11 +791,12 @@ ul {
 }
 
 .bottom-nav {
-  position: fixed;
+  position: absolute;
   left: 50%;
   bottom: 18px;
   transform: translateX(-50%);
-  width: min(484px, calc(100% - 36px));
+  width: calc(100% - 36px);
+  z-index: 100;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
