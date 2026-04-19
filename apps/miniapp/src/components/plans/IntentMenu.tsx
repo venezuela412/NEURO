@@ -1,63 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Zap, TrendingUp, ChevronRight, Info, Coins, ArrowRight } from 'lucide-react';
+import { Shield, Zap, TrendingUp, ChevronRight, Coins, Radio } from 'lucide-react';
+import { useMarketAPY } from '../../hooks/useMarketAPY';
+import { formatAPYRange } from '../../lib/apyService';
 
 type RiskLevel = 'safe' | 'moderate' | 'bold' | null;
 
-const RISK_OPTIONS = [
+interface RiskOption {
+  id: 'safe' | 'moderate' | 'bold';
+  label: string;
+  subtitle: string;
+  icon: typeof Shield;
+  color: string;
+  bg: string;
+  border: string;
+  apy: string;
+  strategyName: string;
+  strategyDesc: string;
+  howItWorks: string;
+}
+
+const BASE_OPTIONS: Omit<RiskOption, 'apy'>[] = [
   {
-    id: 'safe' as const,
+    id: 'safe',
     label: 'Safe',
     subtitle: 'Steady & reliable',
-    description: 'Like a savings account. Low risk, predictable growth.',
     icon: Shield,
     color: '#26d3c7',
     bg: 'rgba(38,211,199,0.08)',
     border: 'rgba(38,211,199,0.25)',
-    apy: '7–19%',
     strategyName: 'Safe Savings',
     strategyDesc: 'Your TON earns steady interest through secure staking. No surprises — just reliable, consistent growth over time.',
     howItWorks: 'We stake your TON through Tonstakers, the leading staking provider on TON. Your funds earn native blockchain rewards automatically.',
   },
   {
-    id: 'moderate' as const,
+    id: 'moderate',
     label: 'Moderate',
     subtitle: 'Balanced growth',
-    description: 'Good returns with managed risk. Best of both worlds.',
     icon: TrendingUp,
     color: '#f59e0b',
     bg: 'rgba(245,158,11,0.08)',
     border: 'rgba(245,158,11,0.25)',
-    apy: '15–30%',
     strategyName: 'Balanced Earner',
     strategyDesc: 'Your TON earns from multiple sources — staking rewards plus trading opportunities. Higher returns with controlled exposure.',
     howItWorks: 'We combine safe staking with selective yield farming across DeDust and STON.fi. The system automatically rebalances to manage risk.',
   },
   {
-    id: 'bold' as const,
+    id: 'bold',
     label: 'Bold',
     subtitle: 'Maximum returns',
-    description: 'Highest earning potential. For those comfortable with volatility.',
     icon: Zap,
     color: '#ef4444',
     bg: 'rgba(239,68,68,0.08)',
     border: 'rgba(239,68,68,0.25)',
-    apy: '30–80%',
     strategyName: 'Power Boost',
     strategyDesc: 'Your TON is actively managed across multiple protocols and chains for maximum returns. High reward, higher volatility.',
     howItWorks: 'Advanced strategies including leveraged positions, cross-chain yield farming, and automated arbitrage. Our system monitors 24/7 to capture opportunities.',
   },
 ];
 
+// Fallback APY strings when data hasn't loaded
+const FALLBACK_APY: Record<string, string> = {
+  safe: '4–8%',
+  moderate: '12–28%',
+  bold: '25–65%',
+};
+
 export const IntentMenu: React.FC = () => {
   const [selectedRisk, setSelectedRisk] = useState<RiskLevel>(null);
   const [isAdvanced, setIsAdvanced] = useState(false);
+  const { data: apyData, loading: apyLoading } = useMarketAPY();
 
   const haptic = (type: 'light' | 'medium' | 'heavy' = 'light') => {
     try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type); } catch(_){}
   };
 
-  const selected = RISK_OPTIONS.find(r => r.id === selectedRisk);
+  // Merge live APY data into risk options
+  const riskOptions: RiskOption[] = useMemo(() => {
+    return BASE_OPTIONS.map((opt) => ({
+      ...opt,
+      apy: apyData
+        ? formatAPYRange(apyData[opt.id].min, apyData[opt.id].max)
+        : FALLBACK_APY[opt.id],
+    }));
+  }, [apyData]);
+
+  const selected = riskOptions.find(r => r.id === selectedRisk);
+
+  // Format "last updated" time
+  const lastUpdated = useMemo(() => {
+    if (!apyData) return null;
+    const mins = Math.round((Date.now() - apyData.updatedAt) / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins === 1) return '1 min ago';
+    return `${mins} min ago`;
+  }, [apyData]);
 
   return (
     <div className="intent-menu">
@@ -100,9 +137,24 @@ export const IntentMenu: React.FC = () => {
               </p>
             </div>
 
+            {/* Live APY badge */}
+            {apyData && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="apy-live-badge"
+              >
+                <Radio size={12} className={`apy-live-dot ${apyData.isLive ? 'apy-live-dot--live' : ''}`} />
+                <span className="apy-live-text">
+                  {apyData.isLive ? 'Live rates' : 'Estimated rates'}
+                  {lastUpdated && ` · ${lastUpdated}`}
+                </span>
+              </motion.div>
+            )}
+
             {/* Risk selector */}
             <div className="risk-selector">
-              {RISK_OPTIONS.map((option) => {
+              {riskOptions.map((option) => {
                 const Icon = option.icon;
                 const isSelected = selectedRisk === option.id;
                 return (
@@ -126,7 +178,9 @@ export const IntentMenu: React.FC = () => {
                         <span className="risk-card-sub">{option.subtitle}</span>
                       </div>
                       <div className="risk-card-apy" style={{ color: option.color }}>
-                        <span className="risk-apy-value">{option.apy}</span>
+                        <span className={`risk-apy-value ${apyLoading ? 'apy-shimmer' : ''}`}>
+                          {option.apy}
+                        </span>
                         <span className="risk-apy-label">EST. APY</span>
                       </div>
                     </div>
