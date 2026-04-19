@@ -660,8 +660,16 @@ server
   .listen({ port, host: "0.0.0.0" })
   .then(async () => {
     server.log.info(`NEURO control plane listening on ${port}`);
-    await scheduleAutoCompoundJob();
-    await addAdminLog("info", "system", `Control plane started on port ${port}`);
+    try {
+      await scheduleAutoCompoundJob();
+    } catch (e) {
+      server.log.warn(`Non-fatal: queue scheduling failed: ${e}`);
+    }
+    try {
+      await addAdminLog("info", "system", `Control plane started on port ${port}`);
+    } catch (e) {
+      server.log.warn(`Non-fatal: admin log write failed: ${e}`);
+    }
   })
   .catch((error) => {
     server.log.error(error);
