@@ -3,9 +3,11 @@ import { type PropsWithChildren, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { APP_NAME } from "@neuro/shared";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTelegramEnv } from "../../hooks/useTelegramEnv";
 import { useNeuroWallet } from "../../hooks/useTonWallet";
 import { useAppStore } from "../../store/appStore";
+import { useHaptics } from "../../hooks/useHaptics";
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -32,6 +34,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const setIsTestnet = useAppStore((state) => state.setIsTestnet);
   const setHasWallet = useAppStore((state) => state.setHasWallet);
   const canGoBack = location.pathname !== "/";
+  const { impactLight } = useHaptics();
 
   useEffect(() => {
     setHasWallet(wallet.connected);
@@ -91,20 +94,40 @@ export function AppShell({ children }: PropsWithChildren) {
         </header>
       )}
 
-      <main className="screen-frame">{children}</main>
+      <AnimatePresence mode="wait">
+        <main className="screen-frame" key={location.pathname}>
+          {children}
+        </main>
+      </AnimatePresence>
 
       {location.pathname !== "/" && (
         <nav className="bottom-nav" aria-label="Primary">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) => (isActive ? "bottom-nav-item active" : "bottom-nav-item")}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.to || (item.to === "/" && location.pathname === "/");
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                onClick={() => {
+                  if (!isActive) impactLight();
+                }}
+                className={clsx(
+                  "bottom-nav-item relative overflow-hidden",
+                  isActive ? "text-white" : "text-[var(--text-muted)] hover:text-white/80"
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="bottom-nav-active"
+                    className="absolute inset-0 bg-white/10 rounded-[16px]"
+                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  />
+                )}
+                <span className="relative z-10">{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
       )}
     </div>

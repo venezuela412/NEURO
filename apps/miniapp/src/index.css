@@ -12,13 +12,13 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --bg: #090b13;
-  --bg-2: #111422;
-  --surface: rgba(17, 20, 34, 0.84);
-  --surface-strong: rgba(23, 28, 47, 0.96);
-  --surface-soft: rgba(255, 255, 255, 0.04);
+  --bg: #050609;
+  --bg-2: #0b0d14;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.08);
+  --surface-soft: rgba(255, 255, 255, 0.02);
   --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(162, 124, 255, 0.2);
+  --border-strong: rgba(255, 255, 255, 0.16);
   --text: #f6f8ff;
   --text-soft: rgba(230, 236, 255, 0.72);
   --text-muted: rgba(230, 236, 255, 0.52);
@@ -27,9 +27,9 @@
   --success: #3ad288;
   --warning: #f6c46b;
   --danger: #ff7c7c;
-  --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
-  --radius-xl: 28px;
-  --radius-lg: 22px;
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
   --radius-md: 18px;
   --radius-sm: 14px;
 }
@@ -48,10 +48,11 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top, rgba(143, 115, 255, 0.18), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(38, 211, 199, 0.1), transparent 24%),
-    var(--bg);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 0%, rgba(143, 115, 255, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 100%, rgba(38, 211, 199, 0.12) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--text);
 }
 

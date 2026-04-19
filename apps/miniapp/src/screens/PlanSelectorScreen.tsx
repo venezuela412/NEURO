@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { AmountInput } from "../components/core/AmountInput";
 import { GoalSelector } from "../components/core/GoalSelector";
 import { FlexibilitySelector } from "../components/core/FlexibilitySelector";
@@ -161,7 +162,7 @@ export function PlanSelectorScreen() {
   const isFinalStep = (step === 1 && goal === "protect") || step === 2;
 
   return (
-    <div className="screen-frame" style={{ justifyContent: "center", paddingTop: "24px" }}>
+    <PageWrapper className="screen-frame" style={{ justifyContent: "center", paddingTop: "24px" }}>
       <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
         <AnimatePresence mode="wait" custom={direction}>
           {renderStep()}

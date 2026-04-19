@@ -1,7 +1,7 @@
+import { PageWrapper } from "../components/layout/PageWrapper";
 import type { ActivityEvent } from "@neuro/shared";
 import { ActivityFeed } from "../components/activity/ActivityFeed";
 import { useAppStore } from "../store/appStore";
-
 /** Stable fallback — `?? []` in a selector returns a new array every render and triggers infinite updates (React #185). */
 const EMPTY_ACTIVITY: ActivityEvent[] = [];
 
@@ -11,7 +11,7 @@ export function ActivityScreen() {
 
   if (isPortfolioHydrating) {
     return (
-      <div className="page-stack">
+      <PageWrapper className="page-stack">
         <section className="card">
           <p className="eyebrow">Meaningful updates only</p>
           <h1 className="headline-sm">Loading activity</h1>
@@ -19,12 +19,12 @@ export function ActivityScreen() {
             NEURO is restoring your most recent plan events from the control plane.
           </p>
         </section>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="page-stack">
+    <PageWrapper className="page-stack">
       <section className="card">
         <p className="eyebrow">Meaningful updates only</p>
         <h1 className="headline-sm">Activity feed</h1>
@@ -33,6 +33,6 @@ export function ActivityScreen() {
         </p>
       </section>
       <ActivityFeed items={activity} />
-    </div>
+    </PageWrapper>
   );
 }

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Languages, Zap } from "lucide-react";
 import { APP_TAGLINE } from "@neuro/shared";
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { useAppStore } from "../store/appStore";
 
 export function LandingScreen() {
@@ -25,7 +26,7 @@ export function LandingScreen() {
   };
 
   return (
-    <section className="page-stack center-stack" style={{ justifyContent: "center", minHeight: "85vh", position: "relative", overflow: "hidden" }}>
+    <PageWrapper className="page-stack center-stack" style={{ justifyContent: "center", minHeight: "85vh", position: "relative", overflow: "hidden" }}>
       
       {/* Dynamic Background Glow */}
       <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "150%", height: "150%", background: "radial-gradient(circle at center, rgba(38, 211, 199, 0.15) 0%, rgba(143, 115, 255, 0.05) 50%, transparent 100%)", filter: "blur(60px)", zIndex: -1, pointerEvents: "none" }} />
@@ -115,6 +116,6 @@ export function LandingScreen() {
           New to TON?
         </Link>
       </div>
-    </section>
+    </PageWrapper>
   );
 }

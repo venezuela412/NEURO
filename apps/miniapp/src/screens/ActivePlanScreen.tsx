@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp } from "lucide-react";
+import { PageWrapper } from "../components/layout/PageWrapper";
+import { StaggerGroup, StaggerItem } from "../components/layout/StaggerGroup";
+import { PremiumButton } from "../components/ui/PremiumButton";
 import { ExecutionStatusCard } from "../components/core/ExecutionStatusCard";
 import { PortfolioSummary } from "../components/portfolio/PortfolioSummary";
 import { StickyActionBar } from "../components/core/StickyActionBar";
@@ -43,13 +45,8 @@ export function ActivePlanScreen() {
   }
 
   return (
-    <>
-      <motion.section
-        className="page-stack"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-      >
+    <PageWrapper>
+      <StaggerGroup className="page-stack">
         <div className="hero-card">
           <div className="pill-row">
             <span className="pill pill-success">
@@ -117,7 +114,7 @@ export function ActivePlanScreen() {
             </section>
           ) : null}
         </div>
-      </motion.section>
+      </StaggerGroup>
 
       <StickyActionBar
         primaryLabel={isPending ? "Working..." : "Switch to safety"}
@@ -131,6 +128,6 @@ export function ActivePlanScreen() {
             : "Connect a wallet to enable switch and withdraw actions."
         }
       />
-    </>
+    </PageWrapper>
   );
 }
