@@ -859,6 +859,45 @@ server.get("/api/approved-tokens", async (_request, reply) => {
   });
 });
 
+// GET /api/treasury-check — Check treasury (operator) wallet status (admin)
+server.get("/api/treasury-check", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    return reply.status(401).send({ error: "unauthorized" });
+  }
+
+  try {
+    const { mnemonicToPrivateKey } = await import("@ton/crypto");
+    const { WalletContractV4, TonClient } = await import("@ton/ton");
+
+    const mnemonic = process.env.NEURO_TREASURY_MNEMONIC ?? "";
+    if (!mnemonic) {
+      return reply.send({ ok: false, error: "NEURO_TREASURY_MNEMONIC not set" });
+    }
+
+    const keyPair = await mnemonicToPrivateKey(mnemonic.split(" "));
+    const wallet = WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 });
+    const address = wallet.address.toString();
+
+    const client = new TonClient({ endpoint: process.env.TON_RPC_ENDPOINT ?? "https://toncenter.com/api/v2/jsonRPC" });
+    const balance = await client.getBalance(wallet.address);
+
+    return reply.send({
+      ok: true,
+      treasuryAddress: address,
+      balanceTon: Number(balance) / 1e9,
+      vaultAddress: process.env.NEURO_VAULT_ADDRESS ?? "NOT SET",
+      needsFunding: Number(balance) / 1e9 < 0.1,
+      minRecommendedTon: 0.5,
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      ok: false,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
+});
+
 // ==================== STARTUP ====================
 
 import { scheduleAutoCompoundJob } from "./queue";
