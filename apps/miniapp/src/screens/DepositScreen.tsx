@@ -1,24 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Info, Shield, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useAppStore } from "../store/appStore";
 import { useNeuroWallet } from "../hooks/useTonWallet";
+import { buildDepositMessage, getIsPaused } from "../lib/vaultTx";
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
 const MIN_DEPOSIT = 3;
 
-const PLAN_LABELS: Record<string, { name: string; color: string }> = {
-  protect: { name: "Safe Savings", color: "#26d3c7" },
-  earn: { name: "Balanced Earner", color: "#f59e0b" },
-  grow: { name: "Power Boost", color: "#ef4444" },
+const PLAN_LABELS: Record<string, { name: string; color: string; intent: number }> = {
+  protect: { name: "Safe Savings", color: "#26d3c7", intent: 1 },
+  earn:    { name: "Balanced Earner", color: "#f59e0b", intent: 1 },
+  grow:    { name: "Power Boost", color: "#ef4444", intent: 2 },
 };
+
+type DepositState = "idle" | "checking" | "signing" | "confirming" | "success" | "error";
 
 export function DepositScreen() {
   const navigate = useNavigate();
   const wallet = useNeuroWallet();
+  const [tonConnectUI] = useTonConnectUI();
   const { goal, setAmountTon } = useAppStore();
   const [amount, setAmount] = useState("");
+  const [depositState, setDepositState] = useState<DepositState>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
   const plan = PLAN_LABELS[goal] ?? PLAN_LABELS.earn;
 
   const numAmount = parseFloat(amount) || 0;
@@ -28,12 +35,52 @@ export function DepositScreen() {
     try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type); } catch {}
   };
 
-  const handleContinue = () => {
-    if (!isValid) return;
+  const handleDeposit = async () => {
+    if (!isValid || !wallet.connected) return;
     haptic("heavy");
-    setAmountTon(numAmount);
-    navigate("/result");
+    setErrorMsg("");
+
+    try {
+      // Step 1: Check if vault is paused
+      setDepositState("checking");
+      const paused = await getIsPaused();
+      if (paused) {
+        setDepositState("error");
+        setErrorMsg("Vault is temporarily paused. Please try again later.");
+        return;
+      }
+
+      // Step 2: Build and sign the deposit transaction
+      setDepositState("signing");
+      const msg = buildDepositMessage(numAmount, plan.intent);
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600, // 10 min validity
+        messages: [msg],
+      });
+
+      // Step 3: Success
+      setDepositState("success");
+      haptic("heavy");
+      setAmountTon(numAmount);
+
+      // Navigate after short celebration
+      setTimeout(() => {
+        navigate("/active");
+      }, 2500);
+
+    } catch (err: any) {
+      setDepositState("error");
+      if (err?.message?.includes("cancel") || err?.message?.includes("reject")) {
+        setErrorMsg("Transaction cancelled");
+      } else {
+        setErrorMsg(err?.message || "Transaction failed. Please try again.");
+      }
+      haptic("medium");
+    }
   };
+
+  const isProcessing = depositState !== "idle" && depositState !== "error" && depositState !== "success";
 
   return (
     <div className="deposit-screen">
@@ -71,11 +118,12 @@ export function DepositScreen() {
             type="number"
             className="deposit-input"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => { setAmount(e.target.value); setDepositState("idle"); }}
             placeholder="0"
             min={MIN_DEPOSIT}
             step={1}
             autoFocus
+            disabled={isProcessing}
           />
           <span className="deposit-currency">TON</span>
         </div>
@@ -102,26 +150,58 @@ export function DepositScreen() {
           <button
             key={preset}
             className={`deposit-preset ${numAmount === preset ? "deposit-preset--active" : ""}`}
-            onClick={() => { setAmount(String(preset)); haptic("light"); }}
+            onClick={() => { setAmount(String(preset)); haptic("light"); setDepositState("idle"); }}
+            disabled={isProcessing}
           >
             {preset} TON
           </button>
         ))}
       </motion.div>
 
-      {/* Info */}
+      {/* Info Card */}
       <motion.div
         className="deposit-info-card"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <Info size={16} className="deposit-info-icon" />
+        <Shield size={16} className="deposit-info-icon" />
         <p>
-          Your TON is deposited into a <strong>non-custodial smart contract</strong>. 
+          Your TON is deposited into a <strong>non-custodial smart contract</strong> on TON mainnet.
           You receive nTON tokens and can withdraw anytime from the Wallet tab.
+          {numAmount > 0 && (
+            <> A <strong>0.1% entry fee</strong> protects against flash-loan attacks.</>
+          )}
         </p>
       </motion.div>
+
+      {/* Status Messages */}
+      <AnimatePresence mode="wait">
+        {depositState === "checking" && (
+          <motion.div className="deposit-status" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Loader2 size={18} className="deposit-spinner" />
+            <span>Checking vault status...</span>
+          </motion.div>
+        )}
+        {depositState === "signing" && (
+          <motion.div className="deposit-status" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Loader2 size={18} className="deposit-spinner" />
+            <span>Please confirm in {wallet.walletName}...</span>
+          </motion.div>
+        )}
+        {depositState === "success" && (
+          <motion.div className="deposit-status deposit-status--success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+            <CheckCircle size={18} />
+            <span>Deposit sent! Your nTON will arrive shortly.</span>
+          </motion.div>
+        )}
+        {depositState === "error" && errorMsg && (
+          <motion.div className="deposit-status deposit-status--error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <XCircle size={18} />
+            <span>{errorMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CTA */}
       <motion.div
@@ -130,17 +210,36 @@ export function DepositScreen() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <button
-          className="deposit-cta"
-          disabled={!isValid}
-          onClick={handleContinue}
-        >
-          <span>Review Plan · {numAmount > 0 ? `${numAmount} TON` : "..."}</span>
-          <ArrowRight size={18} />
-        </button>
+        {!wallet.connected ? (
+          <button
+            className="deposit-cta"
+            onClick={() => { haptic("heavy"); tonConnectUI.openModal(); }}
+          >
+            <span>Connect Wallet to Deposit</span>
+            <ArrowRight size={18} />
+          </button>
+        ) : (
+          <button
+            className="deposit-cta"
+            disabled={!isValid || isProcessing || depositState === "success"}
+            onClick={handleDeposit}
+          >
+            {isProcessing ? (
+              <span>Processing...</span>
+            ) : depositState === "success" ? (
+              <span>✅ Deposited!</span>
+            ) : (
+              <>
+                <span>Deposit {numAmount > 0 ? `${numAmount} TON` : "..."}</span>
+                <ArrowRight size={18} />
+              </>
+            )}
+          </button>
+        )}
         <button
           className="deposit-back"
           onClick={() => { haptic("light"); navigate("/plans"); }}
+          disabled={isProcessing}
         >
           Change strategy
         </button>

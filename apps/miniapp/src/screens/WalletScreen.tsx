@@ -1,56 +1,92 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCw, Shield, ExternalLink, Copy, Check, ToggleLeft, ToggleRight } from "lucide-react";
+import {
+  Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCw, Shield,
+  ExternalLink, Copy, Check, ToggleLeft, ToggleRight, TrendingUp,
+  Loader2, Plus,
+} from "lucide-react";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useNeuroWallet } from "../hooks/useTonWallet";
-import { useAppStore } from "../store/appStore";
-
-const CP_BASE = import.meta.env.VITE_CONTROL_PLANE_URL ?? "";
+import {
+  NEURO_VAULT_ADDRESS,
+  buildWithdrawalMessage,
+  getSharePrice,
+  getVaultTVL,
+  getUserNtonWalletAddress,
+  getUserShares,
+} from "../lib/vaultTx";
 
 export function WalletScreen() {
   const wallet = useNeuroWallet();
+  const navigate = useNavigate();
   const [tonConnectUI] = useTonConnectUI();
   const [tonBalance, setTonBalance] = useState<number | null>(null);
   const [ntonBalance, setNtonBalance] = useState<number | null>(null);
+  const [sharePrice, setSharePrice] = useState<number>(1.0);
+  const [vaultTVL, setVaultTVL] = useState<number>(0);
   const [autoCompound, setAutoCompound] = useState(true);
   const [copied, setCopied] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawResult, setWithdrawResult] = useState<string | null>(null);
+  const [ntonWalletAddr, setNtonWalletAddr] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const haptic = (type: "light" | "medium" | "heavy" = "light") => {
     try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type); } catch {}
   };
 
-  // Load wallet info from TonAPI
-  useEffect(() => {
+  const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+  // Load wallet balances + vault info with staggered requests to avoid rate limits
+  const loadBalances = async () => {
     if (!wallet.connected || !wallet.address) return;
 
     const tonApiKey = import.meta.env.VITE_TONAPI_KEY;
     const headers: Record<string, string> = {};
     if (tonApiKey) headers["Authorization"] = `Bearer ${tonApiKey}`;
 
-    // Fetch TON balance
-    fetch(`https://tonapi.io/v2/accounts/${wallet.address}`, { headers })
-      .then((r) => r.json())
-      .then((d) => setTonBalance((d.balance ?? 0) / 1e9))
-      .catch(() => setTonBalance(0));
+    // TON balance
+    try {
+      const r = await fetch(`https://tonapi.io/v2/accounts/${wallet.address}`, { headers });
+      const d = await r.json();
+      setTonBalance((d.balance ?? 0) / 1e9);
+    } catch { setTonBalance(0); }
 
-    // Fetch jetton (nTON) balances
-    fetch(`https://tonapi.io/v2/accounts/${wallet.address}/jettons`, { headers })
-      .then((r) => r.json())
-      .then((d) => {
-        const jettons = d.balances ?? [];
-        // Look for nTON in the jetton list
-        const nton = jettons.find((j: any) =>
-          j.jetton?.symbol?.toLowerCase() === "nton" ||
-          j.jetton?.name?.toLowerCase()?.includes("neuro")
-        );
-        setNtonBalance(nton ? Number(nton.balance) / 1e9 : 0);
-      })
-      .catch(() => setNtonBalance(0));
+    await delay(500);
+
+    // nTON balance — use on-chain getter (more reliable than jetton index for custom tokens)
+    try {
+      const shares = await getUserShares(wallet.address);
+      setNtonBalance(shares);
+    } catch { setNtonBalance(0); }
+
+    await delay(500);
+
+    // Get user's nTON wallet address (needed for withdrawal)
+    getUserNtonWalletAddress(wallet.address)
+      .then(setNtonWalletAddr)
+      .catch(() => setNtonWalletAddr(null));
+  };
+
+  useEffect(() => {
+    loadBalances();
+    // Load vault stats with delays
+    delay(1000).then(() => getSharePrice().then(setSharePrice));
+    delay(2000).then(() => getVaultTVL().then(setVaultTVL));
   }, [wallet.connected, wallet.address]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    haptic("light");
+    await loadBalances();
+    const [sp, tvl] = await Promise.all([getSharePrice(), getVaultTVL()]);
+    setSharePrice(sp);
+    setVaultTVL(tvl);
+    setTimeout(() => setRefreshing(false), 600);
+  };
 
   const copyAddress = () => {
     if (wallet.address) {
@@ -70,36 +106,40 @@ export function WalletScreen() {
     haptic("heavy");
 
     try {
-      const res = await fetch(`${CP_BASE}/api/withdrawal/build`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress: wallet.address, burnAmountNton: amount }),
-      });
-      const data = await res.json();
-
-      if (data.ok && data.txParams) {
-        // Send via TonConnect
-        await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 600,
-          messages: [{
-            address: data.txParams.to,
-            amount: data.txParams.value,
-            payload: data.txParams.payload,
-          }],
-        });
-        setWithdrawResult("✅ Withdrawal transaction sent! Your TON will arrive shortly.");
-        setShowWithdraw(false);
-        setWithdrawAmount("");
-        haptic("heavy");
-      } else {
-        setWithdrawResult(`❌ ${data.error || "Failed to build withdrawal"}`);
+      if (!ntonWalletAddr) {
+        setWithdrawResult("❌ Could not resolve your nTON wallet address. Try refreshing.");
+        return;
       }
-    } catch (err) {
-      setWithdrawResult("❌ Transaction cancelled or failed");
+
+      const msg = buildWithdrawalMessage(amount, wallet.address, ntonWalletAddr);
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [msg],
+      });
+
+      setWithdrawResult("✅ Withdrawal sent! Your TON will arrive shortly.");
+      setShowWithdraw(false);
+      setWithdrawAmount("");
+      haptic("heavy");
+
+      // Refresh balances after a delay
+      setTimeout(() => loadBalances(), 5000);
+
+    } catch (err: any) {
+      if (err?.message?.includes("cancel") || err?.message?.includes("reject")) {
+        setWithdrawResult("❌ Transaction cancelled");
+      } else {
+        setWithdrawResult(`❌ ${err?.message || "Transaction failed"}`);
+      }
     } finally {
       setWithdrawing(false);
     }
   };
+
+  // Calculate nTON value in TON
+  const ntonValueTon = (ntonBalance ?? 0) * sharePrice;
+  const yieldPercent = ((sharePrice - 1) * 100);
 
   // Not connected state
   if (!wallet.connected) {
@@ -135,10 +175,19 @@ export function WalletScreen() {
             <span className="wallet-label">Your Wallet</span>
             <span className="wallet-addr">{shortAddr}</span>
           </div>
-          <button className="wallet-copy-btn" onClick={copyAddress}>
-            {copied ? <Check size={16} /> : <Copy size={16} />}
-            {copied ? "Copied" : "Copy"}
-          </button>
+          <div className="wallet-address-actions">
+            <button className="wallet-copy-btn" onClick={copyAddress}>
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              className="wallet-refresh-btn"
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCw size={16} className={refreshing ? "wallet-spin" : ""} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -169,13 +218,41 @@ export function WalletScreen() {
           <div className="wallet-balance-header">
             <img src="/nton-logo.png" alt="nTON" className="wallet-balance-coin-logo" />
             <span className="wallet-balance-name">nTON</span>
+            {yieldPercent > 0 && (
+              <span className="wallet-yield-badge">
+                <TrendingUp size={12} /> +{yieldPercent.toFixed(2)}%
+              </span>
+            )}
           </div>
           <span className="wallet-balance-amount">
             {ntonBalance !== null ? ntonBalance.toFixed(4) : "—"}
           </span>
-          <span className="wallet-balance-sub">Earning yield</span>
+          <span className="wallet-balance-sub">
+            ≈ {ntonValueTon.toFixed(4)} TON · 1 nTON = {sharePrice.toFixed(4)} TON
+          </span>
         </motion.div>
       </div>
+
+      {/* Share Price Card */}
+      <motion.div
+        className="wallet-vault-info"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <div className="wallet-vault-row">
+          <span className="wallet-vault-label">Vault TVL</span>
+          <span className="wallet-vault-value">{vaultTVL.toFixed(2)} TON</span>
+        </div>
+        <div className="wallet-vault-row">
+          <span className="wallet-vault-label">Share Price</span>
+          <span className="wallet-vault-value">{sharePrice.toFixed(6)} TON</span>
+        </div>
+        <div className="wallet-vault-row">
+          <span className="wallet-vault-label">Entry Fee</span>
+          <span className="wallet-vault-value">0.1%</span>
+        </div>
+      </motion.div>
 
       {/* Auto-Compound Toggle */}
       <motion.div
@@ -211,6 +288,13 @@ export function WalletScreen() {
         transition={{ delay: 0.4 }}
       >
         <button
+          className="wallet-action-btn wallet-action-btn--deposit"
+          onClick={() => { haptic("medium"); navigate("/deposit"); }}
+        >
+          <Plus size={20} />
+          Deposit
+        </button>
+        <button
           className="wallet-action-btn wallet-action-btn--withdraw"
           onClick={() => { setShowWithdraw(!showWithdraw); haptic("medium"); }}
         >
@@ -243,7 +327,7 @@ export function WalletScreen() {
             <p className="wallet-withdraw-desc">
               Burn nTON to redeem your TON plus earned yields.
               {ntonBalance !== null && ntonBalance > 0 && (
-                <> Available: <strong>{ntonBalance.toFixed(4)} nTON</strong></>
+                <> Available: <strong>{ntonBalance.toFixed(4)} nTON</strong> ≈ {ntonValueTon.toFixed(4)} TON</>
               )}
             </p>
             <div className="wallet-withdraw-input-row">
@@ -270,7 +354,11 @@ export function WalletScreen() {
               onClick={handleWithdraw}
               disabled={withdrawing || !parseFloat(withdrawAmount)}
             >
-              {withdrawing ? "Processing..." : "Confirm Withdrawal"}
+              {withdrawing ? (
+                <><Loader2 size={16} className="wallet-spin" /> Processing...</>
+              ) : (
+                "Confirm Withdrawal"
+              )}
             </button>
 
             <div className="wallet-withdraw-info">

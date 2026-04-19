@@ -2062,4 +2062,230 @@ h1,h2,h3,h4,h5,h6 { margin: 0; line-height: 1.1; }
 }
 .deposit-back:hover { color: var(--text-secondary); }
 
+/* ── Deposit Status Indicators ── */
+.deposit-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  margin-top: 8px;
+}
+.deposit-status--success {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #22c55e;
+}
+.deposit-status--error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+.deposit-spinner {
+  animation: spin 1s linear infinite;
+}
 
+/* ── Wallet Enhancements ── */
+.wallet-address-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wallet-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.wallet-refresh-btn:hover { background: var(--surface-strong); color: var(--text); }
+.wallet-spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.wallet-yield-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Vault Info Card */
+.wallet-vault-info {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.wallet-vault-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wallet-vault-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.wallet-vault-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Deposit button in wallet */
+.wallet-action-btn--deposit {
+  background: linear-gradient(135deg, rgba(143, 115, 255, 0.15), rgba(38, 211, 199, 0.15)) !important;
+  border-color: rgba(143, 115, 255, 0.3) !important;
+}
+.wallet-action-btn--deposit:hover {
+  background: linear-gradient(135deg, rgba(143, 115, 255, 0.25), rgba(38, 211, 199, 0.25)) !important;
+}
+
+/* ── Activity Screen ── */
+.activity-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 4px;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.activity-header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.activity-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.activity-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.activity-refresh-btn:hover { background: var(--surface-strong); color: var(--text); }
+
+.activity-empty,
+.activity-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.activity-empty h2 { font-size: 1.2rem; }
+.activity-empty p { color: var(--text-muted); font-size: 0.88rem; max-width: 280px; }
+.activity-empty-icon { color: var(--text-muted); opacity: 0.5; }
+
+.activity-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+.activity-empty-state h3 { font-size: 1rem; }
+.activity-empty-state p { color: var(--text-muted); font-size: 0.82rem; max-width: 260px; }
+.activity-empty-clock { color: var(--text-muted); opacity: 0.4; }
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.activity-item:hover { background: var(--surface-strong); }
+
+.activity-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.activity-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.activity-item-type {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.activity-item-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.activity-item-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.activity-amount {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.activity-amount--plus { color: #22c55e; }
+.activity-amount--minus { color: #ef4444; }
+.activity-item-link {
+  color: var(--text-muted);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.activity-item-link:hover { opacity: 1; }
+
+/* ── Nav Bar Performance Fix ── */
+/* Remove expensive backdrop-filter — use solid bg instead */
+.app-shell-nav {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: rgba(5, 6, 9, 0.97) !important;
+}

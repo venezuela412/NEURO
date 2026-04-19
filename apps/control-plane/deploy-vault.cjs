@@ -1,0 +1,265 @@
+/**
+ * NeuroTON Vault Deploy & Setup Script
+ * =====================================
+ * 
+ * Deploys a NEW NeuroVault owned by YOUR Tonkeeper wallet.
+ * Then generates all setup links (operator, whitelist) in one go.
+ * 
+ * YOUR MNEMONIC IS NEVER TOUCHED — you sign everything in Tonkeeper.
+ */
+
+const { mnemonicNew, mnemonicToPrivateKey } = require("@ton/crypto");
+const { WalletContractV4 } = require("@ton/ton");
+const { beginCell, Address, toNano, Cell, contractAddress, storeStateInit } = require("@ton/core");
+const fs = require("fs");
+const path = require("path");
+
+// ── Your Tonkeeper wallet address (the deployer = owner) ──
+const OWNER_ADDRESS = "UQC2vr_2ifRi38Wn2rKfDly7HIAENTYdLa4fJR1VT8aRHqXF";
+
+// Tonstakers pool address
+const TONSTAKERS_POOL = "EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR";
+
+// Opcodes from compiled Tact ABI
+const OPCODES = {
+  Deploy:          2490013878,  // from ABI
+  UpdateOperator:  1643308500,  // from ABI
+  SetWhitelist:    993790908,   // from ABI
+};
+
+// Contract code from Tact compilation (exact hex from the compiled output)
+const CONTRACT_CODE_HEX = 'b5ee9c7241025f01001999000262ff008e88f4a413f4bcf2c80bed53208e9c30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862e1ed43d901220202710216020120030b0201200409020166050702e0ab1ded44d0d200018e54fa40fa40fa00fa00d30ffa00d30fd30fd30fd200d307d401d0fa40fa40fa40d430d0fa40fa40d4d20030071112070711110707111007107f107e107d107c107b107a1079107857121110111111100f11100f550e8e87fa40d45902d101e2db3c57105f0f6c21230600022e02e0a8b5ed44d0d200018e54fa40fa40fa00fa00d30ffa00d30fd30fd30fd200d307d401d0fa40fa40fa40d430d0fa40fa40d4d20030071112070711110707111007107f107e107d107c107b107a1079107857121110111111100f11100f550e8e87fa40d45902d101e2db3c57105f0f6c21230800022a02e1b6b7bda89a1a400031ca9f481f481f401f401a61ff401a61fa61fa61fa401a60fa803a1f481f481f481a861a1f481f481a9a400600e22240e0e22220e0e22200e20fe20fc20fa20f820f620f420f220f0ae242220222222201e22201eaa1d1d0ff481a8b205a203c5b678ae20be1ed8430230a0002290201200c110201200d0f02e1b1477b513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db0860230e0004561102e1b032fb513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db0860231000422f9682103b9aca00e12e82080f4240a082103b9aca00a8561082080f4240a0a904020378a0121402dfa36fb513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db086231300022b02dfa3fbb513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db0862315000227020120171d020166181b03f9adbcf6a268690000c72a7d207d207d007d006987fd006987e987e987e9006983ea00e87d207d207d206a18687d207d206a690018038889038388888383888803883f883f083e883e083d883d083c883c2b8908880888888807888807aa874743fd206a2c816880f108888889088888880888888807888807aa876d9e4023191a0164f82801db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d036000c57105f0f6c2102ddaf16f6a268690000c72a7d207d207d007d006987fd006987e987e987e9006983ea00e87d207d207d206a18687d207d206a690018038889038388888383888803883f883f083e883e083d883d083c883c2b8908880888888807888807aa874743fd206a2c816880f16d9e367ab61ac0231c011ef8285612db3c305610522256145252360201581e2002e1b337bb513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db0860231f00022802e1b2da3b513434800063953e903e903e803e8034c3fe8034c3f4c3f4c3f48034c1f500743e903e903e90350c343e903e903534800c01c44481c1c44441c1c44401c41fc41f841f441f041ec41e841e441e15c484440444444403c44403d543a3a1fe90351640b44078b6cf15c417c3db086023210004561003feed44d0d200018e54fa40fa40fa00fa00d30ffa00d30fd30fd30fd200d307d401d0fa40fa40fa40d430d0fa40fa40d4d20030071112070711110707111007107f107e107d107c107b107a1079107857121110111111100f11100f550e8e87fa40d45902d101e21113945f0f5f04e0705612d74920c21fe30001c00001c121b023255403f62170208107d08210b2d05e008101f48113887a707f278d08600000000000000000000000000000000000000000000000000000000000000000048d08600000000000000000000000000000000000000000000000000000000000000000048989890f11110f0f11100f10ef10de10cd10bc10ab109a1089107855152424240043800000000000000000000000000000000000000000000000000000000000000000100456311112d31f2182108ea64828bae3022182107bdd97debae302218210e9e7e01cbae3022182104afe4ba2ba26282b2f03fc5b57110f11110f0e11100e10df551cdb3cf8416f24303281131e532fbef2f41110111311100f11120f0e11110e0d11130d0c11120c0b11110b0a11130a09111209081111080711130706111206051111050411130403111203021111020111130111128153191112db3c561501bc01111301f2f41110111111100f11100f305927039c550edb3c01111401a15309a8812710a9045210a1561082080f4240a0561082080f4240a059a801a904810cb821c200f2f450ffa051fea011111113111111101112111011110f11100f551d21db3c592d5302fe3157121111d33f31fa00fa40d72c01916d93fa4001e231f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d00181090202c705f2f481628723c200f2f482008f11561124bef2f4561082080f4240a0561082080f4240a05240a8362902fc01a9048200f00121c200f2f4205611bc92302fde811243561122bef2f40111110103a151f2a156106eb397310f206ef2d080925710e2707f88103410246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000f11110f0e11100e5e2c551b2a530026000000006e544f4e205769746864726177616c03fc3157121111fa00301110111111100f11100f10ef10de10cd10bc10ab109a10891078106710561045103411124130db3cdb3c8200a4305613c200f2f453eba8812710a9045613816b8d02bbf2f411122da8812710a9042f82080f4240a02f82080f4240a059a801a90481528a21c200f2f451ffa05611111311111112111130312c01dc011111010f11100f10ef10de10cd10bc10ab109a108910781067105610451034401321db3cc87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db312d02f68200ddb824f2f4f8285003db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0820afaf080707021f828218b081035104a1023102bc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec94016504405362e006a0310465522c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004fe8ffd3157121111fa40fa00d307f404301111111311115e3f0e11120e0d11130d0c11120c0b11130b0a11120a0911130908111208071113070611120605111305041112040311130302111202011114011115db3cdb3c1110111111100f11110f0e11110e0d11110d0c11110c0b11110b0a11110a09111109111108070655403031323400108200863e29b3f2f4003af8416f2410235f038200c7a0215614c70592317f95015612c705e2f2f402fc8118a211125614db3c01111301f2f4811f6d5613c200f2f48151ef2e5614bef2f453d9a8812710a90456138200ab0b02bbf2f40d5612a10311130302111202011114017f01111610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00563300d00c11110c0b11100b10af10ce108d107c106b105a1049103847155044461603c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3104fae02182103b3c0bbcba8edc3157121111d307fa4030810e96f8425613c705f2f4815a2122c2009322c1069170e2f2f421c001923625de21c002923524de21c003923423de21c004923322de21c00591329130e25306bc91369130e20f11110f0e11100e10df551ce02182102c76b973bae302218210bb6eac71bae3022153354b4c03fe3157121111d33ffa40d20030f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d06d039232129133e2705043804003c855208210d17354005004cb1f12cb3fce01206e9430cf84809201cee2c95a6d6d40037fc8cf8580ca008936494a011688c87001ca005a02cecec937022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d9383a014fa65ec0bb51343480006760404075c03e903e9015481b04e6be903e901640b4405c00b8b6cf1b0d203901145301db3c3054633052304004ba01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019d810101d700fa40fa4055206c139afa40fa405902d1017002e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba3b3c3f4600c2028020d7217021d749c21f9430d31f01de208210178d4519ba8e1d30d33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e082107bdd97deba8e1cd33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e05f0402e231d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f2481114d533cc705f2f454732123fa40fa0071d721fa00fa00306c6170f83a44305244fa40fa0071d721fa00fa00306c6170f83aa08209c9c38001a023813ebb02a012bcf2f45164a18200f5fc21c2fff2f45284db3c5c403d01fe705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076708040702c4813507cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910561057103440130710465522c8cf8580ca00cf8440ce01fa028069cf40025c6e3e0060016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5403fe31d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb53c7db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a08200f5fc21c2fff2f440bc2bdb3c10344dcbfa40fa0071d721fa00fa00306c61704041420018f82ac87001ca005a02cecec9002cf8276f1021a1820898968066b608a18208989680a0a102fcf83a23c2008e605183a15008a1167150657008c8553082107362d09c5005cb1f13cb3f01fa02cecec928441403506610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00599530365b6c21e2206eb39322c2009170e2923031e30d5943450186206ef2d0807088102310247250346d036d5520c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004400180000000045786365737365730026c87f01ca0055205023810101cf00cecec9ed54010ee3025f04f2c0824701fcd33ffa00d72c01916d93fa4001e231f8416f2481114d5339c705f2f45175a18200f5fc21c2fff2f443305238fa40fa0071d721fa00fa00306c6170f83a8200a99e018209312d00a08208989680a012bcf2f47080405414367f04c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926553048009610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5400011000fccf16ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000f11110f0e11100e10df551cc87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db31017c313d57110bd30f30810e96f8425611c705f2f48200f4e621810bb8bbf2f40f11110f0e11100e10df10ce0d10ac109b108a107910681057104610354430125304c8821061f2e5d4bae302218210374cf45dba8ebe313b571109d30f30810e96f8425611c705f2f48200f923218103e8bbf2f40f11110f0e11100e10df10ce10bd10ac0b108a10791068105710461035443012e0218210d6da773abae302218210454c78b9ba4d534e4f00f631571057110efa4030810e96f8425611c705f2f40f11110f111010df10ce10bd10ac109b108a107910681057104610354403c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db310178313a571108d30f30810e96f8425611c705f2f4811e1021811f40bbf2f40f11110f0e11100e10df10ce10bd10ac109b0a1079106810571046103544035303aa8ebc3139571107d30f30810e96f8425611c705f2f48200899321c165f2f40f11110f0e11100e10df10ce10bd10ac109b108a091068105710461035443012e0218210946a98b6bae302218210819dbe99bae302111353505101c03157121111d33f30c8018210aff90f5758cb1fcb3fc91110111211100f11110f0e11100e10df10ce10bd10ac109b108a10791068105710461035443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb005302e03157121111d33ffa4030011112011113db3c57115612011112011113c8598210327b2b4a5003cb1fcb3fcec90f11110f0e11100e10df10ce10bd10ac109b108a10791068105710461035443012f8427f705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb0052530012f8425612c705f2e0840092c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3104ece3021111f9012082f0c4ef345fe0b9e216a8c1826ac7fa38d0ec1c6893aafa3cf2e9161246bfd4661abae3022082f01426f4b2781b50266062a76b40df9ae9835c2d109b7be92e1048e36bc2761d67bae3022082f0818377509e6b15156bb56cd33fb939f5f4499040536211513c5d5ce55de4a25aba55585b5c02fc5711f8416f2430321110111111100f11110f0e11110e0d11110d0c11110c0b11110b0a11110a091111090811110807111107061111060511110504111104031111030211110201111101111281713511145613db3c9357137f9611135610c705e201111401f2f411101ca00e11110e0d11100d10cf0e10ad109c108b107a565700a8205613c70592307fe028c200945307c7059170e292307fe028c201945306c7059170e292307fe028c202945305c7059170e292307fe028c203945304c7059170e292307fe028c2049323c705923070e2917fe07000a6106910581047103645404300c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed5402bc30810e96f8425611c705f2f4f8276f101110111111100f11100f10ef10de10cd10bc10ab109a10891078106710561045103411124130db3c8208989680a0561321bc9a3f011112010ea10d111193305712e21110111111100f11100f550e595a000a820afaf080008ec87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed5400e43036810e96f8425610c705f2f40e11100e10df10ce10bd10ac109b108a107910687f081057104610354403c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed5401f28e723036810e96f8425610c705f2f40e11100e10df10ce10bd10ac109b108a1079106870081057104610354403c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54e0571211115d015682f064d5198fe48e1c880304d52b76150cdde129b8cb2bcb68ddccc9782e271972d9bae3025f0f5bf2c0825e00b6810e96f8425610c705f2f40e11100e10df551c70c87f01ca0011121111111055e0011111011112ce1fce500dfa02500bfa0219cb0f5007fa0215cb0f13cb0fcb0fca00cb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54c9258d3f';
+
+async function main() {
+  console.log("\n╔══════════════════════════════════════════════════════╗");
+  console.log("║  NeuroTON — Full Vault Deploy & Operator Setup       ║");
+  console.log("╚══════════════════════════════════════════════════════╝\n");
+
+  const ownerAddr = Address.parse(OWNER_ADDRESS);
+
+  // ══════════════════════════════════════════
+  // STEP 1: Build nTON jetton metadata (on-chain)
+  // ══════════════════════════════════════════
+  console.log("📦 STEP 1: Building nTON metadata cell...\n");
+
+  // Standard TEP-64 on-chain metadata
+  const contentDict = beginCell();
+  // On-chain metadata prefix
+  contentDict.storeUint(0x00, 8); // on-chain
+  // Name
+  const nameCell = beginCell().storeUint(0, 8).storeStringTail("NeuroTON").endCell();
+  // Symbol
+  const symbolCell = beginCell().storeUint(0, 8).storeStringTail("nTON").endCell();
+  // Decimals
+  const decimalsCell = beginCell().storeUint(0, 8).storeStringTail("9").endCell();
+  // Description
+  const descCell = beginCell().storeUint(0, 8).storeStringTail("NeuroTON Yield Vault Share Token").endCell();
+
+  // Build content cell with metadata dictionary
+  // Using simplified on-chain format: just store description as comment
+  const content = beginCell()
+    .storeUint(1, 8) // off-chain prefix
+    .storeStringTail("https://neuroton-lime.vercel.app/nton-metadata.json")
+    .endCell();
+
+  console.log("   ✅ Metadata cell built\n");
+
+  // ══════════════════════════════════════════
+  // STEP 2: Compute init state & contract address
+  // ══════════════════════════════════════════
+  console.log("🔧 STEP 2: Computing new vault address...\n");
+
+  const code = Cell.fromHex(CONTRACT_CODE_HEX);
+
+  // Build init data (matches NeuroVault_init from compiled output)
+  const initDataBuilder = beginCell();
+  initDataBuilder.storeUint(0, 1); // un-initialized flag
+  initDataBuilder.storeAddress(ownerAddr); // owner
+  initDataBuilder.storeRef(content); // content
+  const data = initDataBuilder.endCell();
+
+  const stateInit = { code, data };
+  const newVaultAddress = contractAddress(0, stateInit);
+
+  console.log(`   📍 New Vault Address (bounceable): ${newVaultAddress.toString({ bounceable: true })}`);
+  console.log(`   📍 New Vault Address (friendly):   ${newVaultAddress.toString({ bounceable: false })}`);
+  console.log(`   👤 Owner: ${OWNER_ADDRESS}\n`);
+
+  // ══════════════════════════════════════════
+  // STEP 3: Generate operator wallet
+  // ══════════════════════════════════════════
+  console.log("🔑 STEP 3: Generating dedicated operator wallet...\n");
+
+  const mnemonic = await mnemonicNew(24);
+  const keyPair = await mnemonicToPrivateKey(mnemonic);
+  const operatorWallet = WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 });
+  const operatorAddress = operatorWallet.address.toString({ bounceable: false });
+  const operatorBounceable = operatorWallet.address.toString({ bounceable: true });
+
+  console.log(`   📍 Operator Address: ${operatorAddress}`);
+  console.log(`   ✅ Mnemonic generated (will be saved to .env)\n`);
+
+  // ══════════════════════════════════════════
+  // STEP 4: Build Tonkeeper deep links
+  // ══════════════════════════════════════════
+  console.log("🔗 STEP 4: Building Tonkeeper deep links...\n");
+
+  const vaultAddrStr = newVaultAddress.toString({ bounceable: true });
+
+  // 4a. DEPLOY — Send Deploy message with stateInit
+  const deployBody = beginCell()
+    .storeUint(OPCODES.Deploy, 32) // Deploy opcode
+    .storeUint(0, 64) // queryId = 0
+    .endCell();
+
+  // Build stateInit cell for the deep link
+  const stateInitCell = beginCell()
+    .storeBit(false) // split_depth: no
+    .storeBit(false) // special: no
+    .storeBit(true)  // code: yes
+    .storeRef(code)
+    .storeBit(true)  // data: yes
+    .storeRef(data)
+    .storeBit(false) // library: no
+    .endCell();
+
+  const stateInitBoc = stateInitCell.toBoc().toString("base64url");
+  const deployBodyBoc = deployBody.toBoc().toString("base64url");
+
+  // Tonkeeper deep link with stateInit
+  const deployLink = `https://app.tonkeeper.com/transfer/${vaultAddrStr}?amount=${toNano("0.15").toString()}&stateInit=${stateInitBoc}&bin=${deployBodyBoc}`;
+
+  console.log("   ─────────────────────────────────────────────────");
+  console.log("   📋 LINK #1: DEPLOY the new NeuroVault");
+  console.log("   (Creates the contract on-chain with YOU as owner)");
+  console.log("   Cost: 0.15 TON");
+  console.log("   ─────────────────────────────────────────────────");
+  console.log(`\n   ${deployLink}\n`);
+
+  // 4b. UPDATE OPERATOR
+  const updateOpBody = beginCell()
+    .storeUint(OPCODES.UpdateOperator, 32)
+    .storeAddress(operatorWallet.address)
+    .endCell();
+
+  const updateOpBoc = updateOpBody.toBoc().toString("base64url");
+  const updateOpLink = `https://app.tonkeeper.com/transfer/${vaultAddrStr}?amount=${toNano("0.03").toString()}&bin=${updateOpBoc}`;
+
+  console.log("   ─────────────────────────────────────────────────");
+  console.log("   📋 LINK #2: Set Operator (after deploy)");
+  console.log("   Cost: 0.03 TON");
+  console.log("   ─────────────────────────────────────────────────");
+  console.log(`\n   ${updateOpLink}\n`);
+
+  // 4c. SET WHITELIST
+  const whitelistBody = beginCell()
+    .storeUint(OPCODES.SetWhitelist, 32)
+    .storeUint(1, 8)
+    .storeAddress(Address.parse(TONSTAKERS_POOL))
+    .endCell();
+
+  const whitelistBoc = whitelistBody.toBoc().toString("base64url");
+  const whitelistLink = `https://app.tonkeeper.com/transfer/${vaultAddrStr}?amount=${toNano("0.03").toString()}&bin=${whitelistBoc}`;
+
+  console.log("   ─────────────────────────────────────────────────");
+  console.log("   📋 LINK #3: Whitelist Tonstakers (after deploy)");
+  console.log("   Cost: 0.03 TON");
+  console.log("   ─────────────────────────────────────────────────");
+  console.log(`\n   ${whitelistLink}\n`);
+
+  // ══════════════════════════════════════════
+  // STEP 5: Save everything
+  // ══════════════════════════════════════════
+  console.log("💾 STEP 5: Saving configuration...\n");
+
+  // Save operator mnemonic to .env
+  const envPath = path.join(__dirname, ".env");
+  let envContent = fs.readFileSync(envPath, "utf-8");
+  
+  // Update vault address
+  envContent = envContent.replace(
+    /^NEURO_VAULT_ADDRESS=.*$/m, 
+    `NEURO_VAULT_ADDRESS=${vaultAddrStr}`
+  );
+  
+  // Update mnemonic
+  envContent = envContent.replace(
+    /^NEURO_TREASURY_MNEMONIC=.*$/m, 
+    `NEURO_TREASURY_MNEMONIC=${mnemonic.join(" ")}`
+  );
+
+  fs.writeFileSync(envPath, envContent);
+  console.log(`   ✅ .env updated with new vault address + operator mnemonic\n`);
+
+  // Save links file
+  const linksFile = path.join(__dirname, "DEPLOY_AND_SETUP_LINKS.txt");
+  fs.writeFileSync(linksFile, [
+    "NeuroTON — Deploy & Setup Links",
+    "================================",
+    "",
+    `NEW Vault Address: ${vaultAddrStr}`,
+    `NEW Vault Address (friendly): ${newVaultAddress.toString({ bounceable: false })}`,
+    `Owner (your wallet): ${OWNER_ADDRESS}`,
+    `Operator Address: ${operatorAddress}`,
+    "",
+    "═══════════════════════════════════════",
+    "LINK #1 — DEPLOY VAULT (do this FIRST):",
+    deployLink,
+    "",
+    "═══════════════════════════════════════",
+    "LINK #2 — SET OPERATOR (do AFTER deploy confirms):",
+    updateOpLink,
+    "",
+    "═══════════════════════════════════════",
+    "LINK #3 — WHITELIST TONSTAKERS (do AFTER deploy confirms):",
+    whitelistLink,
+    "",
+    "═══════════════════════════════════════",
+    "",
+    "STEP-BY-STEP:",
+    "1. Open LINK #1 in Tonkeeper → confirm → wait ~30 sec for on-chain confirmation",
+    "2. Open LINK #2 in Tonkeeper → confirm",
+    "3. Open LINK #3 in Tonkeeper → confirm",
+    "4. Send 0.5 TON to the vault for gas:",
+    `   ${vaultAddrStr}`,
+    "5. Start control plane: npx tsx src/index.ts",
+    "",
+    "TOTAL COST: ~0.74 TON",
+  ].join("\n"));
+
+  console.log(`   📄 Links saved to: ${linksFile}\n`);
+
+  // ══════════════════════════════════════════
+  // SUMMARY
+  // ══════════════════════════════════════════
+  console.log("╔══════════════════════════════════════════════════════╗");
+  console.log("║  📋 DO THIS IN ORDER:                                ║");
+  console.log("╠══════════════════════════════════════════════════════╣");
+  console.log("║                                                      ║");
+  console.log("║  1. Open LINK #1 in Tonkeeper → Deploy vault         ║");
+  console.log("║     Cost: 0.15 TON                                   ║");
+  console.log("║     Wait ~30 sec for confirmation                    ║");
+  console.log("║                                                      ║");
+  console.log("║  2. Open LINK #2 in Tonkeeper → Set operator         ║");
+  console.log("║     Cost: 0.03 TON                                   ║");
+  console.log("║                                                      ║");
+  console.log("║  3. Open LINK #3 in Tonkeeper → Whitelist Tonstakers ║");
+  console.log("║     Cost: 0.03 TON                                   ║");
+  console.log("║                                                      ║");
+  console.log("║  4. Send 0.5 TON to new vault for gas                ║");
+  console.log("║                                                      ║");
+  console.log("║  5. Start control plane                               ║");
+  console.log("║     npx tsx src/index.ts                              ║");
+  console.log("║                                                      ║");
+  console.log("║  TOTAL COST: ~0.74 TON                                ║");
+  console.log("╚══════════════════════════════════════════════════════╝\n");
+
+  // Also output what files need vault address updates
+  console.log("⚠️  IMPORTANT: After deployment, update vault address in:");
+  console.log(`   • apps/miniapp/src/lib/vaultTx.ts`);
+  console.log(`   • apps/miniapp/.env (if any)`);
+  console.log(`   • packages/shared (if VAULT_ADDRESS exported)\n`);
+  console.log(`   New address: ${vaultAddrStr}\n`);
+}
+
+main().catch(console.error);

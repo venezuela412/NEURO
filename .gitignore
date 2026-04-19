@@ -10,3 +10,5 @@ apps/miniapp/node_modules
 apps/control-plane/node_modules
 packages/*/node_modules
 apps/control-plane/.neuro-db
+
+.vercel

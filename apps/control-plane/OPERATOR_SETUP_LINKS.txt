@@ -1,0 +1,16 @@
+NeuroTON Operator Setup Links
+==============================
+
+Operator Address: UQB6hTeESs4S4Oj7nEVq_HDPRRzo8T1eHpxaAmv1ZFEJpkVQ
+Operator Address (bounceable): EQB6hTeESs4S4Oj7nEVq_HDPRRzo8T1eHpxaAmv1ZFEJphiV
+
+LINK #1 — UpdateOperator (paste in browser or scan QR):
+https://app.tonkeeper.com/transfer/EQCOs853wgjOcR_BPI1FBRniGu8RSiQLpyLeU6a2RqDDyMup?amount=30000000&bin=te6cckEBAQEAKAAAS2Hy5dSAD1Cm8IlZwlwdH3OIrV-OGeijnR4nq8PTi0BNfqyKITTQdzorvA
+
+LINK #2 — SetWhitelist Tonstakers (paste in browser or scan QR):
+https://app.tonkeeper.com/transfer/EQCOs853wgjOcR_BPI1FBRniGu8RSiQLpyLeU6a2RqDDyMup?amount=30000000&bin=te6cckEBAQEAKQAATTs8C7wBgBSLYv5QgSRTbwbBxlIIQeJ8n8QfIa_FfxiVjOBks8RfUJ8NFhI
+
+Vault Address: EQCOs853wgjOcR_BPI1FBRniGu8RSiQLpyLeU6a2RqDDyMup
+Tonstakers Pool: EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR
+
+IMPORTANT: Sign both links from your MAIN (owner) wallet in Tonkeeper.

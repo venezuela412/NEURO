@@ -40,15 +40,22 @@ async function getOperatorWallet() {
  * Build ExecDelegate message body.
  * ExecDelegate { target: Address, amount: Int, mode: Int, payload: Cell }
  */
-function buildExecDelegateBody(target: Address, amountNano: bigint, payload: Cell): Cell {
-  return beginCell()
+function buildExecDelegateBody(target: Address, amountNano: bigint, payload: Cell | null): Cell {
+  // Must match storeExecDelegate from Tact ABI exactly:
+  // [uint32 opcode][address target][coins amount][uint8 mode][bit hasPayload][ref? payload]
+  const b = beginCell()
     .storeUint(OPCODES.ExecDelegate, 32)
-    .storeUint(0, 64) // query_id
     .storeAddress(target)
     .storeCoins(amountNano)
-    .storeUint(1, 8) // mode: 1 = pay transfer fees separately
-    .storeRef(payload) // payload cell
-    .endCell();
+    .storeUint(1, 8); // mode: 1 = pay transfer fees separately
+
+  if (payload) {
+    b.storeBit(true).storeRef(payload);
+  } else {
+    b.storeBit(false);
+  }
+
+  return b.endCell();
 }
 
 /**
@@ -57,9 +64,10 @@ function buildExecDelegateBody(target: Address, amountNano: bigint, payload: Cel
  * The vault mints fee shares to the owner proportional to profit.
  */
 function buildAutoCompoundBody(profitNano: bigint): Cell {
+  // Must match storeAutoCompound from Tact ABI exactly:
+  // [uint32 opcode][coins profitToMint]
   return beginCell()
     .storeUint(OPCODES.AutoCompound, 32)
-    .storeUint(0, 64) // query_id
     .storeCoins(profitNano)
     .endCell();
 }
@@ -204,9 +212,9 @@ export async function getVaultBalance(): Promise<number> {
 // ─── OPCODES for additional messages ───
 
 const EXTRA_OPCODES = {
-  SetWhitelist: 0x4a2e3c8e,    // SetWhitelist from ABI
-  TokenBurn: 0x595f07bc,       // TEP-74 burn
-  JettonTransfer: 0x0f8a7ea5,  // TEP-74 transfer
+  SetWhitelist: 993790908,        // 0x3b3c0bbc — from Tact ABI storeSetWhitelist
+  TokenBurn: 0x595f07bc,          // TEP-74 burn
+  JettonTransfer: 0x0f8a7ea5,    // TEP-74 transfer
 };
 
 /**
@@ -232,9 +240,10 @@ export async function sendSetWhitelist(
     const { wallet, keyPair } = await getOperatorWallet();
     const contract = client.open(wallet);
 
+    // Must match storeSetWhitelist from Tact ABI:
+    // [uint32 opcode][uint8 index][address target]
     const body = beginCell()
       .storeUint(EXTRA_OPCODES.SetWhitelist, 32)
-      .storeUint(0, 64) // query_id
       .storeUint(index, 8)
       .storeAddress(Address.parse(target))
       .endCell();
