@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: NeuroVault
-BoC Size: 4585 bytes
+BoC Size: 6565 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 37
+Total structures: 39
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -125,6 +125,14 @@ Signature: `SetWhitelist{index:uint8,target:address}`
 TL-B: `update_auto_compound_cap#374cf45d newCap:uint16 = UpdateAutoCompoundCap`
 Signature: `UpdateAutoCompoundCap{newCap:uint16}`
 
+### UpdateDelegateLimit
+TL-B: `update_delegate_limit#d6da773a newLimit:uint16 = UpdateDelegateLimit`
+Signature: `UpdateDelegateLimit{newLimit:uint16}`
+
+### UpdateDepositFee
+TL-B: `update_deposit_fee#454c78b9 newFee:uint16 = UpdateDepositFee`
+Signature: `UpdateDepositFee{newFee:uint16}`
+
 ### SwapAdditionalData
 TL-B: `_ minOut:coins receiverAddress:address fwdGas:coins customPayload:Maybe ^cell = SwapAdditionalData`
 Signature: `SwapAdditionalData{minOut:coins,receiverAddress:address,fwdGas:coins,customPayload:Maybe ^cell}`
@@ -146,15 +154,15 @@ TL-B: `_ balance:int257 owner:address master:address walletCode:^cell = JettonWa
 Signature: `JettonWalletData{balance:int257,owner:address,master:address,walletCode:^cell}`
 
 ### NeuroVault$Data
-TL-B: `_ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins autoCompoundCap:uint16 whitelistCount:uint8 whitelist1:address whitelist2:address whitelist3:address whitelist4:address whitelist5:address content:^cell mintable:bool = NeuroVault`
-Signature: `NeuroVault{owner:address,operator:address,totalSupply:coins,totalAssets:coins,performanceFeePrecise:uint16,minDepositAmount:coins,autoCompoundCap:uint16,whitelistCount:uint8,whitelist1:address,whitelist2:address,whitelist3:address,whitelist4:address,whitelist5:address,content:^cell,mintable:bool}`
+TL-B: `_ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins autoCompoundCap:uint16 maxDelegatePercent:uint16 depositFeePrecise:uint16 paused:bool whitelistCount:uint8 whitelist1:address whitelist2:address whitelist3:address whitelist4:address whitelist5:address content:^cell mintable:bool = NeuroVault`
+Signature: `NeuroVault{owner:address,operator:address,totalSupply:coins,totalAssets:coins,performanceFeePrecise:uint16,minDepositAmount:coins,autoCompoundCap:uint16,maxDelegatePercent:uint16,depositFeePrecise:uint16,paused:bool,whitelistCount:uint8,whitelist1:address,whitelist2:address,whitelist3:address,whitelist4:address,whitelist5:address,content:^cell,mintable:bool}`
 
 ### JettonData
 TL-B: `_ totalSupply:int257 mintable:bool owner:address content:^cell walletCode:^cell = JettonData`
 Signature: `JettonData{totalSupply:int257,mintable:bool,owner:address,content:^cell,walletCode:^cell}`
 
 ## Get methods
-Total get methods: 7
+Total get methods: 11
 
 ## get_jetton_data
 No arguments
@@ -172,6 +180,18 @@ No arguments
 No arguments
 
 ## whitelistCount
+No arguments
+
+## isPaused
+No arguments
+
+## depositFee
+No arguments
+
+## maxDelegatePercent
+No arguments
+
+## sharePrice
 No arguments
 
 ## owner
@@ -214,32 +234,35 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 2306: Invalid burn sender
 * 3256: Deposit too small to mint shares
 * 3734: Not Owner
 * 4429: Invalid sender
 * 4675: Insufficient vault assets
-* 7926: Fee shares too small to mint
-* 8987: Invalid sender: not owner or operator
-* 12392: Withdrawal amount too small
-* 12776: Whitelist index must be 1-5
-* 14294: Mint is disabled
-* 14534: Not owner
+* 4894: Below minimum deposit (3 TON)
+* 6306: Target not whitelisted
+* 7696: Max 80%
+* 8045: Zero delegation
 * 16059: Invalid value
-* 16341: No profit to register
-* 16897: Deposit must respect the mathematical minimum (3 TON) to cover network fees.
-* 17347: Profit exceeds single-cycle cap
-* 27021: Invalid supply state
-* 33824: Yield reception only from whitelisted protocols
-* 38247: ExecDelegate exceeds available assets
+* 20975: Exceeds available assets
+* 21130: Fee too small to mint
+* 21273: Insufficient TON for gas
+* 23073: Index 1-5
+* 25223: Cannot burn zero
+* 27533: Profit exceeds cycle cap
+* 28981: Yield only from whitelisted sources
+* 34366: Vault is paused
+* 35219: Max 1%
+* 36625: Burn exceeds supply
+* 42032: No profit
 * 43422: Invalid value - Burn
-* 44977: Cap too high! Max 10% per cycle
-* 51355: Target not in protocol whitelist
-* 53830: Insufficient TON sent for gas buffer.
-* 55717: Cannot delegate zero amount
-* 58338: Fee too high! Max 30% allowed
-* 59952: Cannot burn zero tokens
-* 61374: Invalid burn notification sender
+* 43787: Exceeds per-tx delegation cap
+* 51104: Not owner or operator
+* 56760: Minting disabled
+* 61441: Withdrawal too small
+* 62694: Max 30%
 * 62972: Invalid balance
+* 63779: Max 10%
 
 ## Trait inheritance diagram
 

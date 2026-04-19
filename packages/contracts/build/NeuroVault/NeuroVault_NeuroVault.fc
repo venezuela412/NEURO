@@ -45,10 +45,10 @@ builder $TakeWalletAddress$_store(builder build_0, (int, slice, slice) v) inline
 cell $TakeWalletAddress$_store_cell((int, slice, slice) v, builder b) inline;
 
 ;; $NeuroVault$_store
-builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) inline;
+builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) inline;
 
 ;; $NeuroVault$_load
-(slice, ((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int))) $NeuroVault$_load(slice sc_0) inline;
+(slice, ((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int))) $NeuroVault$_load(slice sc_0) inline;
 
 ;; $StateInit$_get_code
 _ $StateInit$_get_code((cell, cell) v) inline;
@@ -66,13 +66,13 @@ builder $NeuroJettonWallet$init$_store(builder build_0, (slice, slice) v) inline
 (slice, ((slice, cell))) $NeuroVault$init$_load(slice sc_0) inline;
 
 ;; $NeuroVault$_contract_init
-(slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_init(slice $owner, cell $content) impure inline;
+(slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_init(slice $owner, cell $content) impure inline;
 
 ;; $NeuroVault$_contract_load
-(slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_load() impure inline;
+(slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_load() impure inline;
 
 ;; $NeuroVault$_contract_store
-() $NeuroVault$_contract_store((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) impure inline;
+() $NeuroVault$_contract_store((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) impure inline;
 
 ;; $Cell$_fun_asSlice
 slice $Cell$_fun_asSlice(cell $self) impure inline;
@@ -93,10 +93,13 @@ slice $global_contractAddress((cell, cell) $s) impure inline;
 ((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
 
 ;; $NeuroVault$_fun_requireOwnerOrOperator
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwnerOrOperator((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwnerOrOperator((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+
+;; $NeuroVault$_fun_requireNotPaused
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireNotPaused((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_isWhitelisted
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isWhitelisted((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $target) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isWhitelisted((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $target) impure inline_ref;
 
 ;; $SendParameters$_constructor_to_value_mode_bounce_body_code_data
 ((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_bounce_body_code_data(slice $to, int $value, int $mode, int $bounce, cell $body, cell $code, cell $data) inline;
@@ -105,43 +108,55 @@ slice $global_contractAddress((cell, cell) $s) impure inline;
 ((int, int, slice, slice, int, slice)) $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(int $queryId, int $amount, slice $from, slice $response_destination, int $forward_ton_amount, slice $forward_payload) inline;
 
 ;; $NeuroVault$_fun_mintTokens
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_mintTokens((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $to, int $amount, slice $response_destination) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_mintTokens((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $to, int $amount, slice $response_destination) impure inline_ref;
 
 ;; $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode
 ((int, int, slice, cell, cell)) $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode(int $totalSupply, int $mintable, slice $owner, cell $content, cell $walletCode) inline;
 
 ;; $NeuroVault$_fun_get_jetton_data
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), (int, int, slice, cell, cell)) $NeuroVault$_fun_get_jetton_data((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), (int, int, slice, cell, cell)) $NeuroVault$_fun_get_jetton_data((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_get_wallet_address
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_get_wallet_address((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $owner) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_get_wallet_address((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $owner) impure inline_ref;
 
 ;; $NeuroVault$_fun_tvl
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_tvl((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_tvl((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_operator
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_operator((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_operator((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_autoCompoundCap
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_autoCompoundCap((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_autoCompoundCap((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_whitelistCount
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_whitelistCount((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_whitelistCount((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+
+;; $NeuroVault$_fun_isPaused
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isPaused((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+
+;; $NeuroVault$_fun_depositFee
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_depositFee((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+
+;; $NeuroVault$_fun_maxDelegatePercent
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_maxDelegatePercent((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+
+;; $NeuroVault$_fun_sharePrice
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_sharePrice((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_reserveGas
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_reserveGas((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_reserveGas((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_reply
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_reply((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_reply((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline;
 
 ;; $NeuroVault$_fun_notify
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_notify((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_notify((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline;
 
 ;; $NeuroVault$_fun_requireOwner
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwner((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwner((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $NeuroVault$_fun_owner
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_owner((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_owner((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref;
 
 ;; $SendParameters$_constructor_to_value_mode_bounce_body
 ((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_bounce_body(slice $to, int $value, int $mode, int $bounce, cell $body) inline;
@@ -364,8 +379,8 @@ int $global_myBalance() impure asm """
     SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
 """;
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_reply((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_reply((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     slice $to = __tact_context_get_sender();
     int $bounce = true;
     if (false) {
@@ -374,15 +389,15 @@ int $global_myBalance() impure asm """
         if (($balanceBeforeMessage < 0)) {
             $global_nativeReserve(0, 0);
             $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
-            return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+            return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
         }
     }
     $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_notify((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_notify((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, cell $body) impure inline {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     slice $to = __tact_context_get_sender();
     int $bounce = false;
     if (false) {
@@ -391,23 +406,23 @@ int $global_myBalance() impure asm """
         if (($balanceBeforeMessage < 0)) {
             $global_nativeReserve(0, 0);
             $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
-            return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+            return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
         }
     }
     $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwner((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwner((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     throw_unless(132, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_owner((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_33 = $self'owner;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_33);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_owner((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_43 = $self'owner;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_43);
 }
 
 ;; NeuroVault_NeuroVault.constants.fc
@@ -416,9 +431,9 @@ slice __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e
     B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
 """;
 
-;; Cell zVn8os3Cmp2/RvLUluT5JWdGDwFTqSp0uVTNUO9Zzzk=
-cell __gen_cell_cell_cd59fca2cdc29a9dbf46f2d496e4f92567460f0153a92a74b954cd50ef59cf39() asm """
-    B{b5ee9c7241010101001b000032000000005769746864726177616c205375636365737366756ceb69329a} B>boc PUSHREF
+;; Cell tNRlt6VqZUzujw8SCeCC8/Fz0kSrbWvzPaE5khWHnmA=
+cell __gen_cell_cell_b4d465b7a56a654cee8f0f1209e082f3f173d244ab6d6bf33da1399215879e60() asm """
+    B{b5ee9c72410101010015000026000000006e544f4e205769746864726177616c30cb1ff2} B>boc PUSHREF
 """;
 
 ;; NeuroVault_NeuroVault.storage.fc
@@ -605,11 +620,11 @@ cell $NeuroJettonWallet$_child_get_code() impure asm """
 
 ;;
 ;; Type: NeuroVault
-;; TLB: _ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins autoCompoundCap:uint16 whitelistCount:uint8 whitelist1:address whitelist2:address whitelist3:address whitelist4:address whitelist5:address content:^cell mintable:bool = NeuroVault
+;; TLB: _ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins autoCompoundCap:uint16 maxDelegatePercent:uint16 depositFeePrecise:uint16 paused:bool whitelistCount:uint8 whitelist1:address whitelist2:address whitelist3:address whitelist4:address whitelist5:address content:^cell mintable:bool = NeuroVault
 ;;
 
-builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) inline {
-    var (v'owner, v'operator, v'totalSupply, v'totalAssets, v'performanceFeePrecise, v'minDepositAmount, v'autoCompoundCap, v'whitelistCount, v'whitelist1, v'whitelist2, v'whitelist3, v'whitelist4, v'whitelist5, v'content, v'mintable) = v;
+builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) inline {
+    var (v'owner, v'operator, v'totalSupply, v'totalAssets, v'performanceFeePrecise, v'minDepositAmount, v'autoCompoundCap, v'maxDelegatePercent, v'depositFeePrecise, v'paused, v'whitelistCount, v'whitelist1, v'whitelist2, v'whitelist3, v'whitelist4, v'whitelist5, v'content, v'mintable) = v;
     build_0 = build_0.store_slice(v'owner);
     build_0 = build_0.store_slice(v'operator);
     build_0 = build_0.store_varuint16(v'totalSupply);
@@ -617,6 +632,9 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     build_0 = build_0.store_uint(v'performanceFeePrecise, 16);
     build_0 = build_0.store_varuint16(v'minDepositAmount);
     build_0 = build_0.store_uint(v'autoCompoundCap, 16);
+    build_0 = build_0.store_uint(v'maxDelegatePercent, 16);
+    build_0 = build_0.store_uint(v'depositFeePrecise, 16);
+    build_0 = build_0.store_int(v'paused, 1);
     build_0 = build_0.store_uint(v'whitelistCount, 8);
     var build_1 = begin_cell();
     build_1 = build_1.store_slice(v'whitelist1);
@@ -632,7 +650,7 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     return build_0;
 }
 
-(slice, ((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int))) $NeuroVault$_load(slice sc_0) inline {
+(slice, ((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int))) $NeuroVault$_load(slice sc_0) inline {
     var v'owner = sc_0~load_msg_addr();
     var v'operator = sc_0~load_msg_addr();
     var v'totalSupply = sc_0~load_varuint16();
@@ -640,6 +658,9 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     var v'performanceFeePrecise = sc_0~load_uint(16);
     var v'minDepositAmount = sc_0~load_varuint16();
     var v'autoCompoundCap = sc_0~load_uint(16);
+    var v'maxDelegatePercent = sc_0~load_uint(16);
+    var v'depositFeePrecise = sc_0~load_uint(16);
+    var v'paused = sc_0~load_int(1);
     var v'whitelistCount = sc_0~load_uint(8);
     slice sc_1 = sc_0~load_ref().begin_parse();
     var v'whitelist1 = sc_1~load_msg_addr();
@@ -650,7 +671,7 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     var v'whitelist5 = sc_2~load_msg_addr();
     var v'content = sc_2~load_ref();
     var v'mintable = sc_2~load_int(1);
-    return (sc_0, (v'owner, v'operator, v'totalSupply, v'totalAssets, v'performanceFeePrecise, v'minDepositAmount, v'autoCompoundCap, v'whitelistCount, v'whitelist1, v'whitelist2, v'whitelist3, v'whitelist4, v'whitelist5, v'content, v'mintable));
+    return (sc_0, (v'owner, v'operator, v'totalSupply, v'totalAssets, v'performanceFeePrecise, v'minDepositAmount, v'autoCompoundCap, v'maxDelegatePercent, v'depositFeePrecise, v'paused, v'whitelistCount, v'whitelist1, v'whitelist2, v'whitelist3, v'whitelist4, v'whitelist5, v'content, v'mintable));
 }
 
 (slice, ((slice, cell))) $NeuroVault$init$_load(slice sc_0) inline {
@@ -659,7 +680,7 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     return (sc_0, (v'owner, v'content));
 }
 
-(slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_load() impure inline {
+(slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_load() impure inline {
     slice $sc = get_data().begin_parse();
     int $loaded = $sc~load_int(1);
     if ($loaded) {
@@ -672,7 +693,7 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     }
 }
 
-() $NeuroVault$_contract_store((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) impure inline {
+() $NeuroVault$_contract_store((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_int(true, 1);
     b = $NeuroVault$_store(b, v);
@@ -683,8 +704,8 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
 ;; Contract NeuroVault functions
 ;;
 
-(slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_init(slice $owner, cell $content) impure inline {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
+(slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $NeuroVault$_contract_init(slice $owner, cell $content) impure inline {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
     $self'owner = $owner;
     $self'operator = $owner;
     $self'totalSupply = 0;
@@ -692,6 +713,9 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     $self'performanceFeePrecise = 2000;
     $self'minDepositAmount = 3000000000;
     $self'autoCompoundCap = 500;
+    $self'maxDelegatePercent = 5000;
+    $self'depositFeePrecise = 10;
+    $self'paused = false;
     $self'content = $content;
     $self'mintable = true;
     $self'whitelistCount = 0;
@@ -700,96 +724,130 @@ builder $NeuroVault$_store(builder build_0, (slice, slice, int, int, int, int, i
     $self'whitelist3 = __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c();
     $self'whitelist4 = __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c();
     $self'whitelist5 = __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c();
-    return ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable);
+    return ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwnerOrOperator((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireOwnerOrOperator((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-    throw_unless(8987, ( (( equal_slices_bits($ctx'sender, $self'owner) )) ? (true) : (( equal_slices_bits($ctx'sender, $self'operator) )) ));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+    throw_unless(51104, ( (( equal_slices_bits($ctx'sender, $self'owner) )) ? (true) : (( equal_slices_bits($ctx'sender, $self'operator) )) ));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isWhitelisted((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $target) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_requireNotPaused((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    throw_unless(34366, (~ $self'paused));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+}
+
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isWhitelisted((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $target) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     if (( equal_slices_bits($target, $self'owner) )) {
-        var $fresh$ret_19 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_19);
+        var $fresh$ret_24 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_24);
     }
     if (( (($self'whitelistCount >= 1)) ? (( equal_slices_bits($target, $self'whitelist1) )) : (false) )) {
-        var $fresh$ret_20 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_20);
+        var $fresh$ret_25 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_25);
     }
     if (( (($self'whitelistCount >= 2)) ? (( equal_slices_bits($target, $self'whitelist2) )) : (false) )) {
-        var $fresh$ret_21 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_21);
+        var $fresh$ret_26 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_26);
     }
     if (( (($self'whitelistCount >= 3)) ? (( equal_slices_bits($target, $self'whitelist3) )) : (false) )) {
-        var $fresh$ret_22 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_22);
+        var $fresh$ret_27 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_27);
     }
     if (( (($self'whitelistCount >= 4)) ? (( equal_slices_bits($target, $self'whitelist4) )) : (false) )) {
-        var $fresh$ret_23 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_23);
+        var $fresh$ret_28 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_28);
     }
     if (( (($self'whitelistCount >= 5)) ? (( equal_slices_bits($target, $self'whitelist5) )) : (false) )) {
-        var $fresh$ret_24 = true;
-        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_24);
+        var $fresh$ret_29 = true;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_29);
     }
-    var $fresh$ret_25 = false;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_25);
+    var $fresh$ret_30 = false;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_30);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_mintTokens((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $to, int $amount, slice $response_destination) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    throw_unless(14294, $self'mintable);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), ()) $NeuroVault$_fun_mintTokens((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $to, int $amount, slice $response_destination) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    throw_unless(56760, $self'mintable);
     var ($init'code, $init'data) = $NeuroJettonWallet$_init_child($global_myAddress(), $to);
     slice $walletAddress = $global_contractAddress(($init'code, $init'data));
-    $global_send($SendParameters$_constructor_to_value_mode_bounce_body_code_data($walletAddress, 50000000, 2, false, $TokenTransferInternal$_store_cell($TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(0, $amount, $global_myAddress(), $response_destination, 0, $global_emptySlice()), begin_cell()), $init'code, $init'data));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body_code_data($walletAddress, 50000000, 0, false, $TokenTransferInternal$_store_cell($TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(0, $amount, $global_myAddress(), $response_destination, 0, $global_emptySlice()), begin_cell()), $init'code, $init'data));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), ());
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), (int, int, slice, cell, cell)) $NeuroVault$_fun_get_jetton_data((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_26 = $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode($self'totalSupply, $self'mintable, $self'owner, $self'content, $StateInit$_get_code($NeuroJettonWallet$_init_child($global_myAddress(), $self'owner)));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_26);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), (int, int, slice, cell, cell)) $NeuroVault$_fun_get_jetton_data((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_31 = $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode($self'totalSupply, $self'mintable, $self'owner, $self'content, $StateInit$_get_code($NeuroJettonWallet$_init_child($global_myAddress(), $self'owner)));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_31);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_get_wallet_address((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $owner) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_get_wallet_address((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self, slice $owner) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
     var ($init'code, $init'data) = $NeuroJettonWallet$_init_child($global_myAddress(), $owner);
-    var $fresh$ret_27 = $global_contractAddress(($init'code, $init'data));
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_27);
+    var $fresh$ret_32 = $global_contractAddress(($init'code, $init'data));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_32);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_tvl((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_28 = $self'totalAssets;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_28);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_tvl((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_33 = $self'totalAssets;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_33);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_operator((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_29 = $self'operator;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_29);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), slice) $NeuroVault$_fun_operator((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_34 = $self'operator;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_34);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_autoCompoundCap((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_30 = $self'autoCompoundCap;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_30);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_autoCompoundCap((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_35 = $self'autoCompoundCap;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_35);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_whitelistCount((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_31 = $self'whitelistCount;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_31);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_whitelistCount((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_36 = $self'whitelistCount;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_36);
 }
 
-((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_reserveGas((slice, slice, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
-    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
-    var $fresh$ret_32 = 50000000;
-    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_32);
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_isPaused((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_37 = $self'paused;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_37);
+}
+
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_depositFee((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_38 = $self'depositFeePrecise;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_38);
+}
+
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_maxDelegatePercent((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_39 = $self'maxDelegatePercent;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_39);
+}
+
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_sharePrice((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    ifnot ($self'totalSupply) {
+        var $fresh$ret_40 = 1000000000;
+        return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_40);
+    }
+    var $fresh$ret_41 = ((($self'totalAssets + 1000000) * 1000000000) / ($self'totalSupply + 1000000));
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_41);
+}
+
+((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int), int) $NeuroVault$_fun_reserveGas((slice, slice, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_42 = 50000000;
+    return (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable), $fresh$ret_42);
 }
 
 ;;
@@ -833,6 +891,30 @@ _ %whitelistCount() method_id(91646) {
     return res;
 }
 
+_ %isPaused() method_id(126174) {
+    var self = $NeuroVault$_contract_load();
+    var res = self~$NeuroVault$_fun_isPaused();
+    return res;
+}
+
+_ %depositFee() method_id(79293) {
+    var self = $NeuroVault$_contract_load();
+    var res = self~$NeuroVault$_fun_depositFee();
+    return res;
+}
+
+_ %maxDelegatePercent() method_id(68789) {
+    var self = $NeuroVault$_contract_load();
+    var res = self~$NeuroVault$_fun_maxDelegatePercent();
+    return res;
+}
+
+_ %sharePrice() method_id(86219) {
+    var self = $NeuroVault$_contract_load();
+    var res = self~$NeuroVault$_fun_sharePrice();
+    return res;
+}
+
 _ %owner() method_id(83229) {
     var self = $NeuroVault$_contract_load();
     var res = self~$NeuroVault$_fun_owner();
@@ -859,7 +941,7 @@ _ %owner() method_id(83229) {
     __tact_context_sender = msg_sender_addr;
     
     ;; Load contract data
-    var ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable) = $NeuroVault$_contract_load();
+    var ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable) = $NeuroVault$_contract_load();
     
     ;; Handle bounced messages
     if (msg_bounced) { return (); }
@@ -870,22 +952,22 @@ _ %owner() method_id(83229) {
         ;; Receive Deposit message
         if (op == 2393262120) {
             var $msg'intent = in_msg~load_uint(8);
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireNotPaused();
             var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
             int $depositVal = $ctx'value;
-            throw_unless(16897, ($depositVal >= $self'minDepositAmount));
-            throw_unless(53830, ($depositVal > ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reserveGas()));
-            int $netDeposit = ($depositVal - ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reserveGas());
-            int $sharesToMint = 0;
-            if (( (($self'totalSupply == 0)) ? (true) : (($self'totalAssets == 0)) )) {
-                $sharesToMint = $netDeposit;
-            } else {
-                $sharesToMint = (($netDeposit * $self'totalSupply) / $self'totalAssets);
-            }
+            throw_unless(4894, ($depositVal >= $self'minDepositAmount));
+            throw_unless(21273, ($depositVal > ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reserveGas()));
+            int $netDeposit = ($depositVal - ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reserveGas());
+            int $entryFee = (($netDeposit * $self'depositFeePrecise) / 10000);
+            int $depositAfterFee = ($netDeposit - $entryFee);
+            int $effectiveSupply = ($self'totalSupply + 1000000);
+            int $effectiveAssets = ($self'totalAssets + 1000000);
+            int $sharesToMint = (($depositAfterFee * $effectiveSupply) / $effectiveAssets);
             throw_unless(3256, ($sharesToMint > 0));
             $self'totalAssets = ($self'totalAssets + $netDeposit);
             $self'totalSupply = ($self'totalSupply + $sharesToMint);
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_mintTokens($ctx'sender, $sharesToMint, $ctx'sender);
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_mintTokens($ctx'sender, $sharesToMint, $ctx'sender);
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -896,12 +978,17 @@ _ %owner() method_id(83229) {
             var $msg'sender = in_msg~load_msg_addr();
             var $msg'response_destination = in_msg~__tact_load_address_opt();
             var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-            slice $expectedWalletAddress = $global_contractAddress($NeuroJettonWallet$_init_child($global_myAddress(), $msg'sender));
-            throw_unless(61374, ( equal_slices_bits($ctx'sender, $expectedWalletAddress) ));
-            throw_unless(59952, ($msg'amount > 0));
-            throw_unless(27021, ($self'totalSupply >= $msg'amount));
-            int $tonToRelease = (($msg'amount * $self'totalAssets) / $self'totalSupply);
-            throw_unless(12392, ($tonToRelease > 0));
+            slice $expectedWallet = $global_contractAddress($NeuroJettonWallet$_init_child($global_myAddress(), $msg'sender));
+            throw_unless(2306, ( equal_slices_bits($ctx'sender, $expectedWallet) ));
+            throw_unless(25223, ($msg'amount > 0));
+            throw_unless(36625, ($self'totalSupply >= $msg'amount));
+            int $effectiveSupply = ($self'totalSupply + 1000000);
+            int $effectiveAssets = ($self'totalAssets + 1000000);
+            int $tonToRelease = (($msg'amount * $effectiveAssets) / $effectiveSupply);
+            throw_unless(61441, ($tonToRelease > 0));
+            if (($tonToRelease > $self'totalAssets)) {
+                $tonToRelease = $self'totalAssets;
+            }
             throw_unless(4675, ($self'totalAssets >= $tonToRelease));
             $self'totalSupply = ($self'totalSupply - $msg'amount);
             $self'totalAssets = ($self'totalAssets - $tonToRelease);
@@ -909,24 +996,27 @@ _ %owner() method_id(83229) {
             if ((~ null?($msg'response_destination))) {
                 $dest = __tact_not_null($msg'response_destination);
             }
-            $global_send($SendParameters$_constructor_to_value_mode_bounce_body($dest, $tonToRelease, 2, true, __gen_cell_cell_cd59fca2cdc29a9dbf46f2d496e4f92567460f0153a92a74b954cd50ef59cf39()));
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $global_send($SendParameters$_constructor_to_value_mode_bounce_body($dest, $tonToRelease, 0, true, __gen_cell_cell_b4d465b7a56a654cee8f0f1209e082f3f173d244ab6d6bf33da1399215879e60()));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
         ;; Receive AutoCompound message
         if (op == 3924287516) {
             var $msg'profitToMint = in_msg~load_varuint16();
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwnerOrOperator();
-            throw_unless(16341, ($msg'profitToMint > 0));
-            int $maxAllowedProfit = (($self'totalAssets * $self'autoCompoundCap) / 10000);
-            throw_unless(17347, ($msg'profitToMint <= $maxAllowedProfit));
-            int $ownerCutNative = (($msg'profitToMint * $self'performanceFeePrecise) / 10000);
-            int $sharesToMint = (($ownerCutNative * $self'totalSupply) / $self'totalAssets);
-            throw_unless(7926, ($sharesToMint > 0));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireNotPaused();
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwnerOrOperator();
+            throw_unless(42032, ($msg'profitToMint > 0));
+            int $maxProfit = (($self'totalAssets * $self'autoCompoundCap) / 10000);
+            throw_unless(27533, ($msg'profitToMint <= $maxProfit));
+            int $ownerCut = (($msg'profitToMint * $self'performanceFeePrecise) / 10000);
+            int $effectiveSupply = ($self'totalSupply + 1000000);
+            int $effectiveAssets = ($self'totalAssets + 1000000);
+            int $sharesToMint = (($ownerCut * $effectiveSupply) / $effectiveAssets);
+            throw_unless(21130, ($sharesToMint > 0));
             $self'totalSupply = ($self'totalSupply + $sharesToMint);
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_mintTokens($self'owner, $sharesToMint, $self'owner);
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_mintTokens($self'owner, $sharesToMint, $self'owner);
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -936,13 +1026,16 @@ _ %owner() method_id(83229) {
             var $msg'amount = in_msg~load_varuint16();
             var $msg'mode = in_msg~load_uint(8);
             var $msg'payload = in_msg~load_maybe_ref();
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwnerOrOperator();
-            throw_unless(51355, ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_isWhitelisted($msg'target));
-            throw_unless(38247, ($self'totalAssets >= $msg'amount));
-            throw_unless(55717, ($msg'amount > 0));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireNotPaused();
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwnerOrOperator();
+            throw_unless(6306, ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_isWhitelisted($msg'target));
+            throw_unless(8045, ($msg'amount > 0));
+            throw_unless(20975, ($self'totalAssets >= $msg'amount));
+            int $maxDelegate = (($self'totalAssets * $self'maxDelegatePercent) / 10000);
+            throw_unless(43787, ($msg'amount <= $maxDelegate));
             $self'totalAssets = ($self'totalAssets - $msg'amount);
             $global_send($SendParameters$_constructor_to_value_mode_bounce_body($msg'target, $msg'amount, $msg'mode, true, $msg'payload));
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -951,7 +1044,7 @@ _ %owner() method_id(83229) {
             var $msg'index = in_msg~load_uint(8);
             var $msg'target = in_msg~load_msg_addr();
             throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
-            throw_unless(12776, ( (($msg'index >= 1)) ? (($msg'index <= 5)) : (false) ));
+            throw_unless(23073, ( (($msg'index >= 1)) ? (($msg'index <= 5)) : (false) ));
             if (($msg'index == 1)) {
                 $self'whitelist1 = $msg'target;
             }
@@ -970,7 +1063,7 @@ _ %owner() method_id(83229) {
             if (($msg'index > $self'whitelistCount)) {
                 $self'whitelistCount = $msg'index;
             }
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -987,7 +1080,7 @@ _ %owner() method_id(83229) {
                 $owner_address = $msg'owner_address;
             }
             $global_send($SendParameters$_constructor_to_value_mode_body($ctx'sender, 0, 64, $TakeWalletAddress$_store_cell($TakeWalletAddress$_constructor_queryId_wallet_address_owner_address($msg'queryId, $walletAddress, $owner_address), begin_cell())));
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -995,9 +1088,9 @@ _ %owner() method_id(83229) {
         if (op == 3144592497) {
             var $msg'performanceFeePrecise = in_msg~load_uint(16);
             throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
-            throw_unless(58338, ($msg'performanceFeePrecise <= 3000));
+            throw_unless(62694, ($msg'performanceFeePrecise <= 3000));
             $self'performanceFeePrecise = $msg'performanceFeePrecise;
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -1006,7 +1099,7 @@ _ %owner() method_id(83229) {
             var $msg'newOperator = in_msg~load_msg_addr();
             throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
             $self'operator = $msg'newOperator;
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -1014,17 +1107,37 @@ _ %owner() method_id(83229) {
         if (op == 927790173) {
             var $msg'newCap = in_msg~load_uint(16);
             throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
-            throw_unless(44977, ($msg'newCap <= 1000));
+            throw_unless(63779, ($msg'newCap <= 1000));
             $self'autoCompoundCap = $msg'newCap;
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            return ();
+        }
+        
+        ;; Receive UpdateDelegateLimit message
+        if (op == 3604641594) {
+            var $msg'newLimit = in_msg~load_uint(16);
+            throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+            throw_unless(7696, ($msg'newLimit <= 8000));
+            $self'maxDelegatePercent = $msg'newLimit;
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            return ();
+        }
+        
+        ;; Receive UpdateDepositFee message
+        if (op == 1162639545) {
+            var $msg'newFee = in_msg~load_uint(16);
+            throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+            throw_unless(35219, ($msg'newFee <= 100));
+            $self'depositFeePrecise = $msg'newFee;
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
         ;; Receive Deploy message
         if (op == 0x946a98b6) {
             var $deploy'queryId = in_msg~load_uint(64);
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -1032,10 +1145,10 @@ _ %owner() method_id(83229) {
         if (op == 0x819dbe99) {
             var $msg'queryId = in_msg~load_uint(64);
             var $msg'newOwner = in_msg~load_msg_addr();
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwner();
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_requireOwner();
             $self'owner = $msg'newOwner;
-            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reply($ChangeOwnerOk$_store_cell($ChangeOwnerOk$_constructor_queryId_newOwner($msg'queryId, $msg'newOwner), begin_cell()));
-            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+            ($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reply($ChangeOwnerOk$_store_cell($ChangeOwnerOk$_constructor_queryId_newOwner($msg'queryId, $msg'newOwner), begin_cell()));
+            $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
             return ();
         }
         
@@ -1043,25 +1156,43 @@ _ %owner() method_id(83229) {
     ;; Receive empty message
     if ((op == 0) & (in_msg_length <= 32)) {
         var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        throw_unless(33824, ( (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_isWhitelisted($ctx'sender)) ? (true) : (( equal_slices_bits($ctx'sender, $self'operator) )) ));
+        throw_unless(28981, ( (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_isWhitelisted($ctx'sender)) ? (true) : (( equal_slices_bits($ctx'sender, $self'operator) )) ));
         $self'totalAssets = ($self'totalAssets + $ctx'value);
-        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
         return ();
     }
     ;; Empty Receiver and Text Receivers
     var text_op = slice_hash(in_msg);
-    ;; Receive "ExecDelegateBounced" message
-    if (text_op == 0xc1238e6aacd95af3f7c67eec36dc989b3e5aac404b6ecbb610f6ba48372e5b64) {
-        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        $self'totalAssets = ($self'totalAssets + $ctx'value);
-        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+    ;; Receive "Sync" message
+    if (text_op == 0xc4ef345fe0b9e216a8c1826ac7fa38d0ec1c6893aafa3cf2e9161246bfd4661a) {
+        throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+        int $currentBalance = $global_myBalance();
+        int $reserveNeeded = (($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable)~$NeuroVault$_fun_reserveGas() + 10000000);
+        if (($currentBalance > $reserveNeeded)) {
+            $self'totalAssets = ($currentBalance - $reserveNeeded);
+        }
+        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+        return ();
+    }
+    ;; Receive "Pause" message
+    if (text_op == 0x1426f4b2781b50266062a76b40df9ae9835c2d109b7be92e1048e36bc2761d67) {
+        throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+        $self'paused = true;
+        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+        return ();
+    }
+    ;; Receive "Unpause" message
+    if (text_op == 0x818377509e6b15156bb56cd33fb939f5f4499040536211513c5d5ce55de4a25a) {
+        throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+        $self'paused = false;
+        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
         return ();
     }
     ;; Receive "StopMint" message
     if (text_op == 0x64d5198fe48e1c880304d52b76150cdde129b8cb2bcb68ddccc9782e271972d9) {
-        throw_unless(14534, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+        throw_unless(3734, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
         $self'mintable = false;
-        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
+        $NeuroVault$_contract_store(($self'owner, $self'operator, $self'totalSupply, $self'totalAssets, $self'performanceFeePrecise, $self'minDepositAmount, $self'autoCompoundCap, $self'maxDelegatePercent, $self'depositFeePrecise, $self'paused, $self'whitelistCount, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'content, $self'mintable));
         return ();
     }
     ;; Throw if not handled

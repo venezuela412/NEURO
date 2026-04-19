@@ -29,6 +29,7 @@ PROGRAM{
   DECLPROC $NeuroJettonWallet$_init_child
   DECLPROC $MessageParameters$_constructor_bounce_to_value_mode_body
   DECLPROC $NeuroVault$_fun_requireOwnerOrOperator
+  DECLPROC $NeuroVault$_fun_requireNotPaused
   DECLPROC $NeuroVault$_fun_isWhitelisted
   DECLPROC $SendParameters$_constructor_to_value_mode_bounce_body_code_data
   DECLPROC $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload
@@ -40,6 +41,10 @@ PROGRAM{
   DECLPROC $NeuroVault$_fun_operator
   DECLPROC $NeuroVault$_fun_autoCompoundCap
   DECLPROC $NeuroVault$_fun_whitelistCount
+  DECLPROC $NeuroVault$_fun_isPaused
+  DECLPROC $NeuroVault$_fun_depositFee
+  DECLPROC $NeuroVault$_fun_maxDelegatePercent
+  DECLPROC $NeuroVault$_fun_sharePrice
   DECLPROC $NeuroVault$_fun_reserveGas
   DECLPROC $NeuroVault$_fun_reply
   DECLPROC $NeuroVault$_fun_notify
@@ -56,6 +61,10 @@ PROGRAM{
   129896 DECLMETHOD %operator
   91355 DECLMETHOD %autoCompoundCap
   91646 DECLMETHOD %whitelistCount
+  126174 DECLMETHOD %isPaused
+  79293 DECLMETHOD %depositFee
+  68789 DECLMETHOD %maxDelegatePercent
+  86219 DECLMETHOD %sharePrice
   83229 DECLMETHOD %owner
   DECLPROC recv_internal
   65535 DECLMETHOD __tact_selector_hack
@@ -145,20 +154,25 @@ PROGRAM{
     ENDC
   }>
   $NeuroVault$_store PROCINLINE:<{
-    s14 s15 XCHG2
+    s1 17 s() XCHG
+    s0 18 s() XCHG
     STSLICE
-    s1 s12 XCHG
+    s1 s15 XCHG
     STSLICE
-    s0 s10 XCHG2
+    s0 s13 XCHG2
     STVARUINT16
-    s0 s8 XCHG2
+    s0 s11 XCHG2
     STVARUINT16
-    s1 s6 XCHG
+    s1 s9 XCHG
     16 STU
-    s0 s4 XCHG2
+    s0 s7 XCHG2
     STVARUINT16
-    s1 s2 XCHG
+    s1 s5 XCHG
     16 STU
+    s1 s3 XCHG
+    16 STU
+    16 STU
+    1 STI
     8 STU
     SWAP
     NEWC
@@ -187,6 +201,9 @@ PROGRAM{
     16 LDU
     LDVARUINT16
     16 LDU
+    16 LDU
+    16 LDU
+    1 LDI
     8 LDU
     LDREF
     SWAP
@@ -202,6 +219,9 @@ PROGRAM{
     LDREF
     1 LDI
     DROP
+    s7 18 s() XCHG
+    s7 17 s() XCHG
+    s7 16 s() XCHG
     s7 s15 XCHG
     s7 s14 XCHG
     s7 s13 XCHG
@@ -237,14 +257,20 @@ PROGRAM{
     2000 PUSHINT
     3000000000 PUSHINT
     500 PUSHINT
+    5000 PUSHINT
+    10 PUSHINT
+    FALSE
     TRUE
-    s4 PUSH
+    s7 PUSH
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
-    s12 s14 XCHG
+    s15 17 s() XCHG
+    s15 16 s() XCHG
+    s14 s15 XCHG
+    s13 s14 XCHG
     s12 s13 XCHG
     s11 s12 XCHG
     s10 s11 XCHG
@@ -260,7 +286,10 @@ PROGRAM{
     SWAP
     IF:<{
       $NeuroVault$_load INLINECALLDICT
-      1 15 BLKDROP2
+      18 s() POP
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      15 ROLL
     }>ELSE<{
       $NeuroVault$init$_load INLINECALLDICT
       s0 s2 XCHG
@@ -274,6 +303,9 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
+    s0 18 s() XCHG
+    s0 17 s() XCHG
+    s0 16 s() XCHG
     15 -ROLL
     $NeuroVault$_store INLINECALLDICT
     ENDC
@@ -335,21 +367,29 @@ PROGRAM{
     __tact_context_get INLINECALLDICT
     s2 s3 XCHG
     3 BLKDROP
-    8987 PUSHINT
+    51104 PUSHINT
     OVER
-    17 s() PUSH
+    20 s() PUSH
     SDEQ
     IF:<{
       NIP
       TRUE
     }>ELSE<{
-      s1 s15 XCPU
+      SWAP
+      18 s() PUSH
       SDEQ
     }>
     THROWANYIFNOT
   }>
+  $NeuroVault$_fun_requireNotPaused PROCREF:<{
+    34366 PUSHINT
+    s9 PUSH
+    NOT
+    THROWANYIFNOT
+  }>
   $NeuroVault$_fun_isWhitelisted PROCREF:<{
-    s0 s15 PUSH2
+    DUP
+    19 s() PUSH
     SDEQ
     IFJMP:<{
       DROP
@@ -424,7 +464,7 @@ PROGRAM{
   $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload PROCINLINE:<{
   }>
   $NeuroVault$_fun_mintTokens PROCREF:<{
-    14294 PUSHINT
+    56760 PUSHINT
     s4 PUSH
     THROWANYIFNOT
         MYADDR
@@ -433,9 +473,9 @@ PROGRAM{
     2DUP
     $global_contractAddress INLINECALLDICT
     50000000 PUSHINT
-    2 PUSHINT
-    FALSE
     0 PUSHINT
+    FALSE
+    OVER
         MYADDR
     OVER
         b{} PUSHSLICE
@@ -522,11 +562,12 @@ PROGRAM{
   }>
   $NeuroVault$_fun_get_jetton_data PROCREF:<{
         MYADDR
-    s15 PUSH
+    18 s() PUSH
     $NeuroJettonWallet$_init_child INLINECALLDICT
     $StateInit$_get_code INLINECALLDICT
-    s13 s1 s(-2) PU2XC
-    17 s() PUSH
+    16 s() PUSH
+    s2 s1 PUXC
+    20 s() PUSH
     s5 s1 PUXC
     $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode INLINECALLDICT
   }>
@@ -537,16 +578,40 @@ PROGRAM{
     $global_contractAddress INLINECALLDICT
   }>
   $NeuroVault$_fun_tvl PROCREF:<{
-    s11 PUSH
+    s14 PUSH
   }>
   $NeuroVault$_fun_operator PROCREF:<{
-    s13 PUSH
+    16 s() PUSH
   }>
   $NeuroVault$_fun_autoCompoundCap PROCREF:<{
-    s8 PUSH
+    s11 PUSH
   }>
   $NeuroVault$_fun_whitelistCount PROCREF:<{
     s7 PUSH
+  }>
+  $NeuroVault$_fun_isPaused PROCREF:<{
+    s8 PUSH
+  }>
+  $NeuroVault$_fun_depositFee PROCREF:<{
+    s9 PUSH
+  }>
+  $NeuroVault$_fun_maxDelegatePercent PROCREF:<{
+    s10 PUSH
+  }>
+  $NeuroVault$_fun_sharePrice PROCREF:<{
+    s15 PUSH
+    IFNOTJMP:<{
+      1000000000 PUSHINT
+    }>
+    s14 PUSH
+    1000000 PUSHINT
+    ADD
+    1000000000 PUSHINT
+    MUL
+    16 s() PUSH
+    1000000 PUSHINT
+    ADD
+    DIV
   }>
   $NeuroVault$_fun_reserveGas PROCREF:<{
     50000000 PUSHINT
@@ -605,12 +670,12 @@ PROGRAM{
   }>
   $NeuroVault$_fun_requireOwner PROCREF:<{
     __tact_context_get_sender INLINECALLDICT
-    s15 PUSH
+    18 s() PUSH
     SDEQ
     132 THROWIFNOT
   }>
   $NeuroVault$_fun_owner PROCREF:<{
-    s14 PUSH
+    17 s() PUSH
   }>
   $SendParameters$_constructor_to_value_mode_bounce_body PROCINLINE:<{
     s2 s4 XCHG
@@ -636,38 +701,82 @@ PROGRAM{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_get_jetton_data INLINECALLDICT
     15 5 BLKDROP2
+    3 5 BLKDROP2
     $JettonData$_to_external INLINECALLDICT
   }>
   %get_wallet_address PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
     15 ROLL
     $NeuroVault$_fun_get_wallet_address INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   %tvl PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_tvl INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   %operator PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_operator INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   %autoCompoundCap PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_autoCompoundCap INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   %whitelistCount PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_whitelistCount INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %isPaused PROC:<{
+    $NeuroVault$_contract_load INLINECALLDICT
+    $NeuroVault$_fun_isPaused INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %depositFee PROC:<{
+    $NeuroVault$_contract_load INLINECALLDICT
+    $NeuroVault$_fun_depositFee INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %maxDelegatePercent PROC:<{
+    $NeuroVault$_contract_load INLINECALLDICT
+    $NeuroVault$_fun_maxDelegatePercent INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %sharePrice PROC:<{
+    $NeuroVault$_contract_load INLINECALLDICT
+    $NeuroVault$_fun_sharePrice INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   %owner PROC:<{
     $NeuroVault$_contract_load INLINECALLDICT
     $NeuroVault$_fun_owner INLINECALLDICT
-    15 1 BLKDROP2
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
   }>
   recv_internal PROC:<{
     c2 SAVE
@@ -687,89 +796,99 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $NeuroVault$_contract_load INLINECALLDICT
-    s0 16 s() XCHG
+    s0 19 s() XCHG
     IFJMP:<{
       15 BLKDROP
-      DROP
+      4 BLKDROP
     }>
     0 PUSHINT
-    s15 PUSH
+    18 s() PUSH
     SBITS
     DUP
     31 GTINT
     IF:<{
       NIP
-      s0 s15 XCHG
+      s0 18 s() XCHG
       32 LDU
       OVER
       2393262120 PUSHINT
       EQUAL
       IFJMP:<{
         2DROP
-        s14 POP
+        17 s() POP
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        2 13 BLKSWAP
+        $NeuroVault$_fun_requireNotPaused INLINECALLDICT
         __tact_context_get INLINECALLDICT
         DROP
         s2 POP
-        16897 PUSHINT
-        s2 s10 PUSH2
+        4894 PUSHINT
+        s2 s15 PUSH2
         GEQ
         THROWANYIFNOT
-        s13 s14 XCHG
-        s12 s14 XCHG
-        s11 s14 XCHG
-        s10 s14 XCHG
-        s1 s14 XCHG
-        s1 s9 XCHG
-        s1 s8 XCHG
-        s1 s7 XCHG
-        s1 s6 XCHG
-        s5 s15 XCHG2
-        s1 s4 XCHG
-        s3 s3 s0 XCHG3
-        53830 PUSHINT
-        s0 17 s() XCHG
+        16 s() 19 s() XCHG
+        s15 18 s() XCHG
+        s14 17 s() XCHG
+        s13 19 s() XCHG
+        s12 18 s() XCHG
+        s11 17 s() XCHG
+        s10 19 s() XCHG
+        s9 18 s() XCHG
+        s8 17 s() XCHG
+        s7 19 s() XCHG
+        s6 18 s() XCHG
+        s5 17 s() XCHG
+        s4 19 s() XCHG
+        s3 18 s() XCHG
+        s2 17 s() XCHG
+        s1 19 s() XCHG
+        s0 18 s() XCHG
+        21273 PUSHINT
+        s0 18 s() XCHG
         $NeuroVault$_fun_reserveGas INLINECALLDICT
-        16 s() PUSH
+        21 s() PUSH
         SWAP
         GREATER
-        s1 18 s() XCHG
+        s1 19 s() XCHG
         THROWANYIFNOT
-        14 ROLL
-        s0 16 s() XCHG
+        16 s() 17 s() XCHG
+        s15 16 s() XCHG
+        15 ROLL
         $NeuroVault$_fun_reserveGas INLINECALLDICT
-        s1 17 s() XCHG
+        s1 20 s() XCHG
         SUB
-        s12 PUSH
-        0 EQINT
-        IF:<{
-          TRUE
-        }>ELSE<{
-          s11 PUSH
-          0 EQINT
-        }>
-        IF:<{
-          DUP
-        }>ELSE<{
-          s0 s12 PUSH2
-          MUL
-          s12 PUSH
-          DIV
-        }>
+        s0 s9 PUSH2
+        MUL
+        10000 PUSHINT
+        DIV
+        s1 s(-1) PUXC
+        SUB
+        16 s() PUSH
+        1000000 PUSHINT
+        ADD
+        16 s() PUSH
+        1000000 PUSHINT
+        ADD
+        -ROT
+        MUL
+        SWAP
+        DIV
         3256 PUSHINT
         OVER
         0 GTINT
         THROWANYIFNOT
-        s12 s12 XCHG2
+        s15 s15 XCHG2
         ADD
-        s12 s11 XCPU
+        s15 s14 XCPU
         ADD
-        s14 16 s() XCHG
-        s13 s15 XCHG
-        s0 s14 XCHG
-        s12 s13 XCHG
-        s10 s12 XCHG
-        2 10 BLKSWAP
-        TUCK
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s0 17 s() XCHG
+        s15 16 s() XCHG
+        2 14 BLKSWAP
+        OVER
         $NeuroVault$_fun_mintTokens INLINECALLDICT
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
@@ -779,8 +898,8 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         64 LDU
         NIP
         LDVARUINT16
@@ -801,47 +920,63 @@ PROGRAM{
         $NeuroJettonWallet$_init_child INLINECALLDICT
         $global_contractAddress INLINECALLDICT
         SWAP
-        61374 PUSHINT
+        2306 PUSHINT
         s0 s2 XCHG
         SDEQ
         THROWANYIFNOT
-        59952 PUSHINT
+        25223 PUSHINT
         s3 PUSH
         0 GTINT
         THROWANYIFNOT
-        27021 PUSHINT
-        s14 s3 PUSH2
+        36625 PUSHINT
+        17 s() PUSH
+        s4 PUSH
         GEQ
         THROWANYIFNOT
-        s2 s12 PUSH2
+        16 s() PUSH
+        1000000 PUSHINT
+        ADD
+        16 s() PUSH
+        1000000 PUSHINT
+        ADD
+        s4 s(-1) PUXC
         MUL
-        s14 PUSH
+        SWAP
         DIV
-        12392 PUSHINT
+        61441 PUSHINT
         OVER
         0 GTINT
         THROWANYIFNOT
+        DUP
+        17 s() PUSH
+        GREATER
+        IF:<{
+          DROP
+          s15 PUSH
+        }>
         4675 PUSHINT
-        s14 s1 PUSH2
+        17 s() PUSH
+        s2 PUSH
         GEQ
         THROWANYIFNOT
-        s14 s3 XCHG2
+        s1 17 s() XCHG
+        s0 s3 XCHG
         SUB
-        s12 s2 XCPU
+        s15 s2 XCPU
         SUB
-        s13 PUSH
+        16 s() PUSH
         ISNULL
         NOT
         IF:<{
           NIP
-          s0 s12 XCHG
+          s0 s15 XCHG
           __tact_not_null INLINECALLDICT
         }>ELSE<{
-          s13 POP
+          16 s() POP
         }>
-        2 PUSHINT
+        0 PUSHINT
         TRUE
-            B{b5ee9c7241010101001b000032000000005769746864726177616c205375636365737366756ceb69329a} B>boc PUSHREF
+            B{b5ee9c72410101010015000026000000006e544f4e205769746864726177616c30cb1ff2} B>boc PUSHREF
         s3 s4 XCHG
         $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
             NEWC
@@ -910,10 +1045,10 @@ PROGRAM{
             // Group 5: Sending the message, with `mode` on top
             SWAP
             SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-        s12 s14 XCHG
-        s11 s13 XCHG
-        4 9 REVERSE
-        2 9 BLKSWAP
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        4 12 REVERSE
+        2 12 BLKSWAP
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -922,10 +1057,13 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         LDVARUINT16
         DROP
+        16 s() 17 s() XCHG
+        s15 16 s() XCHG
+        s14 s15 XCHG
         s13 s14 XCHG
         s12 s13 XCHG
         s11 s12 XCHG
@@ -937,39 +1075,51 @@ PROGRAM{
         s5 s6 XCHG
         s4 s5 XCHG
         s3 s4 XCHG
-        s1 s3 s15 XCHG3
+        s0 18 s() XCHG
+        s1 s3 s0 XCHG3
+        $NeuroVault$_fun_requireNotPaused INLINECALLDICT
         $NeuroVault$_fun_requireOwnerOrOperator INLINECALLDICT
-        16341 PUSHINT
-        16 s() PUSH
+        42032 PUSHINT
+        19 s() PUSH
         0 GTINT
         THROWANYIFNOT
-        s11 s8 PUSH2
+        s14 s11 PUSH2
         MUL
         10000 PUSHINT
         DIV
-        16 s() PUSH
-        17347 PUSHINT
+        19 s() PUSH
+        27533 PUSHINT
         s0 s2 XCHG
         LEQ
         THROWANYIFNOT
-        s15 s10 XCPU
+        s0 18 s() XCHG
+        s13 PUSH
         MUL
         10000 PUSHINT
         DIV
-        s12 PUSH
+        s15 PUSH
+        1000000 PUSHINT
+        ADD
+        s15 PUSH
+        1000000 PUSHINT
+        ADD
+        -ROT
         MUL
-        s11 PUSH
+        SWAP
         DIV
-        7926 PUSHINT
+        21130 PUSHINT
         OVER
         0 GTINT
         THROWANYIFNOT
-        s12 s12 XCPU
+        s15 s15 XCPU
         ADD
-        s14 PUSH
-        s0 16 s() XCHG
-        s1 s14 XCHG
-        s1 s15 XCHG
+        17 s() PUSH
+        s0 19 s() XCHG
+        17 s() 18 s() XCHG
+        s1 17 s() XCHG
+        s15 16 s() XCHG
+        s14 s15 XCHG
+        s13 s14 XCHG
         s12 s13 XCHG
         s11 s12 XCHG
         s10 s11 XCHG
@@ -991,53 +1141,78 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         LDMSGADDR
         LDVARUINT16
         8 LDU
         LDOPTREF
         DROP
-        s14 16 s() XCHG
-        5 12 REVERSE
-        s11 s15 XCHG
-        s10 16 s() XCHG
-        s9 s15 XCHG
-        s8 16 s() XCHG
-        s7 s15 XCHG
-        s6 16 s() XCHG
-        s5 s15 XCHG
-        s4 16 s() XCHG
-        s3 s15 XCHG
-        s2 16 s() XCHG
-        s1 17 s() XCHG
-        s0 18 s() XCHG
+        17 s() 19 s() XCHG
+        5 15 REVERSE
+        s14 18 s() XCHG
+        s13 19 s() XCHG
+        s12 18 s() XCHG
+        s11 19 s() XCHG
+        s10 18 s() XCHG
+        s9 19 s() XCHG
+        s8 18 s() XCHG
+        s7 19 s() XCHG
+        s6 18 s() XCHG
+        s5 19 s() XCHG
+        s4 18 s() XCHG
+        s3 19 s() XCHG
+        s2 18 s() XCHG
+        s1 20 s() XCHG
+        s0 21 s() XCHG
+        $NeuroVault$_fun_requireNotPaused INLINECALLDICT
         $NeuroVault$_fun_requireOwnerOrOperator INLINECALLDICT
-        14 -ROLL
-        51355 PUSHINT
-        s0 s15 XCHG
-        16 s() PUSH
+        16 s() 17 s() XCHG
+        s15 17 s() XCHG
+        s14 17 s() XCHG
+        s13 17 s() XCHG
+        s12 17 s() XCHG
+        s11 17 s() XCHG
+        s10 17 s() XCHG
+        s9 17 s() XCHG
+        s0 17 s() XCHG
+        s0 s8 XCHG
+        s0 s7 XCHG
+        s0 s6 XCHG
+        5 -ROLL
+        6306 PUSHINT
+        s0 18 s() XCHG
+        20 s() PUSH
         $NeuroVault$_fun_isWhitelisted INLINECALLDICT
-        s1 16 s() XCHG
+        s1 19 s() XCHG
         THROWANYIFNOT
-        38247 PUSHINT
-        s11 PUSH
-        18 s() PUSH
-        GEQ
-        THROWANYIFNOT
-        55717 PUSHINT
-        17 s() PUSH
+        8045 PUSHINT
+        19 s() PUSH
         0 GTINT
         THROWANYIFNOT
-        s0 s10 XCHG
-        16 s() PUSH
+        20975 PUSHINT
+        s14 PUSH
+        20 s() PUSH
+        GEQ
+        THROWANYIFNOT
+        s13 s9 PUSH2
+        MUL
+        10000 PUSHINT
+        DIV
+        19 s() PUSH
+        43787 PUSHINT
+        s0 s2 XCHG
+        LEQ
+        THROWANYIFNOT
+        s0 s13 XCHG
+        18 s() PUSH
         SUB
-        s3 s15 XCHG
-        s2 16 s() XCHG
-        s1 17 s() XCHG
+        s3 19 s() XCHG
+        s2 18 s() XCHG
+        s1 20 s() XCHG
         TRUE
         SWAP
-        s0 19 s() XCHG
+        s0 22 s() XCHG
         $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
             NEWC
             b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
@@ -1105,13 +1280,20 @@ PROGRAM{
             // Group 5: Sending the message, with `mode` on top
             SWAP
             SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-        s9 s14 XCHG
+        s12 17 s() XCHG
+        s11 16 s() XCHG
+        s10 s15 XCHG
+        s12 s14 XCHG
         s8 s13 XCHG
         s7 s12 XCHG
-        s9 s11 XCHG
+        s6 s11 XCHG
         s5 s10 XCHG
-        5 5 BLKSWAP
-        s2 s3 XCHG
+        s4 s9 XCHG
+        s3 s8 XCHG
+        s7 s1 s5 XCHG3
+        s4 s4 XCHG2
+        s6 s1 s6 XCHG3
+        s0 s3 XCHG
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -1120,17 +1302,17 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         8 LDU
         LDMSGADDR
         DROP
         3734 PUSHINT
         __tact_context_get_sender INLINECALLDICT
-        16 s() PUSH
+        19 s() PUSH
         SDEQ
         THROWANYIFNOT
-        12776 PUSHINT
+        23073 PUSHINT
         s2 PUSH
         0 GTINT
         IF:<{
@@ -1178,8 +1360,10 @@ PROGRAM{
         }>ELSE<{
           DROP
         }>
-        s12 s14 XCHG
-        2 12 BLKSWAP
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        2 13 BLKSWAP
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -1188,8 +1372,8 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         64 LDU
         LDMSGADDR
         1 LDI
@@ -1283,8 +1467,10 @@ PROGRAM{
             // Group 5: Sending the message, with `mode` on top
             SWAP
             SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-        s12 s14 XCHG
-        2 12 BLKSWAP
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        2 13 BLKSWAP
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -1293,50 +1479,24 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s10 POP
-        s14 POP
-        s0 s8 XCHG
+        s13 POP
+        17 s() POP
+        s0 s11 XCHG
         16 LDU
         DROP
         3734 PUSHINT
         __tact_context_get_sender INLINECALLDICT
-        s14 PUSH
+        17 s() PUSH
         SDEQ
         THROWANYIFNOT
-        58338 PUSHINT
+        62694 PUSHINT
         OVER
         3000 PUSHINT
         LEQ
         THROWANYIFNOT
-        s12 s14 XCHG
-        s11 s13 XCHG
-        s10 s12 XCHG
-        s9 s11 XCHG
-        s0 s10 XCHG
-        s7 s9 XCHG
-        s6 s8 XCHG
-        s5 s7 XCHG
-        s4 s6 XCHG
-        s3 s5 XCHG
-        s4 s3 s0 XCHG3
-        $NeuroVault$_contract_store INLINECALLDICT
-        RETALT
-      }>
-      OVER
-      1643308500 PUSHINT
-      EQUAL
-      IFJMP:<{
-        NIP
-        s13 POP
-        s14 POP
-        s0 s11 XCHG
-        LDMSGADDR
-        DROP
-        3734 PUSHINT
-        __tact_context_get_sender INLINECALLDICT
-        s14 PUSH
-        SDEQ
-        THROWANYIFNOT
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
         s12 s14 XCHG
         s0 s13 XCHG
         s10 s12 XCHG
@@ -1347,8 +1507,40 @@ PROGRAM{
         s5 s7 XCHG
         s4 s6 XCHG
         s3 s5 XCHG
+        s4 s3 s0 XCHG3
+        s1 s2 XCHG
+        $NeuroVault$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      1643308500 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        16 s() POP
+        17 s() POP
+        s0 s14 XCHG
+        LDMSGADDR
+        DROP
+        3734 PUSHINT
+        __tact_context_get_sender INLINECALLDICT
+        17 s() PUSH
+        SDEQ
+        THROWANYIFNOT
+        s15 17 s() XCHG
+        s0 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
         s4 s0 s3 XCHG3
-        s0 s2 XCHG
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -1357,32 +1549,110 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s8 POP
-        s14 POP
-        s0 s6 XCHG
+        s11 POP
+        17 s() POP
+        s0 s9 XCHG
         16 LDU
         DROP
         3734 PUSHINT
         __tact_context_get_sender INLINECALLDICT
-        s14 PUSH
+        17 s() PUSH
         SDEQ
         THROWANYIFNOT
-        44977 PUSHINT
+        63779 PUSHINT
         OVER
         1000 PUSHINT
         LEQ
         THROWANYIFNOT
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s0 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s3 s0 XCHG3
+        s1 s2 XCHG
+        $NeuroVault$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      3604641594 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        s10 POP
+        17 s() POP
+        s0 s8 XCHG
+        16 LDU
+        DROP
+        3734 PUSHINT
+        __tact_context_get_sender INLINECALLDICT
+        17 s() PUSH
+        SDEQ
+        THROWANYIFNOT
+        7696 PUSHINT
+        OVER
+        8000 PUSHINT
+        LEQ
+        THROWANYIFNOT
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s0 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s0 s3 XCHG3
+        $NeuroVault$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      1162639545 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        s9 POP
+        17 s() POP
+        s0 s7 XCHG
+        16 LDU
+        DROP
+        3734 PUSHINT
+        __tact_context_get_sender INLINECALLDICT
+        17 s() PUSH
+        SDEQ
+        THROWANYIFNOT
+        35219 PUSHINT
+        OVER
+        101 LESSINT
+        THROWANYIFNOT
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
         s12 s14 XCHG
         s11 s13 XCHG
         s10 s12 XCHG
         s9 s11 XCHG
         s8 s10 XCHG
-        s7 s9 XCHG
-        s0 s8 XCHG
+        s0 s9 XCHG
+        s6 s8 XCHG
         s5 s7 XCHG
         s4 s6 XCHG
         s3 s5 XCHG
         s4 s3 s0 XCHG3
+        s1 s2 XCHG
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
@@ -1391,13 +1661,16 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         64 LDU
         DROP
         $DeployOk$_constructor_queryId INLINECALLDICT
         NEWC
         $DeployOk$_store_cell INLINECALLDICT
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
         s13 s15 XCHG
         s12 s14 XCHG
         s11 s13 XCHG
@@ -1410,6 +1683,7 @@ PROGRAM{
         s4 s6 XCHG
         s3 s5 XCHG
         s4 s3 s0 XCHG3
+        s1 s2 XCHG
         $NeuroVault$_fun_notify INLINECALLDICT
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
@@ -1419,19 +1693,24 @@ PROGRAM{
       EQUAL
       IFJMP:<{
         NIP
-        s15 POP
-        s0 s14 XCHG
+        18 s() POP
+        s0 17 s() XCHG
         64 LDU
         LDMSGADDR
         DROP
-        s0 16 s() XCHG
-        s1 s15 XCHG
+        s1 18 s() XCHG
+        s0 19 s() XCHG
         $NeuroVault$_fun_requireOwner INLINECALLDICT
-        s14 POP
-        s14 s15 XCPU
+        17 s() POP
+        18 s() PUSH
+        s1 18 s() XCHG
+        s0 19 s() XCHG
         $ChangeOwnerOk$_constructor_queryId_newOwner INLINECALLDICT
         NEWC
         $ChangeOwnerOk$_store_cell INLINECALLDICT
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
         s12 s14 XCHG
         s11 s13 XCHG
         s10 s12 XCHG
@@ -1443,11 +1722,12 @@ PROGRAM{
         s4 s6 XCHG
         s3 s5 XCHG
         s4 s3 s0 XCHG3
+        s1 s2 XCHG
         $NeuroVault$_fun_reply INLINECALLDICT
         $NeuroVault$_contract_store INLINECALLDICT
         RETALT
       }>
-      s0 16 s() XCHG
+      s0 19 s() XCHG
     }>
     SWAP
     0 EQINT
@@ -1455,42 +1735,51 @@ PROGRAM{
     33 LESSINT
     AND
     IFJMP:<{
-      s14 POP
+      17 s() POP
       __tact_context_get INLINECALLDICT
       DROP
       s2 POP
-      s13 s14 XCHG
-      s12 s14 XCHG
-      s11 s14 XCHG
-      s10 s14 XCHG
-      s1 s14 XCHG
-      s1 s9 XCHG
-      s1 s8 XCHG
-      s1 s7 XCHG
-      s1 s6 XCHG
-      s5 s15 XCHG2
-      s1 s4 XCHG
-      s3 s3 s0 XCHG3
-      33824 PUSHINT
-      s0 17 s() XCHG
-      16 s() PUSH
+      16 s() 17 s() XCHG
+      s15 17 s() XCHG
+      s14 17 s() XCHG
+      s13 17 s() XCHG
+      s12 17 s() XCHG
+      s11 17 s() XCHG
+      s10 17 s() XCHG
+      s9 17 s() XCHG
+      s8 17 s() XCHG
+      s7 17 s() XCHG
+      s6 17 s() XCHG
+      s5 17 s() XCHG
+      s4 17 s() XCHG
+      s3 17 s() XCHG
+      s2 17 s() XCHG
+      s1 17 s() XCHG
+      s0 18 s() XCHG
+      28981 PUSHINT
+      s0 20 s() XCHG
+      19 s() PUSH
       $NeuroVault$_fun_isWhitelisted INLINECALLDICT
       IF:<{
-        16 s() POP
+        19 s() POP
         TRUE
       }>ELSE<{
-        s0 16 s() XCHG
-        s13 PUSH
+        s0 19 s() XCHG
+        16 s() PUSH
         SDEQ
       }>
-      s1 17 s() XCHG
+      s1 20 s() XCHG
       THROWANYIFNOT
-      s9 s13 XCHG2
+      s0 16 s() XCHG
+      s1 s12 XCHG
       ADD
-      s11 s14 XCHG
+      s14 17 s() XCHG
+      s13 16 s() XCHG
+      s12 s15 XCHG
+      s0 s14 XCHG
       s10 s13 XCHG
       s9 s12 XCHG
-      s0 s11 XCHG
+      s8 s11 XCHG
       s7 s10 XCHG
       s6 s9 XCHG
       s5 s8 XCHG
@@ -1500,47 +1789,131 @@ PROGRAM{
       s3 s0 s0 XCHG3
       $NeuroVault$_contract_store INLINECALLDICT
     }>
-    s0 s14 XCHG
+    s0 17 s() XCHG
     HASHSU
     DUP
-    87359202347776376330674263344429808226197842721788624876880768089128631688036 PUSHINT
+    89075956246473633694334709446862600725506910877625368540779624239771065542170 PUSHINT
     EQUAL
     IFJMP:<{
       DROP
-      __tact_context_get INLINECALLDICT
-      s1 s3 XCHG
-      3 BLKDROP
-      s1 s10 XCHG
+      3734 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      17 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+          BALANCE FIRST
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      s14 s15 XCHG
+      s13 s14 XCHG
+      s12 s13 XCHG
+      s11 s12 XCHG
+      s10 s11 XCHG
+      s9 s10 XCHG
+      s8 s9 XCHG
+      s7 s8 XCHG
+      s6 s7 XCHG
+      s5 s6 XCHG
+      s4 s5 XCHG
+      s3 s4 XCHG
+      s0 18 s() XCHG
+      s1 s3 s0 XCHG3
+      $NeuroVault$_fun_reserveGas INLINECALLDICT
+      10000000 PUSHINT
       ADD
+      19 s() PUSH
+      OVER
+      GREATER
+      IF:<{
+        s15 POP
+        s1 18 s() XCHG
+        s0 s14 XCHG
+        SUB
+        s0 s13 XCHG
+        s0 17 s() XCHG
+      }>ELSE<{
+        DROP
+        18 s() POP
+      }>
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      15 ROLL
+      $NeuroVault$_contract_store INLINECALLDICT
+    }>
+    DUP
+    9115085997754740974294215573268521726221387003084486976788058638343367695719 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      s6 POP
+      3734 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      16 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      s14 16 s() XCHG
+      s13 s15 XCHG
       s12 s14 XCHG
       s11 s13 XCHG
       s10 s12 XCHG
-      s0 s11 XCHG
+      s9 s11 XCHG
       s8 s10 XCHG
       s7 s9 XCHG
       s6 s8 XCHG
+      TRUE
+      s0 s8 XCHG
       s5 s7 XCHG
       s4 s6 XCHG
       s3 s5 XCHG
       s4 s0 s3 XCHG3
-      s0 s2 XCHG
       $NeuroVault$_contract_store INLINECALLDICT
     }>
-    s15 POP
-    s0 s14 XCHG
+    DUP
+    58580637914021727107175570026361416141630267461378909668550014580367449956954 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      s6 POP
+      3734 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      16 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      FALSE
+      s0 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s0 s3 XCHG3
+      $NeuroVault$_contract_store INLINECALLDICT
+    }>
+    18 s() POP
+    s0 17 s() XCHG
     45607799706125141626410874205021541062536380004540676750285305551545733575385 PUSHINT
     EQUAL
     IFJMP:<{
-      14534 PUSHINT
+      3734 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s13 PUSH
+      16 s() PUSH
       SDEQ
       THROWANYIFNOT
-      2 12 BLKSWAP
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
       FALSE
       $NeuroVault$_contract_store INLINECALLDICT
     }>
-    14 BLKDROP
+    15 BLKDROP
+    2DROP
     130 THROW
   }>
   __tact_selector_hack PROC:<{

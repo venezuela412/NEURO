@@ -88,6 +88,14 @@ message UpdateAutoCompoundCap {
     newCap: Int as uint16; // e.g. 500 = 5%
 }
 
+message UpdateDelegateLimit {
+    newLimit: Int as uint16; // e.g. 5000 = 50%, max 8000 = 80%
+}
+
+message UpdateDepositFee {
+    newFee: Int as uint16; // e.g. 10 = 0.1%, max 100 = 1%
+}
+
 // STON.fi V2 Specific Swap structures
 struct SwapAdditionalData {
     minOut: Int as coins;              
