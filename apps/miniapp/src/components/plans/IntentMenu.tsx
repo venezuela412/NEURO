@@ -6,48 +6,48 @@ import { StrategyCard } from './StrategyCard';
 const STRATEGIES = [
   {
     id: 1,
-    title: 'Zen Staking',
-    description: 'Safe liquid staking in TON via Tonstakers. Zero impermanent loss, pure native APY.',
+    title: 'Safe Savings',
+    description: 'The safest option. Your TON earns steady interest like a savings account — no surprises, just reliable growth.',
     apy: '7–19%',
     risk: 'Low' as const,
     icon: Shield,
   },
   {
     id: 2,
-    title: 'Degen Leverage',
-    description: 'Autonomous loan loops on EVAA Protocol. Multiplied APY via leveraged nTON.',
+    title: 'Power Boost',
+    description: 'Your earnings are automatically reinvested to multiply your returns. Higher rewards with more market exposure.',
     apy: '25–40%',
     risk: 'High' as const,
     icon: Zap,
   },
   {
     id: 3,
-    title: 'HF Farming',
-    description: 'Agent hops between DeDust & STON.fi pools tracking the highest yield pairs.',
+    title: 'Yield Hopper',
+    description: 'Our system automatically moves your funds to wherever the best returns are — always chasing the top opportunities.',
     apy: '30–60%',
     risk: 'Aggressive' as const,
     icon: TrendingUp,
   },
   {
     id: 4,
-    title: 'Delta-Neutral',
-    description: 'Arbitrage between USDT/TON while hedging exposure. Minimizes volatility.',
+    title: 'Balanced Earner',
+    description: 'Earns from market movement while keeping your position balanced. Good returns with controlled risk.',
     apy: '15–25%',
     risk: 'Medium' as const,
     icon: Scale,
   },
   {
     id: 5,
-    title: 'Stargate',
-    description: 'Solvers mirror capital to Solana & BSC high-yield systems. Rewards in TON.',
+    title: 'Multi-Chain',
+    description: 'Your TON works across multiple blockchains for maximum earning potential. Highest returns, but more volatile.',
     apy: '40–80%',
     risk: 'Aggressive' as const,
     icon: Globe,
   },
   {
     id: 6,
-    title: 'DCA Rain',
-    description: 'Converts daily staking yields into high-momentum tokens like $NOT automatically.',
+    title: 'Smart DCA',
+    description: 'Automatically converts your daily earnings into promising tokens. A hands-off way to build a diversified portfolio.',
     apy: '10–15%',
     risk: 'Medium' as const,
     icon: CloudRain,
@@ -67,7 +67,7 @@ export const IntentMenu: React.FC = () => {
             onClick={() => setIsAdvanced(false)}
             className={`intent-toggle-btn ${!isAdvanced ? 'intent-toggle-btn--active-teal' : ''}`}
           >
-            Concierge
+            Easy Mode
           </button>
           <button
             onClick={() => setIsAdvanced(true)}
@@ -81,14 +81,15 @@ export const IntentMenu: React.FC = () => {
       {/* Header */}
       <div className="intent-header">
         <h2 className="intent-title">
-          {isAdvanced ? 'Direct nTON Custody' : 'Choose Your Intent'}
+          {isAdvanced ? 'Self-Manage Your Tokens' : 'How Do You Want to Earn?'}
         </h2>
         <p className="intent-desc">
           {isAdvanced
-            ? 'Receive nTON liquid tokens and manage your own DeFi integrations.'
-            : 'Select a mission. Our AI solvers will route your TON to outperform the market.'}
+            ? 'Get your nTON tokens directly and manage them yourself in the TON ecosystem.'
+            : 'Pick an earning style that matches your comfort level. Change anytime.'}
         </p>
       </div>
+
 
       {/* Strategy grid or Advanced panel */}
       <AnimatePresence mode="wait">
@@ -120,12 +121,12 @@ export const IntentMenu: React.FC = () => {
             className="intent-advanced"
           >
             <Shield className="intent-advanced-icon" />
-            <h3 className="intent-advanced-title">Advanced Self-Custody</h3>
+            <h3 className="intent-advanced-title">Self-Managed Mode</h3>
             <p className="intent-advanced-desc">
-              Deposit TON directly into the NeuroVault Smart Contract and receive your nTON LSTs.
-              Use them anywhere in the TON Ecosystem.
+              Deposit your TON and receive nTON tokens you can use anywhere in the TON ecosystem.
+              Full control stays with you.
             </p>
-            <button className="intent-advanced-btn">Mint nTON Directly</button>
+            <button className="intent-advanced-btn">Get nTON Tokens</button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -140,12 +141,12 @@ export const IntentMenu: React.FC = () => {
             className="intent-footer-cta"
             onClick={() => {
               try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.("heavy"); } catch(_){}
-              alert(`Transaction initiated! Deposit 3 TON into NeuroVault.`);
+              alert(`Ready to earn! Connect your wallet and deposit at least 3 TON to get started.`);
             }}
           >
-            DEPLOY VAULT AGENT
+            START EARNING
           </button>
-          <p className="intent-footer-min">Minimum 3 TON Deposit</p>
+          <p className="intent-footer-min">Minimum 3 TON to start</p>
         </div>
       )}
     </div>
