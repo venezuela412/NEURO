@@ -8,6 +8,7 @@ import { useTelegramEnv } from "../../hooks/useTelegramEnv";
 import { useNeuroWallet } from "../../hooks/useTonWallet";
 import { useAppStore } from "../../store/appStore";
 import { useHaptics } from "../../hooks/useHaptics";
+import clsx from "clsx";
 
 const navItems = [
   { to: "/", label: "Home" },

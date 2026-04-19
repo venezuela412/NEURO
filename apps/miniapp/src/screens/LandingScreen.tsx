@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Languages, Zap } from "lucide-react";
+import { Languages, Zap, BrainCircuit } from "lucide-react";
 import { APP_TAGLINE } from "@neuro/shared";
 import { PageWrapper } from "../components/layout/PageWrapper";
 import { useAppStore } from "../store/appStore";
@@ -46,13 +46,13 @@ export function LandingScreen() {
            style={{ position: "absolute", width: "160px", height: "160px", border: "1px dashed rgba(143,115,255,0.4)", borderRadius: "50%", zIndex: 1 }}
         />
 
-        <motion.img
-           src="/assets/logo.png"
-           alt="NeuroTON Logo"
+        <motion.div
            animate={{ y: [0, -8, 0], scale: [1, 1.02, 1], filter: ["drop-shadow(0px 0px 10px rgba(38,211,199,0.4))", "drop-shadow(0px 0px 25px rgba(38,211,199,0.8))", "drop-shadow(0px 0px 10px rgba(38,211,199,0.4))"] }}
            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-           style={{ zIndex: 10, width: "100px", height: "100px", objectFit: "contain", borderRadius: "50%" }}
-        />
+           style={{ zIndex: 10, width: "100px", height: "100px", borderRadius: "50%", background: "linear-gradient(135deg, rgba(38,211,199,0.1) 0%, rgba(143,115,255,0.1) 100%)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}
+        >
+          <BrainCircuit size={48} color="#26d3c7" strokeWidth={1.5} />
+        </motion.div>
       </div>
 
       <div className="center-stack stack-sm" style={{ marginBottom: "32px", zIndex: 10 }}>
