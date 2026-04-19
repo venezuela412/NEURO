@@ -218,3 +218,50 @@ export interface WalletSession {
   walletAddress: string;
   expiresAt: string;
 }
+
+// ─── STRATEGY ENGINE SHARED TYPES ───
+
+export interface PoolOpportunity {
+  protocol: string;
+  poolAddress: string;
+  poolName: string;
+  apy: number;
+  riskAdjustedApy: number;
+  tvlTon: number;
+  safetyScore: number; // 0–1
+  category: "staking" | "lp" | "farming";
+}
+
+export interface MarketScanReport {
+  totalPoolsScanned: number;
+  safePoolsFound: number;
+  protocolsOnline: number;
+  bestStakingApy: number | null;
+  bestLpApy: number | null;
+  opportunities: PoolOpportunity[];
+  routeQualityScore: number;
+  rebalanceRecommended: boolean;
+  rebalanceReason: string | null;
+  scannedAt: string;
+}
+
+export interface TokenSafetyInfo {
+  address: string;
+  symbol: string;
+  approved: boolean;
+  safetyScore: number;
+  flags: string[];
+}
+
+export interface WithdrawalTxParams {
+  to: string;
+  value: string;
+  payload: string;   // base64-encoded BOC
+}
+
+// ─── KNOWN PROTOCOL ADDRESSES ───
+
+export const STONFI_ROUTER_V2 = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
+export const DEDUST_FACTORY = "EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67";
+export const TSTON_JETTON_MASTER = "EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav";
+

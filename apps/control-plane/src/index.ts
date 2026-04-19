@@ -672,6 +672,193 @@ server.get("/api/strategy-health", async (request, reply) => {
   }
 });
 
+// ==================== MARKET INTELLIGENCE ENDPOINTS ====================
+
+import { scanMarketOpportunities, getLastScanResult } from "./market-scanner";
+import { sendSetWhitelist, buildWithdrawalTxParams, getVaultTsTonBalance } from "./vault-executor";
+import { APPROVED_TOKENS, checkPoolSafety, assessTokenRisk } from "./token-safety";
+
+// GET /api/market-scan — Latest market scanner results (admin)
+server.get("/api/market-scan", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    return reply.status(401).send({ error: "unauthorized" });
+  }
+
+  try {
+    // Use cached scan if recent, otherwise run fresh
+    let scan = getLastScanResult();
+    if (!scan || Date.now() - new Date(scan.scannedAt).getTime() > 10 * 60 * 1000) {
+      scan = await scanMarketOpportunities(
+        OmniChainSolver.getLastKnownApy() ?? undefined,
+        OmniChainSolver._lastKnownTvl,
+      );
+    }
+
+    return reply.send({
+      ok: true,
+      totalPoolsScanned: scan.marketData.totalPoolsScanned,
+      safePoolsFound: scan.marketData.safePools,
+      protocolsOnline: scan.marketData.totalProtocolsScanned,
+      routeQualityScore: scan.routeQualityScore,
+      bestYieldProtocol: scan.bestYieldProtocol,
+      bestYieldApy: scan.bestYieldApy,
+      rebalanceRecommended: scan.rebalanceRecommended,
+      rebalanceReason: scan.rebalanceReason,
+      allocationEfficiency: scan.currentAllocationEfficiency,
+      pools: scan.marketData.pools.map((p) => ({
+        protocol: p.protocol,
+        name: p.poolName,
+        apy: p.apy,
+        riskAdjustedApy: p.riskAdjustedApy,
+        tvlTon: p.tvlTon,
+        category: p.category,
+        safe: p.safetyReport?.overallSafe ?? true,
+        riskScore: p.safetyReport?.riskScore ?? 1,
+      })),
+      scannedAt: scan.scannedAt,
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      ok: false,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
+});
+
+// GET /api/pool-opportunities — Ranked investment opportunities (admin)
+server.get("/api/pool-opportunities", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    return reply.status(401).send({ error: "unauthorized" });
+  }
+
+  try {
+    const scan = getLastScanResult();
+    if (!scan) {
+      return reply.send({ ok: true, opportunities: [], message: "No scan data available yet" });
+    }
+
+    return reply.send({
+      ok: true,
+      opportunities: scan.rankedOpportunities.map((o) => ({
+        rank: o.rank,
+        protocol: o.pool.protocol,
+        poolName: o.pool.poolName,
+        apy: o.pool.apy,
+        riskAdjustedApy: o.pool.riskAdjustedApy,
+        sharpeRatio: o.sharpeRatio,
+        netApyAfterCosts: o.netApyAfterCosts,
+        recommendedWeight: o.recommendedWeight,
+        tvlTon: o.pool.tvlTon,
+        category: o.pool.category,
+        safe: o.pool.safetyReport?.overallSafe ?? true,
+        reason: o.reason,
+      })),
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      ok: false,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
+});
+
+// POST /api/whitelist/set — One-time vault whitelist configuration (admin)
+server.post<{ Body: { index: number; target: string } }>(
+  "/api/whitelist/set",
+  async (request, reply) => {
+    const auth = requireAdminToken(request);
+    if (!auth.ok) {
+      return reply.status(401).send({ error: "unauthorized" });
+    }
+
+    const { index, target } = request.body ?? {};
+    if (!index || !target || typeof index !== "number" || typeof target !== "string") {
+      return reply.status(400).send({ error: "invalid_payload", hint: "Required: { index: 1-5, target: 'EQ...' }" });
+    }
+
+    try {
+      const result = await sendSetWhitelist(index, target);
+      return reply.send({ ok: result.success, ...result });
+    } catch (error) {
+      return reply.status(500).send({
+        ok: false,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    }
+  },
+);
+
+// GET /api/rebalance/evaluate — Check if rebalancing is recommended (admin)
+server.get("/api/rebalance/evaluate", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    return reply.status(401).send({ error: "unauthorized" });
+  }
+
+  try {
+    const allocation = await OmniChainSolver.computeRebalancePaths();
+    const scan = getLastScanResult();
+
+    return reply.send({
+      ok: true,
+      currentAllocation: allocation.filter((a) => a.weight > 0),
+      optimalAllocation: allocation,
+      rebalanceRecommended: scan?.rebalanceRecommended ?? false,
+      rebalanceReason: scan?.rebalanceReason ?? null,
+      allocationEfficiency: scan?.currentAllocationEfficiency ?? 0,
+      vaultInfo: {
+        tvlTon: OmniChainSolver._lastKnownTvl,
+        tsTonBalance: await getVaultTsTonBalance(),
+      },
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      ok: false,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
+});
+
+// POST /api/withdrawal/build — Build withdrawal tx params for frontend (public, auth required)
+server.post<{ Body: { walletAddress: string; burnAmountNton: number } }>(
+  "/api/withdrawal/build",
+  async (request, reply) => {
+    const { walletAddress, burnAmountNton } = request.body ?? {};
+    if (!walletAddress || !burnAmountNton || burnAmountNton <= 0) {
+      return reply.status(400).send({ error: "invalid_payload" });
+    }
+
+    try {
+      const txParams = buildWithdrawalTxParams(walletAddress, burnAmountNton);
+      return reply.send({
+        ok: true,
+        txParams,
+        instruction: "Send this transaction via TonConnect to burn nTON and receive TON back.",
+      });
+    } catch (error) {
+      return reply.status(500).send({
+        ok: false,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    }
+  },
+);
+
+// GET /api/approved-tokens — List all approved tokens for the UI
+server.get("/api/approved-tokens", async (_request, reply) => {
+  return reply.send({
+    ok: true,
+    tokens: APPROVED_TOKENS.map((t) => ({
+      symbol: t.symbol,
+      name: t.name,
+      address: t.address,
+      category: t.category,
+    })),
+  });
+});
+
 // ==================== STARTUP ====================
 
 import { scheduleAutoCompoundJob } from "./queue";

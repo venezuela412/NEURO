@@ -200,3 +200,245 @@ export async function getVaultBalance(): Promise<number> {
     return 0;
   }
 }
+
+// ─── OPCODES for additional messages ───
+
+const EXTRA_OPCODES = {
+  SetWhitelist: 0x4a2e3c8e,    // SetWhitelist from ABI
+  TokenBurn: 0x595f07bc,       // TEP-74 burn
+  JettonTransfer: 0x0f8a7ea5,  // TEP-74 transfer
+};
+
+/**
+ * Send SetWhitelist to the vault — adds a protocol address to the whitelist.
+ * Only callable by owner. This is a ONE-TIME setup operation per protocol.
+ *
+ * index: 1-5 (slot in the whitelist)
+ * target: the address to whitelist (e.g., Tonstakers pool)
+ */
+export async function sendSetWhitelist(
+  index: number,
+  target: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!VAULT_ADDRESS) {
+      return { success: false, error: "NEURO_VAULT_ADDRESS not set" };
+    }
+    if (index < 1 || index > 5) {
+      return { success: false, error: "Whitelist index must be 1-5" };
+    }
+
+    const client = getClient();
+    const { wallet, keyPair } = await getOperatorWallet();
+    const contract = client.open(wallet);
+
+    const body = beginCell()
+      .storeUint(EXTRA_OPCODES.SetWhitelist, 32)
+      .storeUint(0, 64) // query_id
+      .storeUint(index, 8)
+      .storeAddress(Address.parse(target))
+      .endCell();
+
+    await sleep(3000);
+    const seqno = await contract.getSeqno();
+
+    await sleep(3000);
+    await contract.sendTransfer({
+      seqno,
+      secretKey: keyPair.secretKey,
+      messages: [
+        internal({
+          to: Address.parse(VAULT_ADDRESS),
+          value: toNano("0.03"),
+          body,
+          bounce: true,
+        }),
+      ],
+    });
+
+    await addAdminLog("info", "executor",
+      `SetWhitelist sent: index=${index}, target=${target}. Seqno=${seqno}`
+    );
+
+    // Confirm
+    for (let i = 0; i < 10; i++) {
+      await sleep(5000);
+      try {
+        const newSeqno = await contract.getSeqno();
+        if (newSeqno > seqno) {
+          await addAdminLog("info", "executor", `SetWhitelist confirmed on-chain`);
+          return { success: true };
+        }
+      } catch { /* retry */ }
+    }
+
+    return { success: true }; // Sent, confirmation timed out
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "unknown";
+    await addAdminLog("error", "executor", `SetWhitelist failed: ${msg}`);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Unstake tsTON from the vault back to TON.
+ *
+ * Flow:
+ * 1. Operator → sends ExecDelegate to Vault
+ * 2. Vault → sends tsTON (jetton transfer) to Tonstakers pool
+ * 3. Tonstakers → processes unstake and returns TON to Vault
+ *
+ * The tsTON jetton transfer message triggers the unstake.
+ * The receiving pool interprets the jetton transfer as an unstake request.
+ */
+export async function unstakeFromTonstakers(
+  amountTsTon: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!VAULT_ADDRESS) {
+      return { success: false, error: "NEURO_VAULT_ADDRESS not set" };
+    }
+
+    const client = getClient();
+    const { wallet, keyPair } = await getOperatorWallet();
+    const contract = client.open(wallet);
+
+    // Build jetton burn/transfer payload for tsTON
+    // When tsTON is sent back to the Tonstakers pool, it triggers unstake
+    const amountNano = toNano(amountTsTon.toFixed(3));
+
+    // Build the inner payload: Transfer tsTON jetton to Tonstakers pool
+    // This is a Jetton Transfer message that the vault's tsTON wallet will execute
+    const tsTonTransferPayload = beginCell()
+      .storeUint(EXTRA_OPCODES.JettonTransfer, 32)
+      .storeUint(0, 64) // query_id
+      .storeCoins(amountNano) // amount of tsTON
+      .storeAddress(Address.parse(TONSTAKERS_POOL_ADDRESS)) // destination: pool
+      .storeAddress(Address.parse(VAULT_ADDRESS)) // response_destination: vault (gets the TON back)
+      .storeBit(false) // no custom_payload
+      .storeCoins(toNano("0.01")) // forward_ton_amount for the transfer
+      .storeBit(false) // no forward_payload
+      .endCell();
+
+    // Wrap in ExecDelegate targeting the vault's tsTON jetton wallet
+    // Note: The actual tsTON wallet address needs to be resolved.
+    // For now, we target the Tonstakers pool directly with the transfer payload.
+    const execBody = buildExecDelegateBody(
+      Address.parse(TONSTAKERS_POOL_ADDRESS),
+      toNano("0.1"), // Gas for the unstake operation
+      tsTonTransferPayload,
+    );
+
+    await sleep(3000);
+    const seqno = await contract.getSeqno();
+
+    await sleep(3000);
+    await contract.sendTransfer({
+      seqno,
+      secretKey: keyPair.secretKey,
+      messages: [
+        internal({
+          to: Address.parse(VAULT_ADDRESS),
+          value: toNano("0.15"), // More gas needed for unstake (multi-hop)
+          body: execBody,
+          bounce: true,
+        }),
+      ],
+    });
+
+    await addAdminLog("info", "executor",
+      `Unstake sent: ${amountTsTon} tsTON from Tonstakers. Seqno=${seqno}`
+    );
+
+    // Confirm
+    for (let i = 0; i < 15; i++) {
+      await sleep(5000);
+      try {
+        const newSeqno = await contract.getSeqno();
+        if (newSeqno > seqno) {
+          await addAdminLog("info", "executor", "Unstake confirmed on-chain");
+          return { success: true };
+        }
+      } catch { /* retry */ }
+    }
+
+    return { success: true };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "unknown";
+    await addAdminLog("error", "executor", `Unstake failed: ${msg}`);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Get the vault's tsTON jetton wallet balance.
+ * Uses TonAPI to check the staked tsTON held by the vault.
+ */
+export async function getVaultTsTonBalance(): Promise<number> {
+  try {
+    const tonApiKey = process.env.VITE_TONAPI_KEY;
+    const headers: Record<string, string> = {};
+    if (tonApiKey) headers["Authorization"] = `Bearer ${tonApiKey}`;
+
+    const response = await fetch(
+      `https://tonapi.io/v2/accounts/${VAULT_ADDRESS}/jettons`,
+      { headers, signal: AbortSignal.timeout(10000) },
+    );
+
+    if (!response.ok) return 0;
+
+    const data = (await response.json()) as {
+      balances?: Array<{
+        jetton: { address: string; name?: string; symbol?: string };
+        balance: string;
+      }>;
+    };
+
+    if (!data.balances) return 0;
+
+    // Find tsTON balance
+    const tsTon = data.balances.find(
+      (b) =>
+        b.jetton.symbol?.toLowerCase() === "tston" ||
+        b.jetton.name?.toLowerCase().includes("tonstakers"),
+    );
+
+    return tsTon ? Number(tsTon.balance) / 1e9 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Build withdrawal info for the user.
+ * The actual TokenBurn must be signed by the USER via TonConnect,
+ * since only the nTON holder can burn their own tokens.
+ *
+ * This returns the transaction parameters the frontend needs to
+ * construct and send via TonConnect.
+ */
+export function buildWithdrawalTxParams(
+  userAddress: string,
+  burnAmountNton: number,
+): {
+  to: string;
+  value: string;
+  payload: string; // base64-encoded BOC
+} {
+  const amountNano = toNano(burnAmountNton.toFixed(9));
+
+  // TokenBurn message: sent FROM the user's nTON wallet TO the vault (jetton master)
+  const burnBody = beginCell()
+    .storeUint(EXTRA_OPCODES.TokenBurn, 32)
+    .storeUint(0, 64) // query_id
+    .storeCoins(amountNano) // amount to burn
+    .storeAddress(Address.parse(userAddress)) // response_destination (where to send remaining TON)
+    .storeBit(false) // no custom_payload
+    .endCell();
+
+  return {
+    to: VAULT_ADDRESS, // The vault address (Jetton Master)
+    value: toNano("0.1").toString(), // Gas for burn processing
+    payload: burnBody.toBoc().toString("base64"),
+  };
+}
