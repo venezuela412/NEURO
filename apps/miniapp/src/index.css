@@ -676,6 +676,213 @@ h1,h2,h3,h4,h5,h6 { margin: 0; line-height: 1.1; }
   margin-top: 10px;
 }
 
+/* ───────────────────── Risk Selector ───────────────────── */
+.risk-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.risk-card {
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--risk-border, rgba(255,255,255,0.08));
+  background: rgba(18,18,22,0.5);
+  backdrop-filter: blur(12px);
+  transition: all 250ms ease;
+  overflow: hidden;
+}
+.risk-card:active { transform: scale(0.98); }
+.risk-card--active {
+  background: var(--risk-bg);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--risk-color) 20%, transparent);
+}
+
+.risk-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.risk-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.risk-card-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.risk-card-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.risk-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.risk-card-apy {
+  text-align: right;
+  flex-shrink: 0;
+}
+.risk-apy-value {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.risk-apy-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.risk-card-detail {
+  overflow: hidden;
+}
+.risk-detail-section {
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.risk-detail-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.risk-detail-text {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+/* ───────────────────── nTON Explainer (Advanced) ───────────────────── */
+.advanced-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nton-explainer {
+  padding: 20px;
+  border: 1px solid rgba(143,115,255,0.2);
+  background: rgba(143,115,255,0.05);
+  border-radius: var(--radius-xl);
+}
+.nton-explainer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.nton-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(143,115,255,0.15);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+.nton-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.nton-desc {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+  margin-bottom: 16px;
+}
+.nton-desc strong { color: var(--accent); font-weight: 700; }
+.nton-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nton-benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+.nton-benefit strong { color: var(--text); font-weight: 600; }
+.nton-benefit-arrow {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.nton-flow {
+  padding: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+}
+.nton-flow-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.nton-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.nton-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.nton-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(38,211,199,0.12);
+  color: var(--accent-2);
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.nton-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nton-step-text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.nton-step-text span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
 /* ───────────────────── Shared Components ───────────────────── */
 .card,
 .hero-card {
