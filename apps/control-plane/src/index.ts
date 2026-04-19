@@ -650,6 +650,28 @@ server.post("/api/solver/cron", async (request, reply) => {
   }
 });
 
+// ==================== STRATEGY HEALTH ====================
+
+server.get("/api/strategy-health", async (request, reply) => {
+  const auth = requireAdminToken(request);
+  if (!auth.ok) {
+    return reply.status(401).send({ error: "unauthorized" });
+  }
+
+  try {
+    const health = await OmniChainSolver.evaluateStrategyHealth();
+    return reply.send({
+      ok: true,
+      ...health,
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      ok: false,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
+});
+
 // ==================== STARTUP ====================
 
 import { scheduleAutoCompoundJob } from "./queue";

@@ -1,6 +1,6 @@
 import { addAdminLog } from "./repository";
+import { isCompoundProfitable, GAS_COSTS, TONSTAKERS_POOL_ADDRESS } from "@neuro/shared";
 
-const TON_RPC_ENDPOINT = process.env.TON_RPC_ENDPOINT ?? "https://toncenter.com/api/v2/jsonRPC";
 const VAULT_ADDRESS = process.env.NEURO_VAULT_ADDRESS ?? "";
 const TONAPI_ENDPOINT = "https://tonapi.io/v2";
 
@@ -10,13 +10,30 @@ interface VaultOnChainState {
   tvlTon: number;
 }
 
+interface StrategyHealth {
+  tonstakersApy: number | null;
+  vaultTvlTon: number;
+  isCompoundProfitable: boolean;
+  estimatedYieldTon: number;
+  compoundCostTon: number;
+  lastChecked: string;
+  strategyAllocation: StrategyAllocation[];
+}
+
+interface StrategyAllocation {
+  protocol: string;
+  weight: number;
+  address: string;
+  currentApy: number | null;
+  status: "active" | "pending-whitelist" | "future";
+}
+
 async function fetchVaultTvlFromChain(): Promise<VaultOnChainState | null> {
   if (!VAULT_ADDRESS) {
     return null;
   }
 
   try {
-    // Use TonAPI to call the vault's `tvl` getter
     const tonApiKey = process.env.VITE_TONAPI_KEY;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -47,13 +64,12 @@ async function fetchVaultTvlFromChain(): Promise<VaultOnChainState | null> {
       return null;
     }
 
-    // Parse the TVM stack result — tvl returns a single Int
     const tvlEntry = data.stack[0];
     const tvlNano = parseInt(tvlEntry.num ?? tvlEntry.value ?? "0", 16);
 
     return {
       totalAssets: tvlNano,
-      totalSupply: 0, // Not needed for profit calculation
+      totalSupply: 0,
       tvlTon: tvlNano / 1e9,
     };
   } catch (error) {
@@ -81,7 +97,6 @@ async function fetchTonstakersApy(): Promise<number | null> {
       implementations?: Record<string, { pools?: Array<{ apy: number; name?: string }> }>;
     };
 
-    // Search for Tonstakers pool
     if (data.implementations) {
       for (const impl of Object.values(data.implementations)) {
         const pool = impl.pools?.find(
@@ -99,38 +114,107 @@ async function fetchTonstakersApy(): Promise<number | null> {
   }
 }
 
-// V10 APEX Omni-Chain Solver — Production Implementation
+// V11 APEX Omni-Chain Solver — Production Implementation with Dynamic Fees
 export const OmniChainSolver = {
-  // Compute vault profit by comparing on-chain TVL with historical snapshot
-  async computeAutoCompoundForVault(): Promise<{ profitToMint: number; tvlTon: number; apyEstimate: number | null }> {
+  /** Cached APY for frontend use */
+  _lastKnownApy: null as number | null,
+  _lastKnownTvl: 0,
+
+  /** Get the last known APY (for use by API endpoints without re-fetching) */
+  getLastKnownApy(): number | null {
+    return this._lastKnownApy;
+  },
+
+  /** Compute vault profit with dynamic profitability check */
+  async computeAutoCompoundForVault(): Promise<{
+    profitToMint: number;
+    tvlTon: number;
+    apyEstimate: number | null;
+    isProfitable: boolean;
+    costEstimateTon: number;
+  }> {
     const onChainState = await fetchVaultTvlFromChain();
     const currentApy = await fetchTonstakersApy();
 
+    // Cache for other uses
+    this._lastKnownApy = currentApy;
+    this._lastKnownTvl = onChainState?.tvlTon ?? 0;
+
     if (!onChainState || onChainState.totalAssets === 0) {
       await addAdminLog("info", "solver", "Vault TVL is zero or unavailable — skipping compound cycle");
-      return { profitToMint: 0, tvlTon: 0, apyEstimate: currentApy };
+      return { profitToMint: 0, tvlTon: 0, apyEstimate: currentApy, isProfitable: false, costEstimateTon: 0 };
     }
 
     // Calculate estimated profit since last compound (6h cycle = 1/1460 of annual)
-    const annualRate = currentApy ?? 0.05; // Fallback 5% if API unavailable
+    const annualRate = currentApy ?? 0.05;
     const sixHourRate = annualRate / 1460;
     const estimatedProfit = Math.floor(onChainState.totalAssets * sixHourRate);
+    const estimatedProfitTon = estimatedProfit / 1e9;
 
-    await addAdminLog("info", "solver", `Compound calculation: TVL=${onChainState.tvlTon.toFixed(2)} TON, APY=${(annualRate * 100).toFixed(2)}%, profit=${(estimatedProfit / 1e9).toFixed(4)} TON`);
+    // Dynamic profitability check — don't compound if yield < cost
+    const compoundCostTon = GAS_COSTS.compound_cycle;
+    const profitable = isCompoundProfitable(estimatedProfitTon, onChainState.tvlTon, "tonstakers");
+
+    await addAdminLog("info", "solver",
+      `Compound check: TVL=${onChainState.tvlTon.toFixed(2)} TON, ` +
+      `APY=${(annualRate * 100).toFixed(2)}%, ` +
+      `yield=${estimatedProfitTon.toFixed(4)} TON, ` +
+      `cost=${compoundCostTon} TON, ` +
+      `profitable=${profitable}`
+    );
 
     return {
-      profitToMint: estimatedProfit,
+      profitToMint: profitable ? estimatedProfit : 0,
       tvlTon: onChainState.tvlTon,
       apyEstimate: currentApy,
+      isProfitable: profitable,
+      costEstimateTon: compoundCostTon,
     };
   },
 
-  // Strategy allocation paths
-  async computeRebalancePaths() {
+  /** Dynamic strategy allocation based on live metrics */
+  async computeRebalancePaths(): Promise<StrategyAllocation[]> {
+    const tonstakersApy = await fetchTonstakersApy();
+    this._lastKnownApy = tonstakersApy;
+
     return [
-      { intent: 1, action: "ZEN_STAKING", target: "EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR", weight: 0.8, protocol: "Tonstakers" },
-      { intent: 2, action: "LP_FARMING", target: "STON_ROUTER_DYNAMIC", weight: 0.1, protocol: "STON.fi" },
-      { intent: 3, action: "NATIVE_DEFI", target: "EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67", weight: 0.1, protocol: "DeDust" },
+      {
+        protocol: "Tonstakers",
+        weight: 1.0, // 100% for now — only real working strategy
+        address: TONSTAKERS_POOL_ADDRESS,
+        currentApy: tonstakersApy,
+        status: "active",
+      },
+      {
+        protocol: "STON.fi LP",
+        weight: 0,
+        address: "STON_ROUTER_DYNAMIC",
+        currentApy: null,
+        status: "future",
+      },
+      {
+        protocol: "DeDust",
+        weight: 0,
+        address: "EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67",
+        currentApy: null,
+        status: "future",
+      },
     ];
+  },
+
+  /** Full strategy health assessment for admin dashboard */
+  async evaluateStrategyHealth(): Promise<StrategyHealth> {
+    const compound = await this.computeAutoCompoundForVault();
+    const allocation = await this.computeRebalancePaths();
+
+    return {
+      tonstakersApy: compound.apyEstimate,
+      vaultTvlTon: compound.tvlTon,
+      isCompoundProfitable: compound.isProfitable,
+      estimatedYieldTon: compound.profitToMint / 1e9,
+      compoundCostTon: compound.costEstimateTon,
+      lastChecked: new Date().toISOString(),
+      strategyAllocation: allocation,
+    };
   },
 };

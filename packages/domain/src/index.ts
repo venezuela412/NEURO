@@ -1,6 +1,8 @@
 import {
   DEFAULT_ROUTE_QUALITY,
+  GAS_COSTS,
   GAS_RESERVE_MIN_TON,
+  PROTOCOL_FEES,
   type ActivityEvent,
   type FeePreview,
   type Goal,
@@ -211,14 +213,22 @@ export function calculateFeePreview(
   estimatedValueTon: number,
 ): FeePreview {
   const estimatedProfitTon = Math.max(0, Number((estimatedValueTon - principalTon).toFixed(2)));
-  const estimatedFeeTon = Number((estimatedProfitTon * FEE_RATES[planId]).toFixed(2));
+  const platformFeeTon = Number((estimatedProfitTon * FEE_RATES[planId]).toFixed(4));
+
+  // Include real gas costs based on strategy type
+  const provider = planId === "safe-income" || planId === "exit-to-safety" ? "tonstakers" : "stonfi";
+  const gasCost = planId === "safe-income" ? GAS_COSTS.staking_deposit : GAS_COSTS.swap;
+  const protocolFees = PROTOCOL_FEES[provider] ?? { protocol: 0, pool: 0 };
+  const protocolFeeTon = Number((principalTon * (protocolFees.protocol + protocolFees.pool)).toFixed(4));
+
+  const totalFeeTon = Number((platformFeeTon + gasCost + protocolFeeTon).toFixed(4));
 
   return {
     principalTon: Number(principalTon.toFixed(2)),
     estimatedValueTon: Number(estimatedValueTon.toFixed(2)),
     estimatedProfitTon,
-    estimatedFeeTon,
-    estimatedNetValueTon: Number((estimatedValueTon - estimatedFeeTon).toFixed(2)),
+    estimatedFeeTon: Number(totalFeeTon.toFixed(2)),
+    estimatedNetValueTon: Number((estimatedValueTon - totalFeeTon).toFixed(2)),
   };
 }
 
@@ -251,13 +261,15 @@ export function buildActivityFeed(planId: PlanId, amountTon: number): ActivityEv
 export function buildPortfolioSnapshot(
   recommendation: PlanRecommendation,
   amountTon: number,
+  liveApyPercent?: number,
 ): PortfolioSnapshot {
-  const appreciationMultiplier =
-    recommendation.plan.id === "safe-income"
-      ? 1.012
-      : recommendation.plan.id === "balanced-income"
-        ? 1.024
-        : 1.041;
+  // Use live APY when available, otherwise derive from plan's estimated range
+  const annualPct = liveApyPercent
+    ?? (recommendation.estimatedAnnualRange.low + recommendation.estimatedAnnualRange.high) / 2;
+
+  // Project 30-day appreciation from annual APY
+  const monthlyRate = annualPct / 100 / 12;
+  const appreciationMultiplier = 1 + monthlyRate;
   const estimatedValueTon = Number((amountTon * appreciationMultiplier).toFixed(2));
   const feePreview = calculateFeePreview(recommendation.plan.id, amountTon, estimatedValueTon);
 

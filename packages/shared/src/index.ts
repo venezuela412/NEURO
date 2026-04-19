@@ -8,6 +8,61 @@ export const GAS_RESERVE_MIN_TON = 0.2;
 
 export const DEFAULT_ROUTE_QUALITY = 0.82;
 
+// Dynamic gas costs per operation type (in TON)
+// Source: TON mainnet empirical data — updated 2026-04
+export const GAS_COSTS = {
+  simple_transfer: 0.01,
+  staking_deposit: 0.015,   // Tonstakers stake()
+  staking_withdraw: 0.02,   // Tonstakers unstake()
+  swap: 0.08,               // STON.fi / DeDust swap (worst-case)
+  compound_cycle: 0.1,      // Full harvest: unstake + report yield
+} as const;
+
+// Protocol fees by provider (as decimal, e.g. 0.001 = 0.1%)
+export const PROTOCOL_FEES: Record<string, { protocol: number; pool: number }> = {
+  tonstakers: { protocol: 0, pool: 0 },         // No swap fees — pure staking yield
+  stonfi:     { protocol: 0.001, pool: 0.002 },  // 0.1% protocol + 0.2% pool = 0.3%
+  dedust:     { protocol: 0.001, pool: 0.002 },  // Similar to STON.fi
+};
+
+// Tonstakers mainnet pool address (for whitelist + ExecDelegate)
+export const TONSTAKERS_POOL_ADDRESS = "EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR";
+
+export interface FeeEstimate {
+  gasTon: number;          // Blockchain gas
+  protocolFeePct: number;  // Combined protocol+pool fee as percentage
+  totalCostTon: number;    // gas + (amount * protocolFeePct)
+  netAmountTon: number;    // amount - totalCostTon
+}
+
+export function estimateFees(
+  amountTon: number,
+  operation: keyof typeof GAS_COSTS,
+  provider: string = "tonstakers",
+): FeeEstimate {
+  const gasTon = GAS_COSTS[operation];
+  const fees = PROTOCOL_FEES[provider] ?? { protocol: 0, pool: 0 };
+  const protocolFeePct = fees.protocol + fees.pool;
+  const protocolFeeTon = amountTon * protocolFeePct;
+  const totalCostTon = gasTon + protocolFeeTon;
+  const netAmountTon = Math.max(0, amountTon - totalCostTon);
+  return { gasTon, protocolFeePct, totalCostTon, netAmountTon };
+}
+
+/** Returns true if yield exceeds all costs of compounding */
+export function isCompoundProfitable(
+  estimatedYieldTon: number,
+  tvlTon: number,
+  provider: string = "tonstakers",
+): boolean {
+  const compoundGas = GAS_COSTS.compound_cycle;
+  const fees = PROTOCOL_FEES[provider] ?? { protocol: 0, pool: 0 };
+  const protocolCost = estimatedYieldTon * (fees.protocol + fees.pool);
+  const totalCost = compoundGas + protocolCost;
+  // Only compound if yield is at least 2x the cost (safety margin)
+  return estimatedYieldTon >= totalCost * 2;
+}
+
 export type Goal = "protect" | "earn" | "grow";
 
 export type PlanRisk = "Low" | "Medium" | "High";
