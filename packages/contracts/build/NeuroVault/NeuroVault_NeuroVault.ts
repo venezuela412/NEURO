@@ -1635,6 +1635,106 @@ export function dictValueParserUpdateOperator(): DictionaryValue<UpdateOperator>
     }
 }
 
+export type SetWhitelist = {
+    $$type: 'SetWhitelist';
+    index: bigint;
+    target: Address;
+}
+
+export function storeSetWhitelist(src: SetWhitelist) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(993790908, 32);
+        b_0.storeUint(src.index, 8);
+        b_0.storeAddress(src.target);
+    };
+}
+
+export function loadSetWhitelist(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 993790908) { throw Error('Invalid prefix'); }
+    const _index = sc_0.loadUintBig(8);
+    const _target = sc_0.loadAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function loadTupleSetWhitelist(source: TupleReader) {
+    const _index = source.readBigNumber();
+    const _target = source.readAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function loadGetterTupleSetWhitelist(source: TupleReader) {
+    const _index = source.readBigNumber();
+    const _target = source.readAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function storeTupleSetWhitelist(source: SetWhitelist) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.index);
+    builder.writeAddress(source.target);
+    return builder.build();
+}
+
+export function dictValueParserSetWhitelist(): DictionaryValue<SetWhitelist> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSetWhitelist(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSetWhitelist(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type UpdateAutoCompoundCap = {
+    $$type: 'UpdateAutoCompoundCap';
+    newCap: bigint;
+}
+
+export function storeUpdateAutoCompoundCap(src: UpdateAutoCompoundCap) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(927790173, 32);
+        b_0.storeUint(src.newCap, 16);
+    };
+}
+
+export function loadUpdateAutoCompoundCap(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 927790173) { throw Error('Invalid prefix'); }
+    const _newCap = sc_0.loadUintBig(16);
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function loadTupleUpdateAutoCompoundCap(source: TupleReader) {
+    const _newCap = source.readBigNumber();
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function loadGetterTupleUpdateAutoCompoundCap(source: TupleReader) {
+    const _newCap = source.readBigNumber();
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function storeTupleUpdateAutoCompoundCap(source: UpdateAutoCompoundCap) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.newCap);
+    return builder.build();
+}
+
+export function dictValueParserUpdateAutoCompoundCap(): DictionaryValue<UpdateAutoCompoundCap> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeUpdateAutoCompoundCap(src)).endCell());
+        },
+        parse: (src) => {
+            return loadUpdateAutoCompoundCap(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type SwapAdditionalData = {
     $$type: 'SwapAdditionalData';
     minOut: bigint;
@@ -1971,6 +2071,13 @@ export type NeuroVault$Data = {
     totalAssets: bigint;
     performanceFeePrecise: bigint;
     minDepositAmount: bigint;
+    autoCompoundCap: bigint;
+    whitelistCount: bigint;
+    whitelist1: Address;
+    whitelist2: Address;
+    whitelist3: Address;
+    whitelist4: Address;
+    whitelist5: Address;
     content: Cell;
     mintable: boolean;
 }
@@ -1984,8 +2091,19 @@ export function storeNeuroVault$Data(src: NeuroVault$Data) {
         b_0.storeCoins(src.totalAssets);
         b_0.storeUint(src.performanceFeePrecise, 16);
         b_0.storeCoins(src.minDepositAmount);
-        b_0.storeRef(src.content);
-        b_0.storeBit(src.mintable);
+        b_0.storeUint(src.autoCompoundCap, 16);
+        b_0.storeUint(src.whitelistCount, 8);
+        const b_1 = new Builder();
+        b_1.storeAddress(src.whitelist1);
+        b_1.storeAddress(src.whitelist2);
+        b_1.storeAddress(src.whitelist3);
+        const b_2 = new Builder();
+        b_2.storeAddress(src.whitelist4);
+        b_2.storeAddress(src.whitelist5);
+        b_2.storeRef(src.content);
+        b_2.storeBit(src.mintable);
+        b_1.storeRef(b_2.endCell());
+        b_0.storeRef(b_1.endCell());
     };
 }
 
@@ -1997,9 +2115,18 @@ export function loadNeuroVault$Data(slice: Slice) {
     const _totalAssets = sc_0.loadCoins();
     const _performanceFeePrecise = sc_0.loadUintBig(16);
     const _minDepositAmount = sc_0.loadCoins();
-    const _content = sc_0.loadRef();
-    const _mintable = sc_0.loadBit();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    const _autoCompoundCap = sc_0.loadUintBig(16);
+    const _whitelistCount = sc_0.loadUintBig(8);
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _whitelist1 = sc_1.loadAddress();
+    const _whitelist2 = sc_1.loadAddress();
+    const _whitelist3 = sc_1.loadAddress();
+    const sc_2 = sc_1.loadRef().beginParse();
+    const _whitelist4 = sc_2.loadAddress();
+    const _whitelist5 = sc_2.loadAddress();
+    const _content = sc_2.loadRef();
+    const _mintable = sc_2.loadBit();
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function loadTupleNeuroVault$Data(source: TupleReader) {
@@ -2009,9 +2136,16 @@ export function loadTupleNeuroVault$Data(source: TupleReader) {
     const _totalAssets = source.readBigNumber();
     const _performanceFeePrecise = source.readBigNumber();
     const _minDepositAmount = source.readBigNumber();
+    const _autoCompoundCap = source.readBigNumber();
+    const _whitelistCount = source.readBigNumber();
+    const _whitelist1 = source.readAddress();
+    const _whitelist2 = source.readAddress();
+    const _whitelist3 = source.readAddress();
+    const _whitelist4 = source.readAddress();
+    const _whitelist5 = source.readAddress();
     const _content = source.readCell();
     const _mintable = source.readBoolean();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function loadGetterTupleNeuroVault$Data(source: TupleReader) {
@@ -2021,9 +2155,16 @@ export function loadGetterTupleNeuroVault$Data(source: TupleReader) {
     const _totalAssets = source.readBigNumber();
     const _performanceFeePrecise = source.readBigNumber();
     const _minDepositAmount = source.readBigNumber();
+    const _autoCompoundCap = source.readBigNumber();
+    const _whitelistCount = source.readBigNumber();
+    const _whitelist1 = source.readAddress();
+    const _whitelist2 = source.readAddress();
+    const _whitelist3 = source.readAddress();
+    const _whitelist4 = source.readAddress();
+    const _whitelist5 = source.readAddress();
     const _content = source.readCell();
     const _mintable = source.readBoolean();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function storeTupleNeuroVault$Data(source: NeuroVault$Data) {
@@ -2034,6 +2175,13 @@ export function storeTupleNeuroVault$Data(source: NeuroVault$Data) {
     builder.writeNumber(source.totalAssets);
     builder.writeNumber(source.performanceFeePrecise);
     builder.writeNumber(source.minDepositAmount);
+    builder.writeNumber(source.autoCompoundCap);
+    builder.writeNumber(source.whitelistCount);
+    builder.writeAddress(source.whitelist1);
+    builder.writeAddress(source.whitelist2);
+    builder.writeAddress(source.whitelist3);
+    builder.writeAddress(source.whitelist4);
+    builder.writeAddress(source.whitelist5);
     builder.writeCell(source.content);
     builder.writeBoolean(source.mintable);
     return builder.build();
@@ -2134,7 +2282,7 @@ function initNeuroVault_init_args(src: NeuroVault_init_args) {
 }
 
 async function NeuroVault_init(owner: Address, content: Cell) {
-    const __code = Cell.fromHex('b5ee9c7241023601000d3e000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010f02027102070201200305017bb8b1ded44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c81804000224017bb851ded44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c81806000227020120080d020166090b017fadbcf6a268690000c709fd207d207d007d006987fd006a69002ab8360c470cfd206a2c81688090b82a081889c083e8410859682f002c01bff12a83ed9e3640c00a0164f82801db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d01c017baf16f6a268690000c709fd207d207d007d006987fd006a69002ab8360c470cfd206a2c81688090b82a081889c083e8410859682f002c01bff16d9e3642c00c0118f82828db3c30546620546a501c017bbbb68ed44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe2db3c6c8180e00022603dc30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e13fa40fa40fa00fa00d30ffa00d4d20055706c188e19fa40d45902d1012170541031138107d08210b2d05e0058037fe209925f09e07028d74920c21fe30001c00001c121b0e3023806f90110343504fe3108d31f2182108ea64828ba8ff15b37f8416f2430328142015323bef2f4175068151443308200d2460adb3c5290bc1bf2f4550609db3c1aa125c000917f9324c000e29120965305a825a904e25055a05154a010791068071056551321db3cc87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3111111612000a820afaf08004eee02182107bdd97debae302218210e9e7e01cba8f59313807fa003010671056104510344138db3c813fd529c200f2f45183a8812710a90425a824a9045155a027507918105610451034401321db3cc87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e02182104afe4ba2ba1319161803fc313807d33f31fa00fa40d72c01916d93fa4001e231f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0018200efbe02c705f2f481698d5373bef2f45325a827a9045073a15152a1266eb3973105206ef2d0809136e27270881c14150032000000005769746864726177616c205375636365737366756c00c0103410246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010571046403514c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3102f68137d624f2f4f8285003db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0820afaf080727070f828218b081035104a1023102bc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec94016504405031c17006810465522c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002fe8efc313807fa40fa00d307f4043010795e351048103948abdb3c5148a1103948ab5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010374650134440c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e0191a0034f8416f2410235f0381231b5319c70592317f945118c705e2f2f404ea2182102c76b973bae302218210bb6eac71ba8e4431333701d30f30810e96f84227c705f2f48200e3e221810bb8bbf2f41057104610354143c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e021821061f2e5d4bae302218210946a98b6bae302218210819dbe99ba1b30313202fe313807d33ffa40d20030f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d06d039232129133e2705043804003c855208210d17354005004cb1f12cb3fce01206e9430cf84809201cee2c95a6d6d40037fc8cf8580ca00cf84401c2f011688c87001ca005a02cecec91d022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d91e20014fa65ec0bb51343480006760404075c03e903e9015481b04e6be903e901640b4405c00b8b6cf1b0d201f01145301db3c3054633052302604ba01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019d810101d700fa40fa4055206c139afa40fa405902d1017002e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba2122252c00c2028020d7217021d749c21f9430d31f01de208210178d4519ba8e1d30d33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e082107bdd97deba8e1cd33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e05f0402e231d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f2481114d533cc705f2f454732123fa40fa0071d721fa00fa00306c6170f83a44305244fa40fa0071d721fa00fa00306c6170f83aa08209c9c38001a023813ebb02a012bcf2f45164a18200f5fc21c2fff2f45284db3c5c262301fe705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076708040702c4813507cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910561057103440130710465522c8cf8580ca00cf8440ce01fa028069cf40025c6e240060016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5403fe31d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb53c7db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a08200f5fc21c2fff2f440bc2bdb3c10344dcbfa40fa0071d721fa00fa00306c61702627280018f82ac87001ca005a02cecec9002cf8276f1021a1820898968066b608a18208989680a0a102fcf83a23c2008e605183a15008a1167150657008c8553082107362d09c5005cb1f13cb3f01fa02cecec928441403506610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00599530365b6c21e2206eb39322c2009170e2923031e30d59292b0186206ef2d0807088102310247250346d036d5520c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb002a00180000000045786365737365730026c87f01ca0055205023810101cf00cecec9ed54010ee3025f04f2c0822d01fcd33ffa00d72c01916d93fa4001e231f8416f2481114d5339c705f2f45175a18200f5fc21c2fff2f443305238fa40fa0071d721fa00fa00306c6170f83a8200a99e018209312d00a08208989680a012bcf2f47080405414367f04c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c92655302e009610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed540096ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010575514c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31007031363704fa4030810e96f84227c705f2f410570610354403c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3100c4313807d33f30c8018210aff90f5758cb1fcb3fc91068105710461035443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db3101de8eeb313807d33ffa40305089db3c375178c8598210327b2b4a5003cb1fcb3fcec9105710461035443012f8427f705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54db31e009330010f84228c705f2e084006237f8416f24135f0313a0105710461035504403c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed5400b082f064d5198fe48e1c880304d52b76150cdde129b8cb2bcb68ddccc9782e271972d9ba8e2d8138c6f84226c705f2f41046551370c87f01ca0055705078ce15ce5003fa0201fa02cb0f01fa02ccca00c9ed54e05f07f2c082c65d380a');
+    const __code = Cell.fromHex('b5ee9c72410246010011dd00022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90115020271020d0201200305028db8b1ded44d0d200018e36fa40fa40fa00fa00d30ffa00d30fd307d401d0fa40fa40fa40d430d0fa40fa40d4d20030107f107e107d107c107b107a107910786c1fe30edb3c6cf18160400022b0201200608028db4a3bda89a1a400031c6df481f481f401f401a61ff401a61fa60fa803a1f481f481f481a861a1f481f481a9a4006020fe20fc20fa20f820f620f420f220f0d83fc61db678d9e30160700022e020378a0090b028ba36fb5134348000638dbe903e903e803e8034c3fe8034c3f4c1f500743e903e903e90350c343e903e903534800c041fc41f841f441f041ec41e841e441e1b07f8c3b6cf1b3c6160a000228028ba3fbb5134348000638dbe903e903e803e8034c3fe8034c3f4c1f500743e903e903e90350c343e903e903534800c041fc41f841f441f041ec41e841e441e1b07f8c3b6cf1b3c6160c0002270201200e130201660f110291adbcf6a268690000c71b7d207d207d007d006987fd006987e983ea00e87d207d207d206a18687d207d206a690018083f883f083e883e083d883d083c883c360ff1872a876d9e3678c016100164f82801db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d026028daf16f6a268690000c71b7d207d207d007d006987fd006987e983ea00e87d207d207d206a18687d207d206a690018083f883f083e883e083d883d083c883c360ff1876d9e367ac01612011af8282fdb3c30546d205611525226028dbbb68ed44d0d200018e36fa40fa40fa00fa00d30ffa00d30fd307d401d0fa40fa40fa40d430d0fa40fa40d4d20030107f107e107d107c107b107a107910786c1fe30edb3c6cf18161400022d04f0eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e36fa40fa40fa00fa00d30ffa00d30fd307d401d0fa40fa40fa40d430d0fa40fa40d4d20030107f107e107d107c107b107a107910786c1fe30e1110935f0f30e0702fd74920c21fe30001c00001c121b0e3020ef901201618414403e6fa40d45902d1012170208107d08210b2d05e008101f47f248d08600000000000000000000000000000000000000000000000000000000000000000048d086000000000000000000000000000000000000000000000000000000000000000000489898910ce10cd10bc10ab109a1089107855151717170043800000000000000000000000000000000000000000000000000000000000000000100454310fd31f2182108ea64828bae3022182107bdd97debae302218210e9e7e01cbae3022182104afe4ba2ba191b1e2104e25b3ef8416f243032814201532abef2f410de10ce10be10ae1e19181716505f1443308200d2461111db3c561001bc01111201f2f4550d1110db3c01111101a12cc000917f932bc000e2912096530ca82ca904e2810cb821c200f2f450cca051cba00e11100e10df0e10cd10ac551966db3c1a1a1f40000a820afaf08002fc313f0ed33f31fa00fa40d72c01916d93fa4001e231f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0018200efbe02c705f2f48200ea3023c200f2f481698d53e3bef2f4532ca82ea90481306821c200f2f481124353e1be261c02b4f2f450e3a151c2a12d6eb397310c206ef2d080913de2727f88103410246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010ce10bd5e2955181d400032000000005769746864726177616c205375636365737366756c03e0313f0efa003010de10cd10bc10ab109a108910781067105610451034413fdb3c813fd55610c200f2f453b8a8812710a90456108143c302bbf2f451faa8812710a9042ca82ba904811ef621c200f2f451cca02e11101e1f10cd10bc10ab109a108910781067105610451034401321db3c231f4002f68137d624f2f4f8285003db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0820afaf080727070f828218b081035104a1023102bc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec94016504405032620006810465522c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004e2e3022182103b3c0bbcba8ed2313f0ed307fa4030810e96f8425610c705f2f48131e822c2009322c1069170e2f2f421c001923625de21c002923524de21c003923423de21c004923322de21c00591329130e25306bc91369130e210ce551be02182102c76b973bae302218210bb6eac71ba2240253a03fe313f0efa40fa00d307f404300e11100e5e3c10bf0a11100a109f08111008107f06111006105f04111004103f02111002011111011112db3c55d08200c89b0f5610db3c01111001f2f4820095672b5612bef2f48200d9a55611c200f2f40a5610a1103f02111002011111017f01111310246d50436d03c8cf8580ca00cf84402342240036f8416f2410235f0381231b215611c70592317f94511fc705e2f2f400dace01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00109e108d107c109b105a55441023c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3102fe313f0ed33ffa40d20030f8416f2410235f03f82823db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d06d039232129133e2705043804003c855208210d17354005004cb1f12cb3fce01206e9430cf84809201cee2c95a6d6d40037fc8cf8580ca00cf84402639011688c87001ca005a02cecec927022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d9282a014fa65ec0bb51343480006760404075c03e903e9015481b04e6be903e901640b4405c00b8b6cf1b0d202901145301db3c3054633052303004ba01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019d810101d700fa40fa4055206c139afa40fa405902d1017002e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba2b2c2f3600c2028020d7217021d749c21f9430d31f01de208210178d4519ba8e1d30d33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e082107bdd97deba8e1cd33ffa00596c21a002c87f01ca0055205023810101cf00cecec9ed54e05f0402e231d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f2481114d533cc705f2f454732123fa40fa0071d721fa00fa00306c6170f83a44305244fa40fa0071d721fa00fa00306c6170f83aa08209c9c38001a023813ebb02a012bcf2f45164a18200f5fc21c2fff2f45284db3c5c302d01fe705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076708040702c4813507cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910561057103440130710465522c8cf8580ca00cf8440ce01fa028069cf40025c6e2e0060016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5403fe31d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb53c7db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a08200f5fc21c2fff2f440bc2bdb3c10344dcbfa40fa0071d721fa00fa00306c61703031320018f82ac87001ca005a02cecec9002cf8276f1021a1820898968066b608a18208989680a0a102fcf83a23c2008e605183a15008a1167150657008c8553082107362d09c5005cb1f13cb3f01fa02cecec928441403506610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00599530365b6c21e2206eb39322c2009170e2923031e30d5933350186206ef2d0807088102310247250346d036d5520c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb003400180000000045786365737365730026c87f01ca0055205023810101cf00cecec9ed54010ee3025f04f2c0823701fcd33ffa00d72c01916d93fa4001e231f8416f2481114d5339c705f2f45175a18200f5fc21c2fff2f443305238fa40fa0071d721fa00fa00306c6170f83a8200a99e018209312d00a08208989680a012bcf2f47080405414367f04c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926553038009610246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205023810101cf00cecec9ed5400c6ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010ce551bc87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3102fc8e69313a3e08d30f30810e96f8422ec705f2f48200e3e221810bb8bbf2f410ce10bd10ac109b0a107910681057104610354430c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db31e021821061f2e5d4bae302218210374cf45dba3b3c00be313d3e0bfa4030810e96f8422ec705f2f410ce0d10ac109b108a10791068105710461035440302c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3102fc8e6931383e06d30f30810e96f8422ec705f2f48200afb1218103e8bbf2f410ce10bd10ac109b108a1079081057104610354430c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db31e0218210946a98b6bae302218210819dbe99ba3d3e019e313f0ed33f30c8018210aff90f5758cb1fcb3fc910df10ce10bd10ac109b108a107910681057104610354430f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb004002bc8f59313f0ed33ffa403011101fdb3c3e51efc8598210327b2b4a5003cb1fcb3fcec910ce10bd10ac109b108a107910681057104610354430f8427f705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e011103f400010f8422fc705f2e0840070c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54db3102983ef8416f24303210de10ce10be10ae1e19181716505f1443308200842011115610db3c9357107f9511102dc705e201111101f2f4509da010be10ad109c0b107a106910581047103645404300424300a6530fc70592307fe028c200945307c7059170e292307fe028c201945306c7059170e292307fe028c202945305c7059170e292307fe028c203945304c7059170e292307fe028c2049323c705923070e2917fe070006cc87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed5401fc82f0c1238e6aacd95af3f7c67eec36dc989b3e5aac404b6ecbb610f6ba48372e5b64ba8e5630f8416f24135f031aa010ce10bd10ac0b108a10791068105710461035440302c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54e03f0e4500dc82f064d5198fe48e1c880304d52b76150cdde129b8cb2bcb68ddccc9782e271972d9ba8e438138c6f8422dc705f2f4551b70c87f01ca0055e050efce1cce500afa025008fa0216cb0f5004fa0212cb0fcb0701c8ce12ce12ce02c8ce13ce13cc13ca00cdcdc9ed54e05f0ef2c0827c03df5e');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initNeuroVault_init_args({ $$type: 'NeuroVault_init_args', owner, content })(builder);
@@ -2179,18 +2327,30 @@ export const NeuroVault_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    3256: { message: "Deposit too small to mint shares" },
     3734: { message: "Not Owner" },
     4429: { message: "Invalid sender" },
+    4675: { message: "Insufficient vault assets" },
+    7926: { message: "Fee shares too small to mint" },
     8987: { message: "Invalid sender: not owner or operator" },
+    12392: { message: "Withdrawal amount too small" },
+    12776: { message: "Whitelist index must be 1-5" },
     14294: { message: "Mint is disabled" },
     14534: { message: "Not owner" },
     16059: { message: "Invalid value" },
     16341: { message: "No profit to register" },
     16897: { message: "Deposit must respect the mathematical minimum (3 TON) to cover network fees." },
+    17347: { message: "Profit exceeds single-cycle cap" },
     27021: { message: "Invalid supply state" },
+    33824: { message: "Yield reception only from whitelisted protocols" },
+    38247: { message: "ExecDelegate exceeds available assets" },
     43422: { message: "Invalid value - Burn" },
+    44977: { message: "Cap too high! Max 10% per cycle" },
+    51355: { message: "Target not in protocol whitelist" },
     53830: { message: "Insufficient TON sent for gas buffer." },
+    55717: { message: "Cannot delegate zero amount" },
     58338: { message: "Fee too high! Max 30% allowed" },
+    59952: { message: "Cannot burn zero tokens" },
     61374: { message: "Invalid burn notification sender" },
     62972: { message: "Invalid balance" },
 } as const
@@ -2232,18 +2392,30 @@ export const NeuroVault_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Deposit too small to mint shares": 3256,
     "Not Owner": 3734,
     "Invalid sender": 4429,
+    "Insufficient vault assets": 4675,
+    "Fee shares too small to mint": 7926,
     "Invalid sender: not owner or operator": 8987,
+    "Withdrawal amount too small": 12392,
+    "Whitelist index must be 1-5": 12776,
     "Mint is disabled": 14294,
     "Not owner": 14534,
     "Invalid value": 16059,
     "No profit to register": 16341,
     "Deposit must respect the mathematical minimum (3 TON) to cover network fees.": 16897,
+    "Profit exceeds single-cycle cap": 17347,
     "Invalid supply state": 27021,
+    "Yield reception only from whitelisted protocols": 33824,
+    "ExecDelegate exceeds available assets": 38247,
     "Invalid value - Burn": 43422,
+    "Cap too high! Max 10% per cycle": 44977,
+    "Target not in protocol whitelist": 51355,
     "Insufficient TON sent for gas buffer.": 53830,
+    "Cannot delegate zero amount": 55717,
     "Fee too high! Max 30% allowed": 58338,
+    "Cannot burn zero tokens": 59952,
     "Invalid burn notification sender": 61374,
     "Invalid balance": 62972,
 } as const
@@ -2277,12 +2449,14 @@ const NeuroVault_types: ABIType[] = [
     {"name":"ExecDelegate","header":1258179490,"fields":[{"name":"target","type":{"kind":"simple","type":"address","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"mode","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"payload","type":{"kind":"simple","type":"cell","optional":true}}]},
     {"name":"UpdateFee","header":3144592497,"fields":[{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"UpdateOperator","header":1643308500,"fields":[{"name":"newOperator","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"SetWhitelist","header":993790908,"fields":[{"name":"index","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"target","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"UpdateAutoCompoundCap","header":927790173,"fields":[{"name":"newCap","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"SwapAdditionalData","header":null,"fields":[{"name":"minOut","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"receiverAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"fwdGas","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"customPayload","type":{"kind":"simple","type":"cell","optional":true}}]},
     {"name":"StonfiSwap","header":1717886506,"fields":[{"name":"otherTokenWallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"refundAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"excessesAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"deadline","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"additionalData","type":{"kind":"simple","type":"SwapAdditionalData","optional":false}}]},
     {"name":"StonfiProvideLiquidity","header":3351079513,"fields":[{"name":"otherTokenWallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"refundAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"excessesAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"deadline","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"minLpOut","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"NeuroJettonWallet$Data","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"JettonWalletData","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"NeuroVault$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"operator","type":{"kind":"simple","type":"address","optional":false}},{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalAssets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"minDepositAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"NeuroVault$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"operator","type":{"kind":"simple","type":"address","optional":false}},{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalAssets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"minDepositAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"autoCompoundCap","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"whitelistCount","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"whitelist1","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist2","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist3","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist4","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist5","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"JettonData","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
 ]
 
@@ -2305,6 +2479,8 @@ const NeuroVault_opcodes = {
     "ExecDelegate": 1258179490,
     "UpdateFee": 3144592497,
     "UpdateOperator": 1643308500,
+    "SetWhitelist": 993790908,
+    "UpdateAutoCompoundCap": 927790173,
     "StonfiSwap": 1717886506,
     "StonfiProvideLiquidity": 3351079513,
 }
@@ -2314,6 +2490,8 @@ const NeuroVault_getters: ABIGetter[] = [
     {"name":"get_wallet_address","methodId":103289,"arguments":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
     {"name":"tvl","methodId":68381,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"operator","methodId":129896,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
+    {"name":"autoCompoundCap","methodId":91355,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"whitelistCount","methodId":91646,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 
@@ -2322,6 +2500,8 @@ export const NeuroVault_getterMapping: { [key: string]: string } = {
     'get_wallet_address': 'getGetWalletAddress',
     'tvl': 'getTvl',
     'operator': 'getOperator',
+    'autoCompoundCap': 'getAutoCompoundCap',
+    'whitelistCount': 'getWhitelistCount',
     'owner': 'getOwner',
 }
 
@@ -2331,10 +2511,13 @@ const NeuroVault_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"empty"}},
     {"receiver":"internal","message":{"kind":"typed","type":"AutoCompound"}},
     {"receiver":"internal","message":{"kind":"typed","type":"ExecDelegate"}},
+    {"receiver":"internal","message":{"kind":"text","text":"ExecDelegateBounced"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SetWhitelist"}},
     {"receiver":"internal","message":{"kind":"text","text":"StopMint"}},
     {"receiver":"internal","message":{"kind":"typed","type":"ProvideWalletAddress"}},
     {"receiver":"internal","message":{"kind":"typed","type":"UpdateFee"}},
     {"receiver":"internal","message":{"kind":"typed","type":"UpdateOperator"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"UpdateAutoCompoundCap"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
     {"receiver":"internal","message":{"kind":"typed","type":"ChangeOwner"}},
 ]
@@ -2376,7 +2559,7 @@ export class NeuroVault implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Deposit | TokenBurnNotification | null | AutoCompound | ExecDelegate | "StopMint" | ProvideWalletAddress | UpdateFee | UpdateOperator | Deploy | ChangeOwner) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Deposit | TokenBurnNotification | null | AutoCompound | ExecDelegate | "ExecDelegateBounced" | SetWhitelist | "StopMint" | ProvideWalletAddress | UpdateFee | UpdateOperator | UpdateAutoCompoundCap | Deploy | ChangeOwner) {
         
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deposit') {
@@ -2394,6 +2577,12 @@ export class NeuroVault implements Contract {
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ExecDelegate') {
             body = beginCell().store(storeExecDelegate(message)).endCell();
         }
+        if (message === "ExecDelegateBounced") {
+            body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetWhitelist') {
+            body = beginCell().store(storeSetWhitelist(message)).endCell();
+        }
         if (message === "StopMint") {
             body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
         }
@@ -2405,6 +2594,9 @@ export class NeuroVault implements Contract {
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateOperator') {
             body = beginCell().store(storeUpdateOperator(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateAutoCompoundCap') {
+            body = beginCell().store(storeUpdateAutoCompoundCap(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();
@@ -2444,6 +2636,20 @@ export class NeuroVault implements Contract {
         const builder = new TupleBuilder();
         const source = (await provider.get('operator', builder.build())).stack;
         const result = source.readAddress();
+        return result;
+    }
+    
+    async getAutoCompoundCap(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('autoCompoundCap', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getWhitelistCount(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('whitelistCount', builder.build())).stack;
+        const result = source.readBigNumber();
         return result;
     }
     

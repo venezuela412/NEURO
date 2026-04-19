@@ -1635,6 +1635,106 @@ export function dictValueParserUpdateOperator(): DictionaryValue<UpdateOperator>
     }
 }
 
+export type SetWhitelist = {
+    $$type: 'SetWhitelist';
+    index: bigint;
+    target: Address;
+}
+
+export function storeSetWhitelist(src: SetWhitelist) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(993790908, 32);
+        b_0.storeUint(src.index, 8);
+        b_0.storeAddress(src.target);
+    };
+}
+
+export function loadSetWhitelist(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 993790908) { throw Error('Invalid prefix'); }
+    const _index = sc_0.loadUintBig(8);
+    const _target = sc_0.loadAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function loadTupleSetWhitelist(source: TupleReader) {
+    const _index = source.readBigNumber();
+    const _target = source.readAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function loadGetterTupleSetWhitelist(source: TupleReader) {
+    const _index = source.readBigNumber();
+    const _target = source.readAddress();
+    return { $$type: 'SetWhitelist' as const, index: _index, target: _target };
+}
+
+export function storeTupleSetWhitelist(source: SetWhitelist) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.index);
+    builder.writeAddress(source.target);
+    return builder.build();
+}
+
+export function dictValueParserSetWhitelist(): DictionaryValue<SetWhitelist> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSetWhitelist(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSetWhitelist(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type UpdateAutoCompoundCap = {
+    $$type: 'UpdateAutoCompoundCap';
+    newCap: bigint;
+}
+
+export function storeUpdateAutoCompoundCap(src: UpdateAutoCompoundCap) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(927790173, 32);
+        b_0.storeUint(src.newCap, 16);
+    };
+}
+
+export function loadUpdateAutoCompoundCap(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 927790173) { throw Error('Invalid prefix'); }
+    const _newCap = sc_0.loadUintBig(16);
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function loadTupleUpdateAutoCompoundCap(source: TupleReader) {
+    const _newCap = source.readBigNumber();
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function loadGetterTupleUpdateAutoCompoundCap(source: TupleReader) {
+    const _newCap = source.readBigNumber();
+    return { $$type: 'UpdateAutoCompoundCap' as const, newCap: _newCap };
+}
+
+export function storeTupleUpdateAutoCompoundCap(source: UpdateAutoCompoundCap) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.newCap);
+    return builder.build();
+}
+
+export function dictValueParserUpdateAutoCompoundCap(): DictionaryValue<UpdateAutoCompoundCap> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeUpdateAutoCompoundCap(src)).endCell());
+        },
+        parse: (src) => {
+            return loadUpdateAutoCompoundCap(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type SwapAdditionalData = {
     $$type: 'SwapAdditionalData';
     minOut: bigint;
@@ -1971,6 +2071,13 @@ export type NeuroVault$Data = {
     totalAssets: bigint;
     performanceFeePrecise: bigint;
     minDepositAmount: bigint;
+    autoCompoundCap: bigint;
+    whitelistCount: bigint;
+    whitelist1: Address;
+    whitelist2: Address;
+    whitelist3: Address;
+    whitelist4: Address;
+    whitelist5: Address;
     content: Cell;
     mintable: boolean;
 }
@@ -1984,8 +2091,19 @@ export function storeNeuroVault$Data(src: NeuroVault$Data) {
         b_0.storeCoins(src.totalAssets);
         b_0.storeUint(src.performanceFeePrecise, 16);
         b_0.storeCoins(src.minDepositAmount);
-        b_0.storeRef(src.content);
-        b_0.storeBit(src.mintable);
+        b_0.storeUint(src.autoCompoundCap, 16);
+        b_0.storeUint(src.whitelistCount, 8);
+        const b_1 = new Builder();
+        b_1.storeAddress(src.whitelist1);
+        b_1.storeAddress(src.whitelist2);
+        b_1.storeAddress(src.whitelist3);
+        const b_2 = new Builder();
+        b_2.storeAddress(src.whitelist4);
+        b_2.storeAddress(src.whitelist5);
+        b_2.storeRef(src.content);
+        b_2.storeBit(src.mintable);
+        b_1.storeRef(b_2.endCell());
+        b_0.storeRef(b_1.endCell());
     };
 }
 
@@ -1997,9 +2115,18 @@ export function loadNeuroVault$Data(slice: Slice) {
     const _totalAssets = sc_0.loadCoins();
     const _performanceFeePrecise = sc_0.loadUintBig(16);
     const _minDepositAmount = sc_0.loadCoins();
-    const _content = sc_0.loadRef();
-    const _mintable = sc_0.loadBit();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    const _autoCompoundCap = sc_0.loadUintBig(16);
+    const _whitelistCount = sc_0.loadUintBig(8);
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _whitelist1 = sc_1.loadAddress();
+    const _whitelist2 = sc_1.loadAddress();
+    const _whitelist3 = sc_1.loadAddress();
+    const sc_2 = sc_1.loadRef().beginParse();
+    const _whitelist4 = sc_2.loadAddress();
+    const _whitelist5 = sc_2.loadAddress();
+    const _content = sc_2.loadRef();
+    const _mintable = sc_2.loadBit();
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function loadTupleNeuroVault$Data(source: TupleReader) {
@@ -2009,9 +2136,16 @@ export function loadTupleNeuroVault$Data(source: TupleReader) {
     const _totalAssets = source.readBigNumber();
     const _performanceFeePrecise = source.readBigNumber();
     const _minDepositAmount = source.readBigNumber();
+    const _autoCompoundCap = source.readBigNumber();
+    const _whitelistCount = source.readBigNumber();
+    const _whitelist1 = source.readAddress();
+    const _whitelist2 = source.readAddress();
+    const _whitelist3 = source.readAddress();
+    const _whitelist4 = source.readAddress();
+    const _whitelist5 = source.readAddress();
     const _content = source.readCell();
     const _mintable = source.readBoolean();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function loadGetterTupleNeuroVault$Data(source: TupleReader) {
@@ -2021,9 +2155,16 @@ export function loadGetterTupleNeuroVault$Data(source: TupleReader) {
     const _totalAssets = source.readBigNumber();
     const _performanceFeePrecise = source.readBigNumber();
     const _minDepositAmount = source.readBigNumber();
+    const _autoCompoundCap = source.readBigNumber();
+    const _whitelistCount = source.readBigNumber();
+    const _whitelist1 = source.readAddress();
+    const _whitelist2 = source.readAddress();
+    const _whitelist3 = source.readAddress();
+    const _whitelist4 = source.readAddress();
+    const _whitelist5 = source.readAddress();
     const _content = source.readCell();
     const _mintable = source.readBoolean();
-    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, content: _content, mintable: _mintable };
+    return { $$type: 'NeuroVault$Data' as const, owner: _owner, operator: _operator, totalSupply: _totalSupply, totalAssets: _totalAssets, performanceFeePrecise: _performanceFeePrecise, minDepositAmount: _minDepositAmount, autoCompoundCap: _autoCompoundCap, whitelistCount: _whitelistCount, whitelist1: _whitelist1, whitelist2: _whitelist2, whitelist3: _whitelist3, whitelist4: _whitelist4, whitelist5: _whitelist5, content: _content, mintable: _mintable };
 }
 
 export function storeTupleNeuroVault$Data(source: NeuroVault$Data) {
@@ -2034,6 +2175,13 @@ export function storeTupleNeuroVault$Data(source: NeuroVault$Data) {
     builder.writeNumber(source.totalAssets);
     builder.writeNumber(source.performanceFeePrecise);
     builder.writeNumber(source.minDepositAmount);
+    builder.writeNumber(source.autoCompoundCap);
+    builder.writeNumber(source.whitelistCount);
+    builder.writeAddress(source.whitelist1);
+    builder.writeAddress(source.whitelist2);
+    builder.writeAddress(source.whitelist3);
+    builder.writeAddress(source.whitelist4);
+    builder.writeAddress(source.whitelist5);
     builder.writeCell(source.content);
     builder.writeBoolean(source.mintable);
     return builder.build();
@@ -2179,18 +2327,30 @@ export const NeuroJettonWallet_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    3256: { message: "Deposit too small to mint shares" },
     3734: { message: "Not Owner" },
     4429: { message: "Invalid sender" },
+    4675: { message: "Insufficient vault assets" },
+    7926: { message: "Fee shares too small to mint" },
     8987: { message: "Invalid sender: not owner or operator" },
+    12392: { message: "Withdrawal amount too small" },
+    12776: { message: "Whitelist index must be 1-5" },
     14294: { message: "Mint is disabled" },
     14534: { message: "Not owner" },
     16059: { message: "Invalid value" },
     16341: { message: "No profit to register" },
     16897: { message: "Deposit must respect the mathematical minimum (3 TON) to cover network fees." },
+    17347: { message: "Profit exceeds single-cycle cap" },
     27021: { message: "Invalid supply state" },
+    33824: { message: "Yield reception only from whitelisted protocols" },
+    38247: { message: "ExecDelegate exceeds available assets" },
     43422: { message: "Invalid value - Burn" },
+    44977: { message: "Cap too high! Max 10% per cycle" },
+    51355: { message: "Target not in protocol whitelist" },
     53830: { message: "Insufficient TON sent for gas buffer." },
+    55717: { message: "Cannot delegate zero amount" },
     58338: { message: "Fee too high! Max 30% allowed" },
+    59952: { message: "Cannot burn zero tokens" },
     61374: { message: "Invalid burn notification sender" },
     62972: { message: "Invalid balance" },
 } as const
@@ -2232,18 +2392,30 @@ export const NeuroJettonWallet_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Deposit too small to mint shares": 3256,
     "Not Owner": 3734,
     "Invalid sender": 4429,
+    "Insufficient vault assets": 4675,
+    "Fee shares too small to mint": 7926,
     "Invalid sender: not owner or operator": 8987,
+    "Withdrawal amount too small": 12392,
+    "Whitelist index must be 1-5": 12776,
     "Mint is disabled": 14294,
     "Not owner": 14534,
     "Invalid value": 16059,
     "No profit to register": 16341,
     "Deposit must respect the mathematical minimum (3 TON) to cover network fees.": 16897,
+    "Profit exceeds single-cycle cap": 17347,
     "Invalid supply state": 27021,
+    "Yield reception only from whitelisted protocols": 33824,
+    "ExecDelegate exceeds available assets": 38247,
     "Invalid value - Burn": 43422,
+    "Cap too high! Max 10% per cycle": 44977,
+    "Target not in protocol whitelist": 51355,
     "Insufficient TON sent for gas buffer.": 53830,
+    "Cannot delegate zero amount": 55717,
     "Fee too high! Max 30% allowed": 58338,
+    "Cannot burn zero tokens": 59952,
     "Invalid burn notification sender": 61374,
     "Invalid balance": 62972,
 } as const
@@ -2277,12 +2449,14 @@ const NeuroJettonWallet_types: ABIType[] = [
     {"name":"ExecDelegate","header":1258179490,"fields":[{"name":"target","type":{"kind":"simple","type":"address","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"mode","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"payload","type":{"kind":"simple","type":"cell","optional":true}}]},
     {"name":"UpdateFee","header":3144592497,"fields":[{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"UpdateOperator","header":1643308500,"fields":[{"name":"newOperator","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"SetWhitelist","header":993790908,"fields":[{"name":"index","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"target","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"UpdateAutoCompoundCap","header":927790173,"fields":[{"name":"newCap","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"SwapAdditionalData","header":null,"fields":[{"name":"minOut","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"receiverAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"fwdGas","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"customPayload","type":{"kind":"simple","type":"cell","optional":true}}]},
     {"name":"StonfiSwap","header":1717886506,"fields":[{"name":"otherTokenWallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"refundAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"excessesAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"deadline","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"additionalData","type":{"kind":"simple","type":"SwapAdditionalData","optional":false}}]},
     {"name":"StonfiProvideLiquidity","header":3351079513,"fields":[{"name":"otherTokenWallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"refundAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"excessesAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"deadline","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"minLpOut","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"NeuroJettonWallet$Data","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"JettonWalletData","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"NeuroVault$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"operator","type":{"kind":"simple","type":"address","optional":false}},{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalAssets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"minDepositAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"NeuroVault$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"operator","type":{"kind":"simple","type":"address","optional":false}},{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalAssets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"performanceFeePrecise","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"minDepositAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"autoCompoundCap","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"whitelistCount","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"whitelist1","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist2","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist3","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist4","type":{"kind":"simple","type":"address","optional":false}},{"name":"whitelist5","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"JettonData","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
 ]
 
@@ -2305,6 +2479,8 @@ const NeuroJettonWallet_opcodes = {
     "ExecDelegate": 1258179490,
     "UpdateFee": 3144592497,
     "UpdateOperator": 1643308500,
+    "SetWhitelist": 993790908,
+    "UpdateAutoCompoundCap": 927790173,
     "StonfiSwap": 1717886506,
     "StonfiProvideLiquidity": 3351079513,
 }

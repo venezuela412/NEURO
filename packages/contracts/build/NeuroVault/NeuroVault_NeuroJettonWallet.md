@@ -3,7 +3,7 @@ Contract: NeuroJettonWallet
 BoC Size: 1210 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 35
+Total structures: 37
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -117,6 +117,14 @@ Signature: `UpdateFee{performanceFeePrecise:uint16}`
 TL-B: `update_operator#61f2e5d4 newOperator:address = UpdateOperator`
 Signature: `UpdateOperator{newOperator:address}`
 
+### SetWhitelist
+TL-B: `set_whitelist#3b3c0bbc index:uint8 target:address = SetWhitelist`
+Signature: `SetWhitelist{index:uint8,target:address}`
+
+### UpdateAutoCompoundCap
+TL-B: `update_auto_compound_cap#374cf45d newCap:uint16 = UpdateAutoCompoundCap`
+Signature: `UpdateAutoCompoundCap{newCap:uint16}`
+
 ### SwapAdditionalData
 TL-B: `_ minOut:coins receiverAddress:address fwdGas:coins customPayload:Maybe ^cell = SwapAdditionalData`
 Signature: `SwapAdditionalData{minOut:coins,receiverAddress:address,fwdGas:coins,customPayload:Maybe ^cell}`
@@ -138,8 +146,8 @@ TL-B: `_ balance:int257 owner:address master:address walletCode:^cell = JettonWa
 Signature: `JettonWalletData{balance:int257,owner:address,master:address,walletCode:^cell}`
 
 ### NeuroVault$Data
-TL-B: `_ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins content:^cell mintable:bool = NeuroVault`
-Signature: `NeuroVault{owner:address,operator:address,totalSupply:coins,totalAssets:coins,performanceFeePrecise:uint16,minDepositAmount:coins,content:^cell,mintable:bool}`
+TL-B: `_ owner:address operator:address totalSupply:coins totalAssets:coins performanceFeePrecise:uint16 minDepositAmount:coins autoCompoundCap:uint16 whitelistCount:uint8 whitelist1:address whitelist2:address whitelist3:address whitelist4:address whitelist5:address content:^cell mintable:bool = NeuroVault`
+Signature: `NeuroVault{owner:address,operator:address,totalSupply:coins,totalAssets:coins,performanceFeePrecise:uint16,minDepositAmount:coins,autoCompoundCap:uint16,whitelistCount:uint8,whitelist1:address,whitelist2:address,whitelist3:address,whitelist4:address,whitelist5:address,content:^cell,mintable:bool}`
 
 ### JettonData
 TL-B: `_ totalSupply:int257 mintable:bool owner:address content:^cell walletCode:^cell = JettonData`
@@ -188,18 +196,30 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 3256: Deposit too small to mint shares
 * 3734: Not Owner
 * 4429: Invalid sender
+* 4675: Insufficient vault assets
+* 7926: Fee shares too small to mint
 * 8987: Invalid sender: not owner or operator
+* 12392: Withdrawal amount too small
+* 12776: Whitelist index must be 1-5
 * 14294: Mint is disabled
 * 14534: Not owner
 * 16059: Invalid value
 * 16341: No profit to register
 * 16897: Deposit must respect the mathematical minimum (3 TON) to cover network fees.
+* 17347: Profit exceeds single-cycle cap
 * 27021: Invalid supply state
+* 33824: Yield reception only from whitelisted protocols
+* 38247: ExecDelegate exceeds available assets
 * 43422: Invalid value - Burn
+* 44977: Cap too high! Max 10% per cycle
+* 51355: Target not in protocol whitelist
 * 53830: Insufficient TON sent for gas buffer.
+* 55717: Cannot delegate zero amount
 * 58338: Fee too high! Max 30% allowed
+* 59952: Cannot burn zero tokens
 * 61374: Invalid burn notification sender
 * 62972: Invalid balance
 
