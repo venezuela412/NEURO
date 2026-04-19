@@ -22,4 +22,6 @@ COPY packages/adapters packages/adapters
 
 EXPOSE 8787
 
-CMD ["pnpm", "--filter", "@neuro/control-plane", "start"]
+WORKDIR /app/apps/control-plane
+
+CMD ["npx", "tsx", "src/index.ts"]
