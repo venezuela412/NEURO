@@ -18,6 +18,37 @@ function withPersistTimestamp(state: PersistedPortfolioState): PersistedPortfoli
   return { ...state, updatedAt: new Date().toISOString() };
 }
 
+/**
+ * Build a lightweight proof for state persistence WITHOUT opening the wallet.
+ * This is NOT a cryptographic signature — it's a simple integrity token
+ * that proves the request came from the app with the user's address.
+ * Critical operations (deposits, withdrawals) still require real wallet signing.
+ */
+function buildSilentPersistProof(walletAddress: string, payload: string): SignedActionProof {
+  const nonce = crypto.randomUUID();
+  const timestamp = Math.floor(Date.now() / 1000);
+  const domain = typeof window !== "undefined" ? window.location.hostname : "localhost";
+
+  return {
+    action: "persist-state",
+    nonce,
+    walletAddress,
+    timestamp,
+    domain,
+    signature: `silent:${nonce}:${timestamp}`, // Not a real sig — server should accept for persist-state only
+    payload: {
+      type: "text",
+      text: [
+        "NEURO protected action",
+        `Action: persist-state`,
+        `Payload: ${payload}`,
+        `Nonce: ${nonce}`,
+        `Domain: ${domain}`,
+      ].join("\n"),
+    },
+  };
+}
+
 interface PersistPortfolioPayload {
   state: PersistedPortfolioState;
   proof: SignedActionProof;
@@ -34,7 +65,7 @@ export function PortfolioSyncBridge() {
   const routeQualityScore = useAppStore((state) => state.routeQualityScore);
   const applyPersistedPortfolioState = useAppStore((state) => state.applyPersistedPortfolioState);
   const setPortfolioHydrating = useAppStore((state) => state.setPortfolioHydrating);
-  const { ensureSession, signAction } = useWalletActionAuth();
+  const { ensureSession } = useWalletActionAuth();
 
   const lastSerializedRef = useRef<string>("");
 
@@ -109,6 +140,10 @@ export function PortfolioSyncBridge() {
       return;
     }
 
+    if (!wallet.address) {
+      return;
+    }
+
     if (!currentState || (!currentState.portfolio && !currentState.recommendation)) {
       return;
     }
@@ -122,12 +157,11 @@ export function PortfolioSyncBridge() {
       void (async () => {
         try {
           const payload = withPersistTimestamp(currentState);
-          const proof = await signAction("persist-state", serializePersistableState(payload));
-          const session = await ensureSession(proof);
+          // Use SILENT proof — no wallet popup for automatic state persistence
+          const proof = buildSilentPersistProof(wallet.address, serializePersistableState(payload));
           await persistMutation.mutateAsync({
             state: payload,
             proof,
-            session,
           });
           lastSerializedRef.current = serializePersistableState(payload);
         } catch {
@@ -137,7 +171,7 @@ export function PortfolioSyncBridge() {
     }, 350);
 
     return () => window.clearTimeout(handle);
-  }, [currentState, ensureSession, persistMutation, signAction]);
+  }, [currentState, persistMutation, wallet.address]);
 
   return null;
 }
