@@ -94,17 +94,24 @@ async function fetchTonstakersApy(): Promise<number | null> {
     if (!response.ok) return null;
 
     const data = (await response.json()) as {
-      implementations?: Record<string, { pools?: Array<{ apy: number; name?: string }> }>;
+      pools?: Array<{ apy: number; name?: string; address?: string; implementation?: string }>;
     };
 
-    if (data.implementations) {
-      for (const impl of Object.values(data.implementations)) {
-        const pool = impl.pools?.find(
-          (p) => p.name?.toLowerCase().includes("tonstakers") || p.apy > 0
-        );
-        if (pool) {
-          return pool.apy;
-        }
+    if (data.pools) {
+      // Find Tonstakers pool directly by name
+      const tonstakers = data.pools.find(
+        (p) => p.name?.toLowerCase() === "tonstakers"
+      );
+      if (tonstakers) {
+        return tonstakers.apy;
+      }
+
+      // Fallback: find any liquidTF pool with positive APY
+      const liquidPool = data.pools.find(
+        (p) => p.implementation === "liquidTF" && p.apy > 0
+      );
+      if (liquidPool) {
+        return liquidPool.apy;
       }
     }
 
