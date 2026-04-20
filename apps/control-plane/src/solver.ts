@@ -100,7 +100,7 @@ async function fetchVaultTvlFromChain(): Promise<VaultOnChainState | null> {
     if (!data.success || !data.stack?.length) return null;
 
     const tvlEntry = data.stack[0];
-    const tvlNano = parseInt(tvlEntry!.num ?? tvlEntry!.value ?? "0", 16);
+    const tvlNano = Number(tvlEntry!.num ?? tvlEntry!.value ?? "0");
 
     // Fetch vault's raw TON balance and tsTON balance for idle vs staked breakdown
     let rawBalanceTon = 0;
