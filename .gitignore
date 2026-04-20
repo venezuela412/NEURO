@@ -12,3 +12,12 @@ packages/*/node_modules
 apps/control-plane/.neuro-db
 
 .vercel
+
+# Temp/external folders
+strix_hack/
+temp_gbrain/
+temp_hermes/
+temp_scoria/
+checkBalance.js
+*.png
+!apps/miniapp/public/**
