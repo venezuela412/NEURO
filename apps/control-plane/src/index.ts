@@ -406,8 +406,7 @@ server.post("/admin/trigger-harvest", async (request, reply) => {
     const { stakeViaTonstakers, autoCompound, getVaultBalance } = await import("./vault-executor");
 
     // Step 1: Check vault balance for idle TON
-    const vaultBalance = await getVaultBalance();
-    const idleTon = vaultBalance / 1e9;
+    const idleTon = await getVaultBalance(); // already in TON, not nanoton
 
     await addAdminLog("info", "admin", `[MANUAL] Vault idle balance: ${idleTon.toFixed(4)} TON`);
 
