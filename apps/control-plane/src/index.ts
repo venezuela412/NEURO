@@ -403,27 +403,30 @@ server.post("/admin/trigger-harvest", async (request, reply) => {
 
   try {
     const { OmniChainSolver } = await import("./solver");
-    const { stakeViaTonstakers, autoCompound, getVaultBalance } = await import("./vault-executor");
+    const { stakeViaTonstakers, autoCompound } = await import("./vault-executor");
 
-    // Step 1: Check vault balance for idle TON
-    const idleTon = await getVaultBalance(); // already in TON, not nanoton
+    // Step 1: Use solver to get on-chain TVL data (respects contract's totalAssets accounting)
+    const compoundInfo = await OmniChainSolver.computeAutoCompoundForVault();
+    const idleTon = compoundInfo.idleTon; // from contract's raw balance minus gas reserve
+    const tvlTon = compoundInfo.tvlTon;   // from contract's totalAssets getter
 
-    await addAdminLog("info", "admin", `[MANUAL] Vault idle balance: ${idleTon.toFixed(4)} TON`);
+    await addAdminLog("info", "admin", `[MANUAL] Vault TVL: ${tvlTon.toFixed(4)} TON, idle: ${idleTon.toFixed(4)} TON`);
+
+    // Use the LESSER of idleTon and tvlTon*0.5 (contract caps delegation at maxDelegatePercent=50%)
+    const maxDelegatable = tvlTon * 0.5; // 50% per-tx cap from contract
+    const stakeTarget = Math.min(idleTon, maxDelegatable);
 
     let stakeResult = null;
-    if (idleTon > 3.5) {
-      // Keep 0.5 TON for gas, stake the rest
-      const stakeAmount = idleTon - 0.5;
+    if (stakeTarget > 3.5) {
+      const stakeAmount = stakeTarget - 0.5; // Keep 0.5 TON for gas
       await addAdminLog("info", "admin", `[MANUAL] Staking ${stakeAmount.toFixed(4)} TON in Tonstakers...`);
       stakeResult = await stakeViaTonstakers(stakeAmount);
       await addAdminLog("info", "admin", `[MANUAL] Stake result: ${stakeResult.success ? "SUCCESS" : stakeResult.error}`);
     } else {
-      await addAdminLog("info", "admin", `[MANUAL] Idle balance ${idleTon.toFixed(4)} TON below 3.5 threshold — skipping stake`);
+      await addAdminLog("info", "admin", `[MANUAL] Stakeable amount ${stakeTarget.toFixed(4)} TON below 3.5 threshold — skipping`);
     }
 
     // Step 2: Check if compound is profitable
-    const compoundInfo = await OmniChainSolver.computeAutoCompoundForVault();
-
     let compoundResult = null;
     if (compoundInfo.isProfitable) {
       const profitTon = compoundInfo.profitToMint / 1e9;
@@ -431,13 +434,16 @@ server.post("/admin/trigger-harvest", async (request, reply) => {
       compoundResult = await autoCompound(profitTon);
       await addAdminLog("info", "admin", `[MANUAL] Compound result: ${compoundResult.success ? "SUCCESS" : compoundResult.error}`);
     } else {
-      await addAdminLog("info", "admin", `[MANUAL] Compound not profitable yet — TVL: ${compoundInfo.tvlTon.toFixed(2)} TON`);
+      await addAdminLog("info", "admin", `[MANUAL] Compound not profitable yet — TVL: ${tvlTon.toFixed(2)} TON`);
     }
 
     return {
       ok: true,
+      tvlTon,
       idleTon,
-      stake: stakeResult ?? { skipped: true, reason: `idle ${idleTon.toFixed(2)} < 3.5 TON` },
+      maxDelegatable,
+      stakeTarget,
+      stake: stakeResult ?? { skipped: true, reason: `stakeable ${stakeTarget.toFixed(2)} < 3.5 TON` },
       compound: compoundResult ?? { skipped: true, reason: compoundInfo.isProfitable ? "error" : "not profitable yet" },
     };
   } catch (error) {
