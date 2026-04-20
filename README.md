@@ -5,57 +5,44 @@
 <h1 align="center">NeuroTON Protocol</h1>
 
 <p align="center">
-  <strong>The First Autonomous Omni-Chain Intent Vault on The Open Network (TON).</strong>
+  <strong>Making TON Yields Accessible for Everyone</strong>
 </p>
 
-Oustandingly scalable, mathematically bound, and structurally elegant. NeuroTON is a multi-million dollar architecture built to abstract the complexities of decentralized finance through algorithmic solvers and secure **Zero-Trust** smart contracts.
+<p align="center">
+  <img src="https://img.shields.io/badge/Network-TON-blue?style=flat-square&logo=telegram" alt="TON Network">
+  <img src="https://img.shields.io/badge/Status-Beta-orange?style=flat-square" alt="Status">
+</p>
 
 ---
 
-## 💎 The V10 APEX Architecture
+## 🤔 Why NeuroTON?
 
-NeuroTON is designed as an enterprise-grade Yield Optimizer and Liquid Staking derivative protocol. We process Capital via high-level Intents. 
+Interacting with Web3 and decentralized finance (DeFi) can be overwhelming. Users often face complex interfaces, manual claiming, multiple gas fees, and confusing strategies just to earn a simple return on their crypto. 
 
-Instead of manual swaps, bridging, and liquidity provision, users express an **Intent** (e.g., *Delta-Neutral Arbitrage* or *High-Frequency Farming*). The NeuroTON solvers map these intents into a unified execution path, deployed globally across Telegram via our natively embedded MiniApp.
+**NeuroTON** solves this by removing the friction. Our core purpose is to give *anyone*—whether a crypto beginner or a seasoned user—safe, automated exposure to the yields of **The Open Network (TON)**. 
 
-### 1. Zero-Trust `NeuroVault` (Tact)
-Capital efficiency natively fused with mathematical security.
-- **nTON Liquid Staking Standard:** The Vault acts as a TEP-74 Jetton Master. When TON is deposited, it mints `nTON` algorithmically, representing your exact fractional share of the protocol's TVL.
-- **Strict Operator Isolation:** Withdrawals are disabled for the Control Plane. The Vercel agent operates purely as an `ExecDelegate`, capable only of cycling yields, harvesting rewards, and routing liquidity exactly as defined by the Smart Contract invariants.
-- **Dilution-Minted Performance Fees:** A built-in protocol fee (20%) is minted dynamically during auto-compounding cycles, completely avoiding gas-heavy rebalances and principal decay.
+You simply deposit your TON, and the protocol handles the rest.
 
-### 2. Dual-Mode UI / Premium DApp
-Built for maximum retail conversion while supporting DEFI whales.
-- **Onboarding Wizard:** Cinematic, Framer-Motion driven full-bleed onboarding presentation that adapts dynamically across desktop environments and iOS/Android mobile clients.
-- **Concierge Mode (1-Click):** Allows users to select from 6 pre-built Autonomous Strategies (Zen Staking, Omni-Chain, DCA Rain, etc) and deploy capital automatically.
-- **Advanced Mode (Self-Custody):** For expert DeFi users, allowing direct Mint/Burn functionality to interact with `nTON` directly, utilizing it as collateral in external lending markets like EVAA.
+## ⚙️ How It Works
 
-### 3. Vercel Autonomous Solver (TypeScript)
-The brain of the NeuroTON APEX architecture.
-- **Omni-Chain Router:** Executes Cron-based algorithms (`/api/solver/cron`) computing TVL growth, path-finding across DeDust/STON.fi, and dispatching execution signatures securely.
-- **Edge Deployment:** Highly concurrent serverless routines guarantee the mathematical precision of the protocol without centralized bottlenecks or downtime.
+At its center, NeuroTON is an automated yield platform designed for simplicity and safety.
 
----
+1. **Simple Deposits:** Users deposit TON into a secure smart contract (NeuroVault) directly from Telegram.
+2. **Automated Compounding:** Background bots (solvers) monitor the vault and periodically stake, harvest, and auto-compound the funds to generate yield efficiently.
+3. **Liquid Token (nTON):** Upon depositing, users receive `nTON`, a token representing their exact share of the vault. As the vault's balance grows from the automated yield, the value of `nTON` relative to TON naturally increases.
 
-## 🛠 Project Structure
+## 🚀 Core Philosophy 
 
-```text
-neuroton/
-├── apps/
-│   ├── miniapp/           # Frontend: Telegram-native Premium React / Vite / Tailwind v4
-│   └── control-plane/     # Backend: Autonomous Solver & Cron Agents (Node / Fastify)
-├── packages/
-│   ├── contracts/         # Smart Contracts: NeuroVault & Jetton Standard (Tact)
-│   ├── domain/            # Core financial logic, fee minting, TVL algorithms
-│   └── adapters/          # Execution integrations (DeDust, EVAA, Staking)
-```
+- **Accessibility First:** Integrated natively as a Telegram MiniApp. Anyone with Telegram can access it directly without needing browser extensions or confusing setups.
+- **Hands-off Earning:** No need to manually claim rewards, re-stake, or worry about gas fees for compounding. The system aggregates operations to keep everything highly cost-efficient and completely automated.
+- **Self-Custody:** The smart contracts (written in Tact) ensure that only you can withdraw your funds. The automated bots only have strict, limited permissions to execute yield-generating commands—they cannot extract, freeze, or redirect user capital.
 
-## 🔒 Security Posture & Standards
+## 💼 Usage Modes
 
-NeuroTON strictly adheres to the highest DeFi standards:
-- All Smart Contracts written in **Tact** strictly limiting gas abuse.
-- Complete execution isolation. No human intervention required or allowed on Vault capital beyond deterministic operations.
-- Built-in **3 TON** minimum deposit safeguards to prevent gas-fee erosion attacks and spam vector flooding.
+- **1-Click Strategy:** Designed for everyday users. Connect your wallet, deposit, and let the protocol do the heavy lifting automatically.
+- **Advanced Mode:** For experienced users who want to take their `nTON` receipt token and use it as collateral in other DeFi platforms, while their original deposit continues farming yield in the background.
 
 ---
-**Protocol Phase:** Mainnet Candidate | **Architecture:** V10 APEX Omni-Chain
+<p align="center">
+  <em>NeuroTON Protocol</em>
+</p>
