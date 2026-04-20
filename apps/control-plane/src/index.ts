@@ -393,6 +393,61 @@ server.post("/admin/cleanup-sessions", async (request, reply) => {
   return { ok: true, message: "Expired sessions cleaned up" };
 });
 
+// ==================== MANUAL HARVEST TRIGGER ====================
+
+server.post("/admin/trigger-harvest", async (request, reply) => {
+  const authError = handleAdminAuth(request, reply);
+  if (authError) return authError;
+
+  await addAdminLog("info", "admin", "[MANUAL] Harvest triggered by admin");
+
+  try {
+    const { OmniChainSolver } = await import("./solver");
+    const { stakeViaTonstakers, autoCompound, getVaultBalance } = await import("./vault-executor");
+
+    // Step 1: Check vault balance for idle TON
+    const vaultBalance = await getVaultBalance();
+    const idleTon = vaultBalance / 1e9;
+
+    await addAdminLog("info", "admin", `[MANUAL] Vault idle balance: ${idleTon.toFixed(4)} TON`);
+
+    let stakeResult = null;
+    if (idleTon > 3.5) {
+      // Keep 0.5 TON for gas, stake the rest
+      const stakeAmount = idleTon - 0.5;
+      await addAdminLog("info", "admin", `[MANUAL] Staking ${stakeAmount.toFixed(4)} TON in Tonstakers...`);
+      stakeResult = await stakeViaTonstakers(stakeAmount);
+      await addAdminLog("info", "admin", `[MANUAL] Stake result: ${stakeResult.success ? "SUCCESS" : stakeResult.error}`);
+    } else {
+      await addAdminLog("info", "admin", `[MANUAL] Idle balance ${idleTon.toFixed(4)} TON below 3.5 threshold — skipping stake`);
+    }
+
+    // Step 2: Check if compound is profitable
+    const compoundInfo = await OmniChainSolver.computeAutoCompoundForVault();
+
+    let compoundResult = null;
+    if (compoundInfo.isProfitable) {
+      const profitTon = compoundInfo.profitToMint / 1e9;
+      await addAdminLog("info", "admin", `[MANUAL] Compounding ${profitTon.toFixed(6)} TON profit...`);
+      compoundResult = await autoCompound(profitTon);
+      await addAdminLog("info", "admin", `[MANUAL] Compound result: ${compoundResult.success ? "SUCCESS" : compoundResult.error}`);
+    } else {
+      await addAdminLog("info", "admin", `[MANUAL] Compound not profitable yet — TVL: ${compoundInfo.tvlTon.toFixed(2)} TON`);
+    }
+
+    return {
+      ok: true,
+      idleTon,
+      stake: stakeResult ?? { skipped: true, reason: `idle ${idleTon.toFixed(2)} < 3.5 TON` },
+      compound: compoundResult ?? { skipped: true, reason: compoundInfo.isProfitable ? "error" : "not profitable yet" },
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "unknown";
+    await addAdminLog("error", "admin", `[MANUAL] Harvest failed: ${msg}`);
+    return reply.status(500).send({ ok: false, error: msg });
+  }
+});
+
 // ==================== PORTFOLIO ROUTES ====================
 
 server.get<{ Querystring: { amount?: string } }>("/portfolio/demo", async (request) => {
