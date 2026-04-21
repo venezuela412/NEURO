@@ -79,6 +79,7 @@ const schemaSql = `
     wallet_address TEXT NOT NULL,
     amount INTEGER NOT NULL,
     reason TEXT NOT NULL,
+    meta TEXT,
     created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
   );
 `;

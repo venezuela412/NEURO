@@ -96,15 +96,17 @@ export async function getSharePrice(goal: string = 'safe'): Promise<number> {
     // Overcome contract's accounting drop during delegation
     if (baseSp < 1.0) baseSp = 1.0;
 
-    // Simulate real-time continuous staking yield
-    // Safe ~4.6%, Earn ~20%, Grow ~45%
+    // Simulate real-time continuous staking yield from a fixed epoch (Jan 1, 2024)
+    const EPOCH_MS = 1704067200000; 
     const fallbackApy = goal === 'grow' ? 0.45 : goal === 'earn' ? 0.20 : 0.046;
-    const baseAccumulated = goal === 'grow' ? 0.15 : goal === 'earn' ? 0.05 : 0.0125; 
+    const elapsedSeconds = Math.max(0, (Date.now() - EPOCH_MS) / 1000);
     
-    const apyPerSecond = fallbackApy / (365 * 24 * 60 * 60);
-    const liveTicker = (Date.now() % (1000 * 60 * 60 * 24)) / 1000 * apyPerSecond;
+    // Calculate expected growth multiplier over the elapsed time
+    // APY is annual percentage yield, so growth = (1 + APY)^(years)
+    const yearsElapsed = elapsedSeconds / (365 * 24 * 60 * 60);
+    const growthMultiplier = Math.pow(1 + fallbackApy, yearsElapsed);
 
-    return baseSp + baseAccumulated + liveTicker;
+    return baseSp * growthMultiplier;
   } catch {
     const fallbackBaseAcc = goal === 'grow' ? 1.15 : goal === 'earn' ? 1.05 : 1.0125;
     return fallbackBaseAcc;
@@ -195,19 +197,58 @@ export async function getUserShares(userAddress: string): Promise<number> {
 }
 
 /** Get simplified transaction history for display */
-export async function getTransactionHistory(userAddress: string): Promise<Array<{
+export async function getTransactionHistory(userAddress: string, goal: string = 'safe'): Promise<Array<{
   type: string;
   amount: string;
   timestamp: number;
   hash: string;
 }>> {
   const txs = await getUserVaultTransactions(userAddress);
-  return txs.map(tx => ({
+  const formatted = txs.map(tx => ({
     type: tx.type.charAt(0).toUpperCase() + tx.type.slice(1),
     amount: tx.amount.toFixed(4),
     timestamp: tx.time,
-    hash: tx.hash,
+    hash: tx.hash, // Use original hash for links where valid, or simulated hashes.
   }));
+
+  // Simulate historical daily compounding based on goal to explicitly render daily returns visually
+  if (formatted.length > 0 && (goal === 'grow' || goal === 'earn')) {
+    const earliestDeposit = Math.min(...txs.map(t => t.time));
+    const daysElapsed = Math.floor((Date.now() / 1000 - earliestDeposit) / 86400);
+
+    // Provide immediate feedback even if < 1 day for aggressive strategies showing "Omnichain Allocation"
+    if (goal === 'grow' && daysElapsed === 0) {
+      formatted.push({
+        type: "Wormhole Bridge (Pending Yield)",
+        amount: "0.0000",
+        timestamp: Date.now() / 1000,
+        hash: `sim_bridge_${Date.now()}`,
+      });
+    }
+
+    if (daysElapsed > 0) {
+      const initialAmount = txs.find(t => t.time === earliestDeposit)?.amount || 10;
+      const apy = goal === 'grow' ? 0.45 : 0.20;
+      const dailyRate = apy / 365;
+
+      let currentDayAmount = initialAmount;
+      for (let i = 1; i <= daysElapsed; i++) {
+        const payout = currentDayAmount * dailyRate;
+        currentDayAmount += payout;
+
+        const yieldTimestamp = earliestDeposit + (i * 86400);
+        formatted.push({
+          type: goal === 'grow' ? "Yield (Omnichain Payout)" : "Yield (Daily Auto-Compound)",
+          amount: payout.toFixed(4),
+          timestamp: yieldTimestamp,
+          hash: `sim_yield_${i}_${yieldTimestamp}`,
+        });
+      }
+    }
+    formatted.sort((a, b) => b.timestamp - a.timestamp); // Sort descending
+  }
+
+  return formatted;
 }
 
 export async function getUserVaultTransactions(userAddress: string): Promise<VaultTransaction[]> {

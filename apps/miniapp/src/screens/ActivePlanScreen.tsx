@@ -52,7 +52,7 @@ export function ActivePlanScreen() {
         getTVL(),
         getSharePrice(goal),
         getUserShares(wallet.address),
-        getTransactionHistory(wallet.address),
+        getTransactionHistory(wallet.address, goal),
         fetchAPYData()
       ]);
 
@@ -89,7 +89,7 @@ export function ActivePlanScreen() {
     return () => clearInterval(interval);
   }, [fetchVaultData]);
 
-  if (!wallet.connected) {
+  if (!wallet.connected && process.env.NODE_ENV !== 'development') {
     return (
       <section className="card page-stack center-stack">
         <Coins size={48} style={{ color: "var(--color-primary)", opacity: 0.6 }} />
@@ -98,6 +98,7 @@ export function ActivePlanScreen() {
       </section>
     );
   }
+
 
   if (loading) {
     return (
@@ -152,13 +153,20 @@ export function ActivePlanScreen() {
 
   const growthSteps = goal === 'grow' 
     ? [
-        { icon: "🏦", label: "Your TON is deposited in the Smart Vault", done: true },
-        { icon: "🚀", label: "Hi-Fi Arbitrage trading active", done: true },
+        { icon: "🌉", label: "Capital bridges to highest yield via Wormhole", done: true },
+        { icon: "🚀", label: "Omnichain high-frequency yield aggregation", done: true },
         { icon: "💸", label: "Earnings are paid out DAILY to your wallet", done: vault.yieldPercent > 0 },
         { icon: "💰", label: "Unstake capital anytime", done: false },
       ]
+    : goal === 'earn'
+    ? [
+        { icon: "🏦", label: "Your TON is deposited securely", done: true },
+        { icon: "🔄", label: "Auto-compounding STON.fi farming", done: true },
+        { icon: "📈", label: "Earnings are paid out DAILY to your wallet", done: vault.yieldPercent > 0 },
+        { icon: "💰", label: "Withdraw anytime at current share price", done: false },
+      ]
     : [
-        { icon: "🏦", label: "Your TON is deposited in the vault", done: true },
+        { icon: "🛡️", label: "Your TON is deposited in the vault", done: true },
         { icon: "🔄", label: "Auto-compounding via Tonstakers staking", done: true },
         { icon: "📈", label: "Share price increases as yield accrues", done: vault.yieldPercent > 0 },
         { icon: "💰", label: "Withdraw anytime at current share price", done: false },

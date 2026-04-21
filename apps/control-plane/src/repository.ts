@@ -666,28 +666,55 @@ export async function linkReferral(walletAddress: string, referralCode: string) 
   );
 
   if ((result.affectedRows ?? 0) > 0) {
-    // Both users get bonus points upon linking
+    // New user gets an initial signup bonus right away.
+    // However, the Referrer does NOT get their reward until the referred user deposits.
     await awardPoints(normalized, 100, "REFERRAL_BONUS_NEW_USER");
-    await awardPoints(referrer.wallet_address, 500, "REFERRAL_BONUS_INVITER");
   }
 
   return referrer.wallet_address;
 }
 
-export async function awardPoints(walletAddress: string, amount: number, reason: string) {
+export async function processDepositForReferral(walletAddress: string, depositAmountTon: number, txHash: string) {
+  // If the deposit is too small, skip. Minimum is 5 TON.
+  if (depositAmountTon < 5) return false;
+
   const db = await getDb();
   const normalized = normalizeWalletAddress(walletAddress);
+  
+  const user = await getUserProfile(normalized);
+  if (!user || !user.referred_by) return false;
+
+  // Grant the referrer their successful activation points. Use txHash as meta for anti-replay safety.
+  // We use "REFERRAL_ACTIVATION" reason for the referrer's reward.
+  return await awardPoints(user.referred_by, 500, "REFERRAL_ACTIVATION", txHash);
+}
+
+export async function awardPoints(walletAddress: string, amount: number, reason: string, meta?: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  
+  // ANTI-GAMING: Check if this meta (e.g. tx_hash) has already been rewarded for this reason
+  if (meta) {
+    const existing = await db.query(
+      "SELECT id FROM point_events WHERE wallet_address = $1 AND reason = $2 AND meta = $3 LIMIT 1",
+      [normalized, reason, meta]
+    );
+    if (existing.rows.length > 0) return false; // Already processed
+  }
+
   const id = `pt_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   
   await db.query(
-    "INSERT INTO point_events (id, wallet_address, amount, reason) VALUES ($1, $2, $3, $4)",
-    [id, normalized, amount, reason]
+    "INSERT INTO point_events (id, wallet_address, amount, reason, meta) VALUES ($1, $2, $3, $4, $5)",
+    [id, normalized, amount, reason, meta || null]
   );
 
   await db.query(
     "UPDATE users SET total_points = total_points + $1 WHERE wallet_address = $2",
     [amount, normalized]
   );
+
+  return true;
 }
 
 export async function getUserPoints(walletAddress: string) {
@@ -697,8 +724,8 @@ export async function getUserPoints(walletAddress: string) {
   const user = await getUserProfile(normalized);
   if (!user) return { total: 0, history: [] };
 
-  const history = await db.query<{ amount: number; reason: string; created_at: string }>(
-    "SELECT amount, reason, created_at FROM point_events WHERE wallet_address = $1 ORDER BY created_at DESC LIMIT 50",
+  const history = await db.query<{ amount: number; reason: string; created_at: string; meta: string | null }>(
+    "SELECT amount, reason, created_at, meta FROM point_events WHERE wallet_address = $1 ORDER BY created_at DESC LIMIT 50",
     [normalized]
   );
 
