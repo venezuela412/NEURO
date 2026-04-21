@@ -20,6 +20,7 @@ import {
   type MarketScanResult,
   type RankedOpportunity,
 } from "./market-scanner";
+import { beginCell, toNano } from "@ton/core";
 
 const VAULT_ADDRESS = process.env.NEURO_VAULT_ADDRESS ?? "";
 const TONAPI_ENDPOINT = "https://tonapi.io/v2";
@@ -359,4 +360,24 @@ export const OmniChainSolver = {
       allocationEfficiency: scan?.currentAllocationEfficiency ?? 0,
     };
   },
+
+  /**
+   * Generates a LayerZero v2 OFT execution intent payload.
+   * Emits a valid BOC string that can be used via TonConnect or the Server Keeper.
+   */
+  generateLayerZeroIntentPayload(targetEvmChainId: number, evmRecipient: string, amountTon: number): string {
+    // Arbitrary opcode defined in the future Vault for OFT bridging
+    const OFT_SEND_OPCODE = 0x12345678; 
+    
+    // Construct LayerZero cross-chain payload
+    // [uint32 opcode][uint32 chainId][uint256 recipient][coins amount]
+    const payload = beginCell()
+      .storeUint(OFT_SEND_OPCODE, 32)
+      .storeUint(targetEvmChainId, 32)
+      .storeBuffer(Buffer.from(evmRecipient.replace('0x', '').padStart(64, '0'), 'hex'))
+      .storeCoins(toNano(amountTon.toFixed(9)))
+      .endCell();
+      
+    return payload.toBoc().toString("base64");
+  }
 };
