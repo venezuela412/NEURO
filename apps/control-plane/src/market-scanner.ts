@@ -43,6 +43,8 @@ const VOLATILITY_ESTIMATES: Record<string, number> = {
   staking: 0.02,   // Very low vol — yield is predictable
   lp: 0.15,        // Higher vol due to impermanent loss
   farming: 0.25,   // Highest vol — farming rewards can change fast
+  "delta-neutral": 0.01, // Extremely low volatility due to perfect spot-short hedge
+  "omnichain-avs": 0.08, // Moderate edge-case risk from bridge layer transfers
 };
 
 // ─── CORE SCANNER ───
@@ -311,28 +313,29 @@ export function computeOptimalWeights(
   }));
 
   // Apply constraints:
-  // 1. Staking must have at least 40% weight (safety floor)
-  // 2. No single LP pool can exceed 30%
+  // 1. Staking must have at least 15% weight (safety floor)
+  // 2. Pure LP pools capped at 30% to prevent extreme IL
   // 3. No weight below 5% (not worth the gas)
 
   const stakingEntry = weights.find((w) => w.protocol === "tonstakers");
-  if (stakingEntry && stakingEntry.weight < 0.4) {
-    const deficit = 0.4 - stakingEntry.weight;
-    stakingEntry.weight = 0.4;
+  if (stakingEntry && stakingEntry.weight < 0.15) {
+    const deficit = 0.15 - stakingEntry.weight;
+    stakingEntry.weight = 0.15;
 
-    // Redistribute deficit proportionally from LP pools
-    const lpPools = weights.filter((w) => w.protocol !== "tonstakers" && w.weight > 0);
-    const lpTotal = lpPools.reduce((sum, w) => sum + w.weight, 0);
-    if (lpTotal > 0) {
-      lpPools.forEach((w) => {
-        w.weight -= deficit * (w.weight / lpTotal);
+    // Redistribute deficit proportionally
+    const otherPools = weights.filter((w) => w.protocol !== "tonstakers" && w.weight > 0);
+    const otherTotal = otherPools.reduce((sum, w) => sum + w.weight, 0);
+    if (otherTotal > 0) {
+      otherPools.forEach((w) => {
+        w.weight -= deficit * (w.weight / otherTotal);
       });
     }
   }
 
-  // Cap LP pools at 30%
+  // Cap Standard LP pools at 30%
   weights.forEach((w) => {
-    if (w.protocol !== "tonstakers" && w.weight > 0.3) {
+    const opp = safe.find((s) => s.pool.protocol === w.protocol && s.pool.poolAddress === w.poolAddress);
+    if (opp?.pool.category === "lp" && w.weight > 0.3) {
       w.weight = 0.3;
     }
   });
