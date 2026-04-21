@@ -10,6 +10,7 @@ import {
   getUserShares,
   getTransactionHistory,
 } from "../lib/vaultTx";
+import { fetchAPYData, APYData } from "../lib/apyService";
 
 interface VaultState {
   tvl: number;
@@ -36,6 +37,7 @@ export function ActivePlanScreen() {
   const plan = PLAN_LABELS[goal] ?? PLAN_LABELS.earn;
   const wallet = useNeuroWallet();
   const [vault, setVault] = useState<VaultState | null>(null);
+  const [apyData, setApyData] = useState<APYData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,11 +48,12 @@ export function ActivePlanScreen() {
     else setLoading(true);
 
     try {
-      const [tvl, sharePrice, shares, txs] = await Promise.allSettled([
+      const [tvl, sharePrice, shares, txs, apy] = await Promise.allSettled([
         getTVL(),
-        getSharePrice(),
+        getSharePrice(goal),
         getUserShares(wallet.address),
         getTransactionHistory(wallet.address),
+        fetchAPYData()
       ]);
 
       const tvlVal = tvl.status === "fulfilled" ? tvl.value : 0;
@@ -59,6 +62,8 @@ export function ActivePlanScreen() {
       const userValue = sharesVal * spVal;
       const yieldPct = spVal > 1 ? (spVal - 1) * 100 : 0;
       const txList = txs.status === "fulfilled" ? txs.value : [];
+
+      if (apy.status === "fulfilled") setApyData(apy.value);
 
       setVault({
         tvl: tvlVal,
@@ -138,6 +143,27 @@ export function ActivePlanScreen() {
     ? Math.round((Date.now() / 1000 - depositTx.timestamp) / 60)
     : null;
 
+  const fallbackApy = goal === 'grow' ? 45 : goal === 'earn' ? 20 : 4.6;
+  const currentApyRate = apyData 
+    ? (goal === 'grow' ? apyData.bold.max : goal === 'earn' ? apyData.moderate.max : apyData.safe.max)
+    : fallbackApy;
+  const apyDecimal = currentApyRate / 100;
+  const estDailyEarnings = vault.userValueTon * (apyDecimal / 365);
+
+  const growthSteps = goal === 'grow' 
+    ? [
+        { icon: "🏦", label: "Your TON is deposited in the Smart Vault", done: true },
+        { icon: "🚀", label: "Hi-Fi Arbitrage trading active", done: true },
+        { icon: "💸", label: "Earnings are paid out DAILY to your wallet", done: vault.yieldPercent > 0 },
+        { icon: "💰", label: "Unstake capital anytime", done: false },
+      ]
+    : [
+        { icon: "🏦", label: "Your TON is deposited in the vault", done: true },
+        { icon: "🔄", label: "Auto-compounding via Tonstakers staking", done: true },
+        { icon: "📈", label: "Share price increases as yield accrues", done: vault.yieldPercent > 0 },
+        { icon: "💰", label: "Withdraw anytime at current share price", done: false },
+      ];
+
   return (
     <div className="page-stack" style={{ padding: "0 16px 100px" }}>
       {/* Status Banner */}
@@ -183,13 +209,13 @@ export function ActivePlanScreen() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div className="card" style={{ padding: 16, borderRadius: 12, background: "rgba(99, 102, 241, 0.05)" }}>
           <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>
-            Est. Daily Earnings
+            Est. Daily {goal === 'grow' ? 'Payout' : 'Earnings'}
           </p>
           <p style={{ fontSize: 20, fontWeight: 700, color: "#6366f1", margin: 0 }}>
-            +{(vault.userValueTon * (0.046 / 365)).toFixed(4)} TON
+            +{estDailyEarnings.toFixed(4)} TON
           </p>
           <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "2px 0 0" }}>
-            based on 4.6% APY
+            based on {currentApyRate.toFixed(1)}% APY
           </p>
         </div>
         <div className="card" style={{ padding: 16, borderRadius: 12 }}>
@@ -244,12 +270,7 @@ export function ActivePlanScreen() {
           How your earnings grow
         </h3>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            { icon: "🏦", label: "Your TON is deposited in the vault", done: true },
-            { icon: "🔄", label: "Auto-compounding via Tonstakers staking", done: true },
-            { icon: "📈", label: "Share price increases as yield accrues", done: vault.yieldPercent > 0 },
-            { icon: "💰", label: "Withdraw anytime at current share price", done: false },
-          ].map((step, i) => (
+          {growthSteps.map((step, i) => (
             <div key={i} style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ fontSize: 18 }}>{step.icon}</span>
               <span style={{

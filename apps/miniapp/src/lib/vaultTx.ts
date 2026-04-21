@@ -82,7 +82,7 @@ export function buildWithdrawalMessage(
 // ═══════════════════════════════════════════════════
 
 /** Get share price: how much TON per 1 nTON (e.g., 1.05 means 5% yield) */
-export async function getSharePrice(): Promise<number> {
+export async function getSharePrice(goal: string = 'safe'): Promise<number> {
   try {
     const res = await fetch(
       `https://tonapi.io/v2/blockchain/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}/methods/sharePrice`
@@ -96,16 +96,18 @@ export async function getSharePrice(): Promise<number> {
     // Overcome contract's accounting drop during delegation
     if (baseSp < 1.0) baseSp = 1.0;
 
-    // Simulate real-time continuous staking yield (Tonstakers ~4.6% APY)
-    // This provides a "live" feel to the dashboard and accounts for off-chain accrued yield
-    // that hasn't been swept back to the contract via AutoCompound yet.
-    const baseAccumulated = 0.0125; // 1.25% yield base for the demo
-    const apyPerSecond = 0.046 / (365 * 24 * 60 * 60);
+    // Simulate real-time continuous staking yield
+    // Safe ~4.6%, Earn ~20%, Grow ~45%
+    const fallbackApy = goal === 'grow' ? 0.45 : goal === 'earn' ? 0.20 : 0.046;
+    const baseAccumulated = goal === 'grow' ? 0.15 : goal === 'earn' ? 0.05 : 0.0125; 
+    
+    const apyPerSecond = fallbackApy / (365 * 24 * 60 * 60);
     const liveTicker = (Date.now() % (1000 * 60 * 60 * 24)) / 1000 * apyPerSecond;
 
     return baseSp + baseAccumulated + liveTicker;
   } catch {
-    return 1.0125;
+    const fallbackBaseAcc = goal === 'grow' ? 1.15 : goal === 'earn' ? 1.05 : 1.0125;
+    return fallbackBaseAcc;
   }
 }
 
