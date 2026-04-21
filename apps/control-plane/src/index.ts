@@ -596,6 +596,48 @@ server.post<{ Params: { walletAddress: string; executionId: string } }>(
   },
 );
 
+// ==================== USERS & REFERRALS ====================
+
+import { createUserProfile, getUserProfile, linkReferral, getUserPoints } from "./repository";
+
+server.get<{ Params: { walletAddress: string } }>("/api/users/:walletAddress", async (request) => {
+  let user = await getUserProfile(request.params.walletAddress);
+  if (!user) {
+    user = await createUserProfile(request.params.walletAddress);
+  }
+  const points = await getUserPoints(request.params.walletAddress);
+  
+  return {
+    ...user,
+    points: points.total,
+    history: points.history
+  };
+});
+
+server.post<{ Params: { walletAddress: string }; Body: { referralCode: string } }>(
+  "/api/users/:walletAddress/referral",
+  async (request, reply) => {
+    if (!request.body?.referralCode) {
+      reply.code(400);
+      return { error: "missing_referral_code" };
+    }
+
+    // Need to ensure the user profile exists first
+    let user = await getUserProfile(request.params.walletAddress);
+    if (!user) {
+      user = await createUserProfile(request.params.walletAddress);
+    }
+
+    const linkedTo = await linkReferral(request.params.walletAddress, request.body.referralCode);
+    if (!linkedTo) {
+      reply.code(400);
+      return { error: "invalid_or_already_linked" };
+    }
+
+    return { ok: true, linkedTo };
+  }
+);
+
 server.post<{ Params: { walletAddress: string } }>("/portfolio/:walletAddress/switch-to-safety", async (request, reply) => {
   const parsed = sessionMutationSchema.safeParse(request.body ?? {});
   if (!parsed.success) {

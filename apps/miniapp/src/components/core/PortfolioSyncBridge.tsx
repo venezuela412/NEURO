@@ -95,6 +95,25 @@ export function PortfolioSyncBridge() {
     applyPersistedPortfolioState(persistedQuery.data);
   }, [applyPersistedPortfolioState, persistedQuery.data, wallet.address, wallet.connected]);
 
+  // Referral processing logic
+  useEffect(() => {
+    if (wallet.connected && wallet.address) {
+      try {
+        const startParam = (window as any).Telegram?.WebApp?.initDataUnsafe?.start_param;
+        if (startParam && startParam.startsWith("ref_")) {
+          // Don't await, let it process in background
+          fetch(`/api/users/${wallet.address}/referral`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referralCode: startParam })
+          }).catch(console.error);
+        }
+      } catch (e) {
+        console.error("Failed to process referral", e);
+      }
+    }
+  }, [wallet.connected, wallet.address]);
+
   const currentState = useMemo<PersistedPortfolioState | null>(() => {
     if (!wallet.connected || !wallet.address) {
       return null;

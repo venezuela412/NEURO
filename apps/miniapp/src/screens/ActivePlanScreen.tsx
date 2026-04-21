@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ShieldCheck, TrendingUp, Coins, ArrowDownToLine, RefreshCw, ExternalLink } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useNeuroWallet } from "../hooks/useTonWallet";
+import { useAppStore } from "../store/appStore";
 import {
   NEURO_VAULT_ADDRESS,
   getSharePrice,
@@ -24,7 +25,15 @@ interface VaultState {
   }>;
 }
 
+const PLAN_LABELS: Record<string, { name: string; color: string }> = {
+  protect: { name: "Safe Savings", color: "#26d3c7" },
+  earn:    { name: "Balanced Earner", color: "#f59e0b" },
+  grow:    { name: "Power Boost", color: "#ef4444" },
+};
+
 export function ActivePlanScreen() {
+  const { goal } = useAppStore();
+  const plan = PLAN_LABELS[goal] ?? PLAN_LABELS.earn;
   const wallet = useNeuroWallet();
   const [vault, setVault] = useState<VaultState | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,8 +154,8 @@ export function ActivePlanScreen() {
           <span className="pill pill-success" style={{ fontSize: 11 }}>
             <ShieldCheck size={12} /> Active
           </span>
-          <span className="pill" style={{ fontSize: 11, background: "rgba(99, 102, 241, 0.15)", color: "#818cf8" }}>
-            <TrendingUp size={12} /> Safe Strategy
+          <span className="pill" style={{ fontSize: 11, background: plan.color + "22", color: plan.color }}>
+            <TrendingUp size={12} /> {plan.name}
           </span>
         </div>
 
@@ -172,6 +181,17 @@ export function ActivePlanScreen() {
 
       {/* Stats Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="card" style={{ padding: 16, borderRadius: 12, background: "rgba(99, 102, 241, 0.05)" }}>
+          <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>
+            Est. Daily Earnings
+          </p>
+          <p style={{ fontSize: 20, fontWeight: 700, color: "#6366f1", margin: 0 }}>
+            +{(vault.userValueTon * (0.046 / 365)).toFixed(4)} TON
+          </p>
+          <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "2px 0 0" }}>
+            based on 4.6% APY
+          </p>
+        </div>
         <div className="card" style={{ padding: 16, borderRadius: 12 }}>
           <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>
             Share Price

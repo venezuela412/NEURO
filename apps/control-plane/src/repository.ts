@@ -609,3 +609,101 @@ export async function cleanupExpiredSessions() {
   const now = new Date().toISOString();
   await db.query("DELETE FROM wallet_sessions WHERE expires_at < $1", [now]);
 }
+
+// --- USERS & POINTS ---
+
+export interface UserRow {
+  wallet_address: string;
+  referral_code: string;
+  referred_by: string | null;
+  total_points: number;
+}
+
+export async function getUserProfile(walletAddress: string): Promise<UserRow | null> {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const result = await db.query<UserRow>(
+    "SELECT wallet_address, referral_code, referred_by, total_points FROM users WHERE wallet_address = $1",
+    [normalized]
+  );
+  return result.rows.length > 0 ? result.rows[0] : null;
+}
+
+export async function createUserProfile(walletAddress: string): Promise<UserRow> {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const referralCode = `ref_${Math.random().toString(36).substring(2, 10)}`;
+  
+  await db.query(
+    `INSERT INTO users (wallet_address, referral_code) 
+     VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+    [normalized, referralCode]
+  );
+
+  return (await getUserProfile(normalized))!;
+}
+
+export async function linkReferral(walletAddress: string, referralCode: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  
+  // Find referrer
+  const referrerRes = await db.query<UserRow>(
+    "SELECT wallet_address FROM users WHERE referral_code = $1 LIMIT 1",
+    [referralCode]
+  );
+
+  if (referrerRes.rows.length === 0) return null;
+  const referrer = referrerRes.rows[0];
+
+  // Prevent self-referral
+  if (referrer.wallet_address === normalized) return null;
+
+  // Link user
+  const result = await db.query(
+    "UPDATE users SET referred_by = $1 WHERE wallet_address = $2 AND referred_by IS NULL RETURNING wallet_address",
+    [referrer.wallet_address, normalized]
+  );
+
+  if ((result.affectedRows ?? 0) > 0) {
+    // Both users get bonus points upon linking
+    await awardPoints(normalized, 100, "REFERRAL_BONUS_NEW_USER");
+    await awardPoints(referrer.wallet_address, 500, "REFERRAL_BONUS_INVITER");
+  }
+
+  return referrer.wallet_address;
+}
+
+export async function awardPoints(walletAddress: string, amount: number, reason: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  const id = `pt_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  
+  await db.query(
+    "INSERT INTO point_events (id, wallet_address, amount, reason) VALUES ($1, $2, $3, $4)",
+    [id, normalized, amount, reason]
+  );
+
+  await db.query(
+    "UPDATE users SET total_points = total_points + $1 WHERE wallet_address = $2",
+    [amount, normalized]
+  );
+}
+
+export async function getUserPoints(walletAddress: string) {
+  const db = await getDb();
+  const normalized = normalizeWalletAddress(walletAddress);
+  
+  const user = await getUserProfile(normalized);
+  if (!user) return { total: 0, history: [] };
+
+  const history = await db.query<{ amount: number; reason: string; created_at: string }>(
+    "SELECT amount, reason, created_at FROM point_events WHERE wallet_address = $1 ORDER BY created_at DESC LIMIT 50",
+    [normalized]
+  );
+
+  return {
+    total: user.total_points,
+    history: history.rows
+  };
+}
