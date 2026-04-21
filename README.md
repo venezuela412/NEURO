@@ -1,136 +1,150 @@
 <p align="center">
-  <img src="https://neuroton-lime.vercel.app/assets/logo.png" width="120" alt="NEURO Logo" style="border-radius: 25px; box-shadow: 0 0 30px rgba(143,115,255,0.4);">
+  <img src="https://neuroton-lime.vercel.app/assets/logo.png" width="180" alt="NEURO Logo" style="border-radius: 35px; box-shadow: 0 0 50px rgba(143,115,255,0.6);">
 </p>
 
-<h1 align="center">NeuroTON Protocol</h1>
+<h1 align="center">NeuroTON Protocol: Autonomous Omnichain Yield Engine</h1>
 
 <p align="center">
-  <strong>Autonomous AI-Driven Omnichain Yield Execution</strong>
+  <em>Next-generation AI-driven liquidity routing and multi-chain yield optimization on the TON Blockchain.</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Network-TON%20%7C%20Omnichain-blue?style=flat-square&logo=telegram" alt="Network">
-  <img src="https://img.shields.io/badge/Status-Beta%20V2-orange?style=flat-square" alt="Status">
-  <img src="https://img.shields.io/badge/Routing-Wormhole-black?style=flat-square" alt="Wormhole">
-  <img src="https://img.shields.io/badge/AI_Engine-Neuro_Agents-purple?style=flat-square" alt="AI Engine">
+  <a href="https://neuroton-lime.vercel.app"><img src="https://img.shields.io/badge/Live_App-neuroton.vercel.app-7132F5?style=for-the-badge&logo=vercel" alt="Live App"></a>
+  <a href="https://ton.org"><img src="https://img.shields.io/badge/Network-TON-0098EA?style=for-the-badge&logo=telegram" alt="Network"></a>
+  <a href="https://wormhole.com"><img src="https://img.shields.io/badge/Bridging-Wormhole-white?style=for-the-badge" alt="Wormhole"></a>
+  <a href="https://t.me/neuroton_bot"><img src="https://img.shields.io/badge/Telegram-MiniApp-2CA5E0?style=for-the-badge&logo=telegram" alt="Telegram"></a>
 </p>
 
 ---
 
-## 🧭 Overview
+## 🌌 The Omnichain Vision
 
-**NeuroTON** is a production-grade autonomous yield aggregator and smart-routing DEX execution layer on the TON blockchain. It sources, aggregates, and leverages cross-chain interoperability via **Wormhole** to dynamically route capital across LPs, Liquid Restaking Tokens (LRTs), and high-frequency arbitrage opportunities, continuously guaranteeing the maximum APY for deposited assets.
+**NeuroTON** is a production-grade autonomous yield aggregator and smart-routing DEX execution layer built natively for the **TON (The Open Network)** ecosystem. By leveraging **Wormhole** for cross-chain interoperability, our embedded Neuro AI Agents map and secure the highest possible APY across the entire Defi landscape (Liquid Restaking, LP provisioning, and Arbitrage).
 
-[**Live Application →**](https://neuroton-lime.vercel.app)
+Instead of forcing users to navigate complex bridges and gas fees, NeuroTON handles multi-chain execution entirely autonomously through a single, secure Smart Vault integration.
 
 ---
 
-## 🏛️ System Architecture
+## 🚀 Key Features
 
-NeuroTON uses a micro-service, deeply integrated infrastructure combining a Telegram MiniApp frontend, an ultra-fast control plane, and a robust smart contract vault architecture.
+| Feature | Description |
+| ------- | ----------- |
+| 🧠 **Autonomous AI Routing** | Solvers continuously scan TON DEXs (STON.fi, DeDust) and multi-chain pools (via Wormhole) to deploy capital dynamically where yields are highest, targeting **>100% Dynamic APY**. |
+| 🛡️ **Self-Custodial Vaults** | Users deposit TON into a non-custodial Smart Vault and receive `nTON` (Neuro TON) LP shares. Total sovereignty. No private keys face the web. |
+| 🌉 **Omnichain Staking** | Capital is not restricted to TON. High-risk tolerance capital bridges to Arbitrum, Base, or Optimism via Wormhole for maximum LRT burst yields. |
+| 💎 **Robust Sybil Resistance** | Advanced off-chain control-plane indexing prevents point farming. Referrals require a minimum 5-TON vault deposit to activate. |
+| 🤖 **Telegram MiniApp UX** | Seamless smartphone integration. Connect your Tonkeeper wallet and deploy cross-chain strategies with three taps. |
+
+---
+
+## 🏛️ Enterprise System Architecture
+
+NeuroTON uses an event-driven microservice architecture, bridging Web2 off-chain performance with Web3 on-chain security.
 
 ```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                          NeuroTON Telegram MiniApp                     │
-│                                                                        │
-│ ┌──────────────┐     ┌───────────────┐     ┌──────────────────────┐    │
-│ │ / Dashboard  │     │ / Points Hub  │     │ / Analytics & Health │    │
-│ └──────┬───────┘     └───────┬───────┘     └──────────┬───────────┘    │
-│        │                     │                        │                │
-│ ┌──────▼─────────────────────▼────────────────────────▼──────────────┐ │
-│ │                  Fastify Control Plane (Node.js)                   │ │
-│ │      Anti-Sybil Ledger + Referral Attribution + Strategy AI        │ │
-│ └────────────────────────────┬───────────────────────────────────────┘ │
-│                              │                                         │
-│ ┌────────────────────────────▼───────────────────────────────────────┐ │
-│ │                      TonConnectUI Provider                         │ │
-│ └────────────────────────────┬───────────────────────────────────────┘ │
-└──────────────────────────────┼─────────────────────────────────────────┘
-                               │
-               ┌───────────────▼───────────────┐
-               │    NeuroTON Smart Vault L1    │
-               └───────────────┬───────────────┘
-                               │
-         ┌─────────────────────┼──────────────────────┐
-         ▼                     ▼                      ▼
-  ┌─────────────┐       ┌─────────────┐        ┌──────────────┐
-  │ Tonstakers  │       │   STON.fi   │        │   Wormhole   │
-  │   (Safe)    │       │   (Earn)    │        │ Omnichain AI │
-  └─────────────┘       └─────────────┘        └──────────────┘
+                                  ┌────────────────────────┐
+                                  │   Telegram User Client │
+                                  │   (Vite + React)       │
+                                  └───────────┬────────────┘
+                                              │ Uses TonConnect UI
+┌─────────────────────────────────────────────▼─────────────────────────────────────────────┐
+│                                                                                           │
+│ ┌────────────────────────┐    ┌────────────────────────┐    ┌────────────────────────┐    │
+│ │   Dashboard Engine     │    │   Point & Referrals    │    │   Strategy Analytics   │    │
+│ └──────────┬─────────────┘    └──────────┬─────────────┘    └──────────┬─────────────┘    │
+│            │                             │                             │                  │
+├────────────┼─────────────────────────────┼─────────────────────────────┼──────────────────┤
+│            │                             │                             │                  │
+│            ▼                             ▼                             ▼                  │
+│ ┌───────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                             Fastify Control Plane (Node.js)                           │ │
+│ │   [ Auth Ledger ]    [ Anti-Sybil Meta Cache ]   [ OmniChain AI Solver Cron Job ]     │ │
+│ └──────────────────────────────────────┬────────────────────────────────────────────────┘ │
+│                                        │ Signed Txs                                       │
+└────────────────────────────────────────┼──────────────────────────────────────────────────┘
+                                         ▼
+                     ┌──────────────────────────────────────┐
+                     │          NeuroTON Smart Vault        │
+                     │          (Compiled Tact ABI)         │
+                     └──────┬────────────────────────┬──────┘
+                            │                        │
+               ┌────────────▼───────────┐    ┌───────▼────────────────┐
+               │    TON Native Yield    │    │ Wormhole Cross-Chain   │
+               │  (STON.fi, Tonstakers) │    │ Arbitrum/Base/Ethereum │
+               └────────────────────────┘    └────────────────────────┘
 ```
 
-## 🧠 Dynamic Omnichain Intelligence (>100% APY Target)
+### The Neuro AI Execution Pipeline
+1. **Index:** Market Scanners (`market-scanner.ts`) poll DEX APIs and Wormhole aggregators every minute.
+2. **Evaluate:** Safety contracts cross-reference token volatility and slippage.
+3. **Execute:** The Control Plane calculates optimal auto-compounding intervals and triggers `execute` calls on the Vault via strict chron routines.
 
-Unlike static yield farms, the **Aggressive / Grow** strategy employs our autonomous AI system. The solver bots autonomously:
-1. Rotate across highly liquid pools detecting inefficiencies.
-2. Bridge capital using **Wormhole** to intercept multi-chain Liquid Restaking (LRT) bursts.
-3. Automatically execute high-frequency localized arbitrage.
+---
 
-To achieve continuous compound growth rates dynamically targeting **124.5%+ APY**, yields are algorithmically swept and dropped **DAILY** to the user's dashboard representation.
+## 🔒 Security & Anti-Gaming
 
-## 🏆 Points, Referrals, & Anti-Gaming Economy
+We take protocol health seriously. The hackathon iteration includes multiple safeguards:
 
-Our internal system operates a robust off-chain referral tree backed by Supabase with intensive anti-gaming safeguards ready for Token Generation Events (Airdrops):
+- **Row-Level Replay Defenses:** Our internal ledger tracks individual `txHash` execution strings in a strict `meta` JSON column. Actions cannot be double-spent or rebroadcast.
+- **Deposit-Gated Referrals:** To prevent Airdrop farming, the referrer only receives their activation bonus fully once the newly referred user eclipses the **5 TON Active Minimum** threshold on on-chain queries.
+- **TonConnect Nonce Safety:** All authenticated endpoints utilize `proof` based on TonConnect nonces signed by the wallet origin. 
 
-- **Activation Thresholds:** Referred users must execute a minimum of `5 TON` deposit to trigger the core referral activation points.
-- **Anti-Replay Ledger:** We index all executed `txHash`es into our strict `seen_swap_tx_ids` meta cache in the Point Events ledger. Replay attacks are mathematically blocked at the database row-level.
-- **Bonus Scaling:** New onboarded wallets receive immediate signup bonuses, driving viral loop retention.
+---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Dependencies
 
-- **Frontend:** React + TypeScript, Vite, TailwindCSS (Dark OLED Design)
-- **Backend:** Node.js, Fastify API, `node-cron`
-- **Database:** Supabase (PostgreSQL)
-- **Web3 Integrations:** `@tonconnect/ui-react`, Ton API, Wormhole Interoperability layer.
-- **Deployment:** Vercel (Frontend), Railway / Render (Backend)
+- **Frontend Core:** React, TypeScript, Vite
+- **UI & Styling:** Tailwind CSS (Custom Dark OLED System), Lucide React
+- **Web3 Ecosystem:** `@tonconnect/ui-react`, `@ton/core`, TonAPI
+- **Backend Infrastructure:** Fastify, Node.js, `node-cron`
+- **Database Architecture:** Supabase (PostgreSQL) with Prisma/Drizzle (SQL)
+- **Omnichain Oracle:** Wormhole API integrations for liquidity routing
 
-## 📦 Project Structure
+---
 
-```
-NEURO/
-├── apps/
-│   ├── miniapp/                # Telegram MiniApp Frontend
-│   │   ├── src/
-│   │   │   ├── components/     # UI Elements
-│   │   │   ├── lib/            # Smart Contract APIs & vaultTx
-│   │   │   └── screens/        # Views (ActivePlan, Admin)
-│   │   └── package.json
-│   ├── control-plane/          # Backend Aggregator & AI Coordinator
-│   │   ├── src/
-│   │   │   ├── index.ts        # Fastify API Routes
-│   │   │   ├── repository.ts   # DB Models & Anti-Sybil Logic
-│   │   │   ├── db.ts           # PostgreSQL setup
-│   │   │   └── core/           # Routing engines (Wormhole Stubs)
-│   │   └── package.json
-├── package.json                # Monorepo Workspace Root
-└── README.md
-```
-
-## 🔒 Security Posture
-
-1. **Self-Custody First:** All vault operations rely upon purely non-custodial smart contracts.
-2. **Rate Limiting:** IP-level and Wallet-level controls protect against API spanning on the Fastify endpoints.
-3. **Environment Segregation:** High-security admin vaults require strict cryptographic `CRON_SECRET` parameters to accept internal solver triggers.
-
-## 🚀 Getting Started
+## 💻 Local Development Setup
 
 ### Prerequisites
+- Node.js (v18+)
+- Postgres Database (or remote Supabase connection)
 
-Ensure you have Node.js and `npm` installed. You also need a PostgreSQL database.
-
+### 1. Clone the Repository
 ```bash
-# Install Monorepo dependencies
-npm install
-
-# Start local miniapp UI
-npm run dev --workspace=@neuro/miniapp
-
-# Start backend control plane
-npm run dev --workspace=@neuro/control-plane
+git clone https://github.com/your-org/NeuroTON.git
+cd NeuroTON
 ```
 
-_Note for Local Testing:_ The Vite frontend automatically defaults to a public TonConnect demonstration manifest (`tonconnect-manifest.json`) if run on `localhost` to ensure your mobile Tonkeeper can resolve and connect without CORS/DNS issues.
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Environment Variables
+Create a `.env` in the `apps/control-plane` directory:
+```env
+DATABASE_URL=postgres://...
+CRON_SECRET=super_secret_cron_string
+NEURO_ADMIN_TOKEN=your_admin_jwt
+NEXT_PUBLIC_SUPABASE_URL=...
+```
+
+### 4. Run the Modules
+```bash
+# Start the Backend Control Plane (Fastify)
+npm run dev --workspace=@neuro/control-plane
+
+# Start the Frontend Telegram MiniApp (Vite)
+npm run dev --workspace=@neuro/miniapp
+```
+
+_Note for Tonkeeper:_ During local UI development on `localhost`, the system safely defaults to a public sample `tonconnect-manifest.json` ensuring seamless mobile wallet linkage without CORS errors.
+
+---
 
 ## ⚖️ License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+NeuroTON is deployed under the **MIT License**. We embrace the open source Defi builder community. See `LICENSE` for more information.
+
+<p align="center">
+  <i>Built with ❤️ for the TON Ecosystem</i>
+</p>
