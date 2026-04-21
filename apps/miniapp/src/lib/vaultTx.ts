@@ -98,7 +98,7 @@ export async function getSharePrice(goal: string = 'safe'): Promise<number> {
 
     // Simulate real-time continuous staking yield from a fixed epoch (Jan 1, 2024)
     const EPOCH_MS = 1704067200000; 
-    const fallbackApy = goal === 'grow' ? 0.45 : goal === 'earn' ? 0.20 : 0.046;
+    const fallbackApy = goal === 'grow' ? 1.245 : goal === 'earn' ? 0.20 : 0.046;
     const elapsedSeconds = Math.max(0, (Date.now() - EPOCH_MS) / 1000);
     
     // Calculate expected growth multiplier over the elapsed time
@@ -228,7 +228,7 @@ export async function getTransactionHistory(userAddress: string, goal: string = 
 
     if (daysElapsed > 0) {
       const initialAmount = txs.find(t => t.time === earliestDeposit)?.amount || 10;
-      const apy = goal === 'grow' ? 0.45 : 0.20;
+      const apy = goal === 'grow' ? 1.245 : 0.20;
       const dailyRate = apy / 365;
 
       let currentDayAmount = initialAmount;

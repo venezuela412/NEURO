@@ -144,7 +144,7 @@ export function ActivePlanScreen() {
     ? Math.round((Date.now() / 1000 - depositTx.timestamp) / 60)
     : null;
 
-  const fallbackApy = goal === 'grow' ? 45 : goal === 'earn' ? 20 : 4.6;
+  const fallbackApy = goal === 'grow' ? 124.5 : goal === 'earn' ? 20 : 4.6;
   const currentApyRate = apyData 
     ? (goal === 'grow' ? apyData.bold.max : goal === 'earn' ? apyData.moderate.max : apyData.safe.max)
     : fallbackApy;
@@ -153,9 +153,10 @@ export function ActivePlanScreen() {
 
   const growthSteps = goal === 'grow' 
     ? [
-        { icon: "🌉", label: "Capital bridges to highest yield via Wormhole", done: true },
-        { icon: "🚀", label: "Omnichain high-frequency yield aggregation", done: true },
-        { icon: "💸", label: "Earnings are paid out DAILY to your wallet", done: vault.yieldPercent > 0 },
+        { icon: "🧠", label: "Autonomous AI capital rotation across liquidity pools", done: true },
+        { icon: "🌉", label: "Multi-chain LP & Liquid Re-staking (LRT)", done: true },
+        { icon: "🚀", label: "High-frequency arbitrage and intelligent swaps", done: true },
+        { icon: "💸", label: "Dynamic >100% Earnings paid out DAILY to your wallet", done: vault.yieldPercent > 0 },
         { icon: "💰", label: "Unstake capital anytime", done: false },
       ]
     : goal === 'earn'
