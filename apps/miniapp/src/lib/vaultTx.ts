@@ -15,8 +15,8 @@ export const NEURO_VAULT_ADDRESS = import.meta.env.VITE_NEURO_VAULT_ADDRESS || "
 
 // ── Opcodes from Tact-compiled ABI ──
 const OPCODES = {
-  Deposit:   2393262120,  // 0x8ea64828 — from storeDeposit in compiled bindings
-  TokenBurn: 0x595f07bc,  // TEP-74 standard burn
+  deposit: 0x546c1a82, // Deposit { intent: uint8 }
+  tokenBurn: 0x595f07bc, // TokenBurn { queryId: uint64, amount: coins, ... }
 } as const;
 
 // ═══════════════════════════════════════════════════
@@ -32,7 +32,7 @@ const OPCODES = {
  */
 export function buildDepositMessage(amountTon: number, intent: number = 1) {
   const payload = beginCell()
-    .storeUint(OPCODES.Deposit, 32)
+    .storeUint(OPCODES.deposit, 32)
     .storeUint(intent, 8)
     .endCell();
 
@@ -42,6 +42,7 @@ export function buildDepositMessage(amountTon: number, intent: number = 1) {
     payload: payload.toBoc().toString("base64"),
   };
 }
+
 
 // ═══════════════════════════════════════════════════
 // WITHDRAWAL — Burn nTON, receive TON back
@@ -106,16 +107,17 @@ export async function getSharePrice(goal: string = 'safe'): Promise<number> {
 /** Get vault TVL in TON */
 export async function getVaultTVL(): Promise<number> {
   try {
-    // Fetch raw idle balance from TonAPI
-    const res = await fetch(`https://tonapi.io/v2/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}`);
+    const res = await fetch(
+      `https://tonapi.io/v2/blockchain/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}/methods/tvl`
+    );
     const data = await res.json();
-    const idleBalance = data.balance ? Number(data.balance) / 1e9 : 19.37;
-    
-    // Add the known delegated assets sitting in Tonstakers (tsTON) 
-    // Since the smart contract totalAssets drops during delegation, we reconcile it here
-    const stakedBalance = 11.625; 
-    
-    return idleBalance + stakedBalance;
+    if (data.success && data.stack?.[0]?.num) {
+      return Number(data.stack[0].num) / 1e9;
+    }
+    // Fallback to raw balance if getter fails
+    const rawRes = await fetch(`https://tonapi.io/v2/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}`);
+    const rawData = await rawRes.json();
+    return rawData.balance ? Number(rawData.balance) / 1e9 : 19.37;
   } catch {
     return 30.95; // fallback
   }

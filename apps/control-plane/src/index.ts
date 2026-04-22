@@ -1,8 +1,10 @@
+import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { z } from "zod";
 import crypto from "crypto";
+import cron from "node-cron";
 
 import {
   buildPlanPreviewResponse,
@@ -1020,6 +1022,34 @@ server
     } catch (e) {
       server.log.warn(`Non-fatal: admin log write failed: ${e}`);
     }
+
+    // Start cron job for Daily TVL Points Accrual (Runs at midnight UTC)
+    cron.schedule("0 0 * * *", async () => {
+      server.log.info("[CRON] Running daily TVL points accrual...");
+      try {
+        const { accrueDailyYieldPoints } = await import("./repository");
+        const count = await accrueDailyYieldPoints();
+        server.log.info(`[CRON] Success: Awarded daily points to ${count} users.`);
+      } catch (err) {
+        server.log.error(`[CRON] Error during points accrual: ${err instanceof Error ? err.message : err}`);
+      }
+    });
+
+    // Start cron job to trigger Keeper rebalances every 15 minutes
+    cron.schedule("*/15 * * * *", async () => {
+      server.log.info("[CRON] Initiating automated solver and Keeper rebalance check...");
+      try {
+        const compoundData = await OmniChainSolver.computeAutoCompoundForVault();
+        const strategies = await OmniChainSolver.computeRebalancePaths();
+        await addAdminLog("info", "cron", `Auto-compound resolved: profit=${compoundData.profitToMint}, strategies=${strategies.length}`, {
+          profitToMint: compoundData.profitToMint,
+          strategiesCount: strategies.length,
+        });
+        server.log.info(`[CRON] Success: resolved ${compoundData.profitToMint} profit and ${strategies.length} strategies.`);
+      } catch (err) {
+        server.log.error(`[CRON] Error during Keeper automation run: ${err instanceof Error ? err.message : err}`);
+      }
+    });
   })
   .catch((error) => {
     server.log.error(error);

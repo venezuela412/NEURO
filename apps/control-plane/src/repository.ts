@@ -734,3 +734,57 @@ export async function getUserPoints(walletAddress: string) {
     history: history.rows
   };
 }
+
+export async function accrueDailyYieldPoints() {
+  const db = await getDb();
+  
+  // Get all portfolios
+  const result = await db.query<{ wallet_address: string; state_json: string }>(
+    "SELECT wallet_address, state_json FROM portfolio_state"
+  );
+
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  let awardedCount = 0;
+
+  for (const row of result.rows) {
+    try {
+      const state = JSON.parse(row.state_json) as PersistedPortfolioState;
+      const tvl = state.portfolio?.netEstimatedValueTon || 0;
+      
+      if (tvl > 0) {
+        // Check if user has an execution receipt older than 24 hours (maturity)
+        const receiptsRes = await db.query<{ created_at: string }>(
+          "SELECT created_at FROM execution_receipts WHERE wallet_address = $1 ORDER BY created_at ASC LIMIT 1",
+          [row.wallet_address]
+        );
+
+        if (receiptsRes.rows.length > 0) {
+          const firstReceiptTime = new Date(receiptsRes.rows[0].created_at).getTime();
+          const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+
+          if (firstReceiptTime <= twentyFourHoursAgo) {
+            // Points formula: 100 points per 1 TON of TVL per day
+            const dailyPoints = Math.floor(tvl * 100);
+            
+            // `awardPoints` automatically protects against double-awarding if we pass the date as `meta`
+            const success = await awardPoints(
+              row.wallet_address, 
+              dailyPoints, 
+              "DAILY_TVL_YIELD", 
+              today
+            );
+            
+            if (success) {
+              await addAdminLog("info", "points", `Awarded ${dailyPoints} daily points to ${row.wallet_address} (TVL: ${tvl.toFixed(2)})`);
+              awardedCount++;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore parse errors for individual users so the loop continues
+    }
+  }
+
+  return awardedCount;
+}

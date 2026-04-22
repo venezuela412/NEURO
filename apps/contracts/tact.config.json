@@ -2,7 +2,7 @@
   "projects": [
     {
       "name": "NeuroVault",
-      "path": "./contracts/neuro_vault.tact",
+      "path": "./contracts/neuro_master.tact",
       "output": "./build/NeuroVault",
       "options": {
         "debug": true

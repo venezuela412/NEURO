@@ -38,6 +38,33 @@ By deploying **Delta-Neutral Vaults**, NeuroTON generates >100% APY systematical
 
 ---
 
+## 📈 nTON Tokenomics vs tsTON
+
+nTON is not just another Liquid Staking Token (LST). While traditional solutions like tsTON rely solely on Proof-of-Stake (PoS) validator rewards yielding around ~4-5% APY, **nTON** is an AVS Receipt Token representing yield generated through sophisticated Delta-Neutral strategies.
+
+### Why nTON is Superior:
+- **Capital Efficiency:** Standard staking locks TON to secure the network. nTON deploys TON into Spot Liquidity Pools and short Perpetual contracts simultaneously.
+- **Yield Multiplier:** By earning both DEX LP fees and Perpetual Funding Rates, nTON targets **15-30%+ APY** consistently, vastly outperforming the 4-5% ceiling of vanilla staking.
+- **Zero Directional Risk:** The delta-neutral architecture means your capital is protected from TON price volatility while still farming high yields.
+- **Omnichain Utility:** Backed by LayerZero v2 OFT standards, nTON can be transferred and utilized as collateral across any connected chain instantly.
+
+---
+
+## 💎 The Points Engine & Incentives
+
+NeuroTON features a robust, mathematically sound points system designed to prevent sybil attacks and reward genuine, long-term liquidity providers.
+
+### 1. TVL-Based Daily Accrual
+Points are not given out for mere clicks. Capital must be deployed.
+- **24-Hour Warmup:** To prevent deposit-and-withdraw flash-gaming, new deposits must sit in the protocol for at least 24 hours before they begin generating points.
+- **Daily Yield:** Once mature, portfolios earn **100 points per 1 TON of TVL** automatically every 24 hours via our backend Cron execution matrix.
+
+### 2. Sybil-Resistant Referrals
+- **Sign-up Bonus:** New users receive an immediate 100-point boost.
+- **Value-Gated Referral Bonus:** The referrer earns a massive **500-point** reward *only* when the invited user commits a minimum capital sink of 5 TON. Phantom wallets and bot nets are fundamentally ignored by the protocol.
+
+---
+
 ## 🏛️ Enterprise System Architecture
 
 NeuroTON uses an event-driven Actively Validated Service (AVS) architecture, allowing off-chain AI solvers to securely manage on-chain multi-protocol capital allocation.

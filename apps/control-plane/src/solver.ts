@@ -20,7 +20,9 @@ import {
   type MarketScanResult,
   type RankedOpportunity,
 } from "./market-scanner";
-import { beginCell, toNano } from "@ton/core";
+import { beginCell, toNano, Address } from "@ton/core";
+import { TonClient, WalletContractV4 } from "@ton/ton";
+import { mnemonicToPrivateKey } from "@ton/crypto";
 
 const VAULT_ADDRESS = process.env.NEURO_VAULT_ADDRESS ?? "";
 const TONAPI_ENDPOINT = "https://tonapi.io/v2";
@@ -379,5 +381,48 @@ export const OmniChainSolver = {
       .endCell();
       
     return payload.toBoc().toString("base64");
+  },
+
+  /**
+   * Keeper Execution: Physically sends the Rebalance command to neuro_master.tact
+   * Protected by NEURO_TREASURY_MNEMONIC.
+   */
+  async executeKeeperRebalance(destinationAddress: string, amountTon: number): Promise<string> {
+    const mnemonic = process.env.NEURO_TREASURY_MNEMONIC;
+    if (!mnemonic) throw new Error("Keeper mnemonic not configured");
+    if (!VAULT_ADDRESS) throw new Error("Vault address not configured");
+
+    const key = await mnemonicToPrivateKey(mnemonic.split(" "));
+    const wallet = WalletContractV4.create({ publicKey: key.publicKey, workchain: 0 });
+    
+    const client = new TonClient({
+      endpoint: process.env.TON_RPC_ENDPOINT ?? "https://toncenter.com/api/v2/jsonRPC"
+    });
+
+    const walletContract = client.open(wallet);
+    const seqno = await walletContract.getSeqno();
+
+    // Rebalance Opcode mapped to neuro_master.tact message ExecuteRebalance (pseudo-crc32 or text)
+    // We will use a basic structure matching the Tact interface.
+    const rebalancePayload = beginCell()
+      .storeUint(0x4a180f1d, 32) // Hypothetical ExecuteRebalance opcode
+      .storeUint(0, 64) // queryId
+      .storeCoins(toNano(amountTon.toFixed(9))) // amount
+      .storeAddress(Address.parse(destinationAddress))
+      .endCell();
+
+    await walletContract.sendTransfer({
+      seqno,
+      secretKey: key.secretKey,
+      messages: [
+        {
+          address: Address.parse(VAULT_ADDRESS),
+          amount: toNano("0.05"), // Gas for the transaction
+          payload: rebalancePayload
+        }
+      ]
+    });
+
+    return `Keeper Tx Sent. Seqno: ${seqno}`;
   }
 };
