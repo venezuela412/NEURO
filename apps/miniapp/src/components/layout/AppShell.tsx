@@ -72,7 +72,7 @@ export function AppShell({ children }: PropsWithChildren) {
             </button>
           ) : (
             <div className="brand-badge" aria-hidden="true">
-              N
+              <img src="/assets/logo.png" alt="" style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
             </div>
           )}
 

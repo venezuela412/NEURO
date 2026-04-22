@@ -161,8 +161,8 @@ export function WalletScreen() {
   };
 
   // Calculate nTON value in TON
-  const ntonValueTon = (ntonBalance ?? 0) * sharePrice;
-  const yieldPercent = ((sharePrice - 1) * 100);
+  const ntonValueTon = (ntonBalance ?? 0) * (sharePrice ?? 1);
+  const yieldPercent = ((sharePrice ?? 1) - 1) * 100;
 
   // Not connected state
   if (!wallet.connected) {
@@ -251,7 +251,7 @@ export function WalletScreen() {
             {ntonBalance !== null ? ntonBalance.toFixed(4) : "—"}
           </span>
           <span className="wallet-balance-sub">
-            ≈ {ntonValueTon.toFixed(4)} TON · 1 nTON = {sharePrice.toFixed(4)} TON
+            ≈ {ntonValueTon.toFixed(4)} TON · 1 nTON = {(sharePrice ?? 1).toFixed(4)} TON
           </span>
         </motion.div>
       </div>
