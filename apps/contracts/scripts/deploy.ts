@@ -10,17 +10,10 @@ async function sleep(ms: number) {
 import { getHttpEndpoint } from '@orbs-network/ton-access';
 
 async function main() {
-    // 1. Initialize TonClient with TonCenter API key
-    const apiKey = process.env.TONCENTER_API_KEY;
-    if (!apiKey) {
-        console.error('❌ Set TONCENTER_API_KEY env var first');
-        process.exit(1);
-    }
-    const client = new TonClient({
-        endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-        apiKey,
-    });
-    console.log('✅ Connected to TonCenter');
+    // 1. Initialize TonClient via free orbs-network endpoint (no API key needed)
+    const endpoint = await getHttpEndpoint({ network: 'mainnet' });
+    const client = new TonClient({ endpoint });
+    console.log('✅ Connected to TON mainnet via', endpoint);
 
     // 2. Fetch Keeper Mnemonic — MUST be set as env var, never hardcoded
     const mnemonic = process.env.NEURO_TREASURY_MNEMONIC;
