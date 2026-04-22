@@ -11,7 +11,7 @@
 import { beginCell, toNano, Address } from "@ton/core";
 
 // ── Hardened v3 Vault Address (immutable on-chain) ──
-export const NEURO_VAULT_ADDRESS = import.meta.env.VITE_NEURO_VAULT_ADDRESS || "EQCKXgA7n5_VNdCnNBgMWuIrQVgV-ceySK4L7na_uJJP10Hb";
+export const NEURO_VAULT_ADDRESS = import.meta.env.VITE_NEURO_VAULT_ADDRESS || "EQCjAVxDnmPPJfld77JuZuGdjN6OvWIrkwiDa8dwxyZ5ZyWQ";
 
 // ── Opcodes from Tact-compiled ABI ──
 const OPCODES = {
