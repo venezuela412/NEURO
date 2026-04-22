@@ -53,8 +53,11 @@ async function main() {
     const ownerAddress = wallet.address; 
     const keeperAddress = wallet.address;
     
-    // Minimal Jetton Content (could be updated later to IPFS JSON)
-    const jettonContent = beginCell().storeUint(0, 8).endCell();
+    // Jetton Content — nTON token metadata (v2: generates fresh address)
+    const jettonContent = beginCell()
+        .storeUint(1, 8)   // on-chain metadata format
+        .storeStringTail("nTON")
+        .endCell();
 
     console.log('Initializing NeuroMaster...');
     const masterInit = await NeuroMaster.fromInit(ownerAddress, keeperAddress, jettonContent);
@@ -87,7 +90,7 @@ async function main() {
                     code: masterInit.init!.code,
                     data: masterInit.init!.data
                 },
-                body: beginCell().storeUint(0, 32).storeStringTail("Deploy").endCell()
+                body: beginCell().storeUint(0x946a98b6, 32).storeUint(0, 64).endCell() // Tact Deploy{queryId: 0}
             })
         ]
     });
