@@ -60,8 +60,8 @@ export function ActivePlanScreen() {
         fetchAPYData()
       ]);
 
-      const tvlVal = tvl.status === "fulfilled" ? tvl.value : 0;
-      const spVal = sharePrice.status === "fulfilled" ? sharePrice.value : 1;
+      const tvlVal = tvl.status === "fulfilled" && tvl.value !== null ? tvl.value : 0;
+      const spVal = sharePrice.status === "fulfilled" && sharePrice.value !== null ? sharePrice.value : 1;
       const sharesVal = shares.status === "fulfilled" ? shares.value : 0;
       const userValue = sharesVal * spVal;
       const yieldPct = spVal > 1 ? (spVal - 1) * 100 : 0;
@@ -280,7 +280,7 @@ export function ActivePlanScreen() {
             Vault TVL
           </p>
           <p style={{ fontSize: 20, fontWeight: 700, color: "var(--color-text)", margin: 0 }}>
-            {vault.tvl.toFixed(2)}
+            {vault.tvl > 0 ? vault.tvl.toFixed(2) : "—"}
           </p>
           <p style={{ fontSize: 11, color: "var(--color-text-muted)", margin: "2px 0 0" }}>
             TON locked

@@ -22,8 +22,12 @@ async function main() {
     });
     console.log('✅ Connected to TonCenter');
 
-    // 2. Fetch Keeper Mnemonic
-    const mnemonic = process.env.NEURO_TREASURY_MNEMONIC || 'solar remain someone weekend adjust sell mother day gather sock paper cart elbow jungle since ocean scissors this salute group entire turkey orbit fashion';
+    // 2. Fetch Keeper Mnemonic — MUST be set as env var, never hardcoded
+    const mnemonic = process.env.NEURO_TREASURY_MNEMONIC;
+    if (!mnemonic) {
+        console.error('❌ Set NEURO_TREASURY_MNEMONIC env var (24-word phrase)');
+        process.exit(1);
+    }
     const key = await mnemonicToPrivateKey(mnemonic.split(' '));
 
     // 3. Setup Keeper Wallet

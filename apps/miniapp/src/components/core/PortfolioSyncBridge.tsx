@@ -100,9 +100,10 @@ export function PortfolioSyncBridge() {
     if (wallet.connected && wallet.address) {
       try {
         const startParam = (window as any).Telegram?.WebApp?.initDataUnsafe?.start_param;
-        if (startParam && startParam.startsWith("ref_")) {
+        const cpUrl = import.meta.env.VITE_CONTROL_PLANE_URL;
+        if (startParam && startParam.startsWith("ref_") && cpUrl) {
           // Don't await, let it process in background
-          fetch(`/api/users/${wallet.address}/referral`, {
+          fetch(`${cpUrl}/api/users/${wallet.address}/referral`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ referralCode: startParam })

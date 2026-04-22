@@ -54,12 +54,20 @@ export function ActivityScreen() {
 
   const loadPoints = async () => {
     if (!wallet.connected || !wallet.address) return;
+    const cpUrl = import.meta.env.VITE_CONTROL_PLANE_URL;
+    if (!cpUrl) return;
     try {
-      const res = await fetch(`/api/users/${wallet.address}`);
-      const data = await res.json();
-      setPointsData(data);
+      const res = await fetch(`${cpUrl}/api/users/${wallet.address}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPointsData(data);
+      }
     } catch {
-      // ignore
+      // ignore — control plane may not be reachable
     }
   };
 

@@ -23,8 +23,8 @@ export function WalletScreen() {
   const [tonConnectUI] = useTonConnectUI();
   const [tonBalance, setTonBalance] = useState<number | null>(null);
   const [ntonBalance, setNtonBalance] = useState<number | null>(null);
-  const [sharePrice, setSharePrice] = useState<number>(1.0);
-  const [vaultTVL, setVaultTVL] = useState<number>(0);
+  const [sharePrice, setSharePrice] = useState<number | null>(null);
+  const [vaultTVL, setVaultTVL] = useState<number | null>(null);
   const [autoCompound, setAutoCompound] = useState(true);
   const [copied, setCopied] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -77,8 +77,8 @@ export function WalletScreen() {
   useEffect(() => {
     loadBalances();
     // Load vault stats with delays
-    delay(1000).then(() => getSharePrice().then(setSharePrice));
-    delay(2000).then(() => getVaultTVL().then(setVaultTVL));
+    delay(1000).then(() => getSharePrice().then(v => { if (v !== null) setSharePrice(v); }));
+    delay(2000).then(() => getVaultTVL().then(v => { if (v !== null) setVaultTVL(v); }));
   }, [wallet.connected, wallet.address]);
 
   const handleRefresh = async () => {
@@ -86,8 +86,8 @@ export function WalletScreen() {
     haptic("light");
     await loadBalances();
     const [sp, tvl] = await Promise.all([getSharePrice(), getVaultTVL()]);
-    setSharePrice(sp);
-    setVaultTVL(tvl);
+    if (sp !== null) setSharePrice(sp);
+    if (tvl !== null) setVaultTVL(tvl);
     setTimeout(() => setRefreshing(false), 600);
   };
 
@@ -265,11 +265,11 @@ export function WalletScreen() {
       >
         <div className="wallet-vault-row">
           <span className="wallet-vault-label">Vault TVL</span>
-          <span className="wallet-vault-value">{vaultTVL.toFixed(2)} TON</span>
+          <span className="wallet-vault-value">{vaultTVL !== null ? vaultTVL.toFixed(2) + " TON" : "Loading..."}</span>
         </div>
         <div className="wallet-vault-row">
           <span className="wallet-vault-label">Share Price</span>
-          <span className="wallet-vault-value">{sharePrice.toFixed(6)} TON</span>
+          <span className="wallet-vault-value">{sharePrice !== null ? sharePrice.toFixed(6) + " TON" : "Loading..."}</span>
         </div>
         <div className="wallet-vault-row">
           <span className="wallet-vault-label">Entry Fee</span>
