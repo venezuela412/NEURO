@@ -2,6 +2,7 @@ import type { ActivityEvent, ExecutionReceipt, PersistedPortfolioState } from "@
 import { buildPortfolioSnapshot, getPlanDefinition } from "@neuro/domain";
 import { getDb } from "./db";
 import { reconcileExecutionReceipt } from "./reconciliation";
+import crypto from "crypto";
 
 interface PortfolioStateRow {
   wallet_address: string;
@@ -551,12 +552,22 @@ export async function addAdminLog(
   metadata?: Record<string, unknown>,
 ) {
   const db = await getDb();
+  // [FIX L2] Sanitize metadata — ensure it's valid JSON and limit size
+  let safeMetadata: string | null = null;
+  if (metadata) {
+    try {
+      const json = JSON.stringify(metadata);
+      safeMetadata = json.length > 10000 ? json.substring(0, 10000) : json;
+    } catch {
+      safeMetadata = JSON.stringify({ error: "metadata_serialization_failed" });
+    }
+  }
   await db.query(
     `
       INSERT INTO admin_logs (level, category, message, metadata, created_at)
       VALUES ($1, $2, $3, $4, $5)
     `,
-    [level, category, message, metadata ? JSON.stringify(metadata) : null, new Date().toISOString()],
+    [level, category, message, safeMetadata, new Date().toISOString()],
   );
 }
 
@@ -610,6 +621,13 @@ export async function cleanupExpiredSessions() {
   await db.query("DELETE FROM wallet_sessions WHERE expires_at < $1", [now]);
 }
 
+// [FIX M1] Cleanup consumed nonces older than 24 hours to prevent unbounded table growth
+export async function cleanupExpiredNonces() {
+  const db = await getDb();
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  await db.query("DELETE FROM consumed_action_nonce WHERE created_at < $1", [cutoff]);
+}
+
 // --- USERS & POINTS ---
 
 export interface UserRow {
@@ -632,7 +650,8 @@ export async function getUserProfile(walletAddress: string): Promise<UserRow | n
 export async function createUserProfile(walletAddress: string): Promise<UserRow> {
   const db = await getDb();
   const normalized = normalizeWalletAddress(walletAddress);
-  const referralCode = `ref_${Math.random().toString(36).substring(2, 10)}`;
+  // [FIX M2] Use crypto.randomBytes instead of Math.random() for unpredictable referral codes
+  const referralCode = `ref_${crypto.randomBytes(6).toString('hex')}`;
   
   await db.query(
     `INSERT INTO users (wallet_address, referral_code) 
@@ -702,7 +721,8 @@ export async function awardPoints(walletAddress: string, amount: number, reason:
     if (existing.rows.length > 0) return false; // Already processed
   }
 
-  const id = `pt_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  // [FIX M3] Use crypto.randomUUID() instead of Math.random() for collision-resistant IDs
+  const id = `pt_${crypto.randomUUID()}`;
   
   await db.query(
     "INSERT INTO point_events (id, wallet_address, amount, reason, meta) VALUES ($1, $2, $3, $4, $5)",
@@ -743,7 +763,9 @@ export async function accrueDailyYieldPoints() {
     "SELECT wallet_address, state_json FROM portfolio_state"
   );
 
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  // [FIX M4] Date is derived from toISOString() which is always UTC.
+  // The cron at "0 0 * * *" also fires at midnight UTC. Both are UTC-aligned.
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD (UTC)
   let awardedCount = 0;
 
   for (const row of result.rows) {

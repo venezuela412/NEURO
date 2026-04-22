@@ -83,29 +83,25 @@ export function buildWithdrawalMessage(
 // ═══════════════════════════════════════════════════
 
 /** Get share price: how much TON per 1 nTON (e.g., 1.05 means 5% yield) */
-export async function getSharePrice(goal: string = 'safe'): Promise<number> {
+// [FIX C4 + L1] Returns null on failure instead of fake numbers. No longer clamps below 1.0.
+export async function getSharePrice(_goal: string = 'safe'): Promise<number | null> {
   try {
     const res = await fetch(
       `https://tonapi.io/v2/blockchain/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}/methods/sharePrice`
     );
     const data = await res.json();
-    let baseSp = 1.0;
     if (data.success && data.stack?.[0]?.num) {
-      baseSp = Number(data.stack[0].num) / 1e9;
+      return Number(data.stack[0].num) / 1e9;
     }
-    
-    // Overcome contract's accounting drop during delegation
-    if (baseSp < 1.0) baseSp = 1.0;
-
-    return baseSp;
+    return null; // [FIX C4] No fake fallback
   } catch {
-    const fallbackBaseAcc = goal === 'grow' ? 1.15 : goal === 'earn' ? 1.05 : 1.0125;
-    return fallbackBaseAcc;
+    return null; // [FIX C4] No fake fallback
   }
 }
 
 /** Get vault TVL in TON */
-export async function getVaultTVL(): Promise<number> {
+// [FIX C4] Returns null on failure instead of hardcoded fake numbers.
+export async function getVaultTVL(): Promise<number | null> {
   try {
     const res = await fetch(
       `https://tonapi.io/v2/blockchain/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}/methods/tvl`
@@ -117,9 +113,9 @@ export async function getVaultTVL(): Promise<number> {
     // Fallback to raw balance if getter fails
     const rawRes = await fetch(`https://tonapi.io/v2/accounts/${encodeURIComponent(NEURO_VAULT_ADDRESS)}`);
     const rawData = await rawRes.json();
-    return rawData.balance ? Number(rawData.balance) / 1e9 : 19.37;
+    return rawData.balance ? Number(rawData.balance) / 1e9 : null;
   } catch {
-    return 30.95; // fallback
+    return null; // [FIX C4] No fake fallback
   }
 }
 
@@ -188,50 +184,21 @@ export async function getUserShares(userAddress: string): Promise<number> {
   }
 }
 
-export async function getTransactionHistory(userAddress: string, goal: string = 'safe'): Promise<Array<{
+// [FIX C3] Removed all fake/simulated "Yield Payout" transactions.
+// Transaction history now shows ONLY real on-chain data.
+export async function getTransactionHistory(userAddress: string, _goal: string = 'safe'): Promise<Array<{
   type: string;
   amount: string;
   timestamp: number;
   hash: string;
 }>> {
   const txs = await getUserVaultTransactions(userAddress);
-  let formatted = txs.map(tx => ({
+  return txs.map(tx => ({
     type: tx.type.charAt(0).toUpperCase() + tx.type.slice(1),
     amount: tx.amount.toFixed(4),
     timestamp: tx.time,
     hash: tx.hash,
-  }));
-
-  // For the 'grow' / aggressive plan, inject AVS intent fulfillment logs visually
-  if (goal === 'grow' && formatted.length > 0) {
-    const now = Math.floor(Date.now() / 1000);
-    // Generate 3 recent simulated intent fulfillments to visualize the delta-neutral streaming
-    const simulatedIntents = [
-      {
-        type: "Yield Payout",
-        amount: (parseFloat(formatted[0].amount) * 0.0015).toFixed(4),
-        timestamp: now - 300, // 5 mins ago
-        hash: "avs_intent_execution_hyperliquid",
-      },
-      {
-        type: "Yield Payout",
-        amount: (parseFloat(formatted[0].amount) * 0.0011).toFixed(4),
-        timestamp: now - 1800, // 30 mins ago
-        hash: "avs_intent_execution_layerzero",
-      },
-      {
-        type: "Yield Payout",
-        amount: (parseFloat(formatted[0].amount) * 0.0022).toFixed(4),
-        timestamp: now - 7200, // 2 hours ago
-        hash: "avs_intent_execution_stormtrade",
-      }
-    ];
-    formatted = [...simulatedIntents, ...formatted]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 10);
-  }
-
-  return formatted;
+  })).slice(0, 20);
 }
 
 export async function getUserVaultTransactions(userAddress: string): Promise<VaultTransaction[]> {

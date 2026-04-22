@@ -385,7 +385,8 @@ export async function unstakeFromTonstakers(
  */
 export async function getVaultTsTonBalance(): Promise<number> {
   try {
-    const tonApiKey = process.env.VITE_TONAPI_KEY;
+    // [FIX M5] Use TONAPI_KEY (not VITE_ prefix) on server side
+    const tonApiKey = process.env.TONAPI_KEY;
     const headers: Record<string, string> = {};
     if (tonApiKey) headers["Authorization"] = `Bearer ${tonApiKey}`;
 

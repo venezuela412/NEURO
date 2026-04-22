@@ -62,6 +62,17 @@ message ExecuteRebalance {
     destination: Address;
 }
 
+// [SECURITY FIX C2] Whitelist management — owner-only
+message SetWhitelist {
+    index: Int as uint8;       // Slot 1–5
+    target: Address;           // Protocol address to whitelist
+}
+
+// [SECURITY FIX C1] AutoCompound — report yield back to inflate share price
+message AutoCompound {
+    profitToMint: Int as coins;
+}
+
 message ProvideWalletAddress {
     queryId: Int as uint64;
     owner_address: Address;

@@ -19,6 +19,7 @@ import {
   applySwitchToSafety,
   applyWithdraw,
   cleanupExpiredSessions,
+  cleanupExpiredNonces,
   countExecutionReceiptRows,
   countPortfolioRows,
   createWalletSession,
@@ -42,8 +43,14 @@ const server = Fastify({
   bodyLimit: 128 * 1024,
 });
 
+// [FIX H4] Restrict CORS to actual application domains instead of allowing all origins
 await server.register(cors, {
-  origin: true,
+  origin: [
+    "https://neuroton-lime.vercel.app",
+    "https://neuro-ton.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+  ],
 });
 
 await server.register(rateLimit, {
@@ -392,7 +399,9 @@ server.post("/admin/cleanup-sessions", async (request, reply) => {
   if (authError) return authError;
 
   await cleanupExpiredSessions();
-  return { ok: true, message: "Expired sessions cleaned up" };
+  // [FIX M1] Also clean up expired nonces (older than 24 hours)
+  await cleanupExpiredNonces();
+  return { ok: true, message: "Expired sessions and stale nonces cleaned up" };
 });
 
 // ==================== MANUAL HARVEST TRIGGER ====================
@@ -602,21 +611,39 @@ server.post<{ Params: { walletAddress: string; executionId: string } }>(
 
 import { createUserProfile, getUserProfile, linkReferral, getUserPoints } from "./repository";
 
-server.get<{ Params: { walletAddress: string } }>("/api/users/:walletAddress", async (request) => {
-  let user = await getUserProfile(request.params.walletAddress);
-  if (!user) {
-    user = await createUserProfile(request.params.walletAddress);
-  }
-  const points = await getUserPoints(request.params.walletAddress);
-  
-  return {
-    ...user,
-    points: points.total,
-    history: points.history
-  };
-});
+// [FIX H1] User profile retrieval — read-only, but still require proof to prevent enumeration
+server.post<{ Params: { walletAddress: string }; Body: z.infer<typeof sessionMutationSchema> }>(
+  "/api/users/:walletAddress",
+  async (request, reply) => {
+    const parsed = sessionMutationSchema.safeParse(request.body ?? {});
+    if (!parsed.success) {
+      reply.code(400);
+      return { error: "invalid_payload" };
+    }
 
-server.post<{ Params: { walletAddress: string }; Body: { referralCode: string } }>(
+    try {
+      await requireWalletAuthorization(request.params.walletAddress, parsed.data);
+    } catch (error) {
+      reply.code(403);
+      return { error: error instanceof Error ? error.message : "forbidden" };
+    }
+
+    let user = await getUserProfile(request.params.walletAddress);
+    if (!user) {
+      user = await createUserProfile(request.params.walletAddress);
+    }
+    const points = await getUserPoints(request.params.walletAddress);
+    
+    return {
+      ...user,
+      points: points.total,
+      history: points.history
+    };
+  }
+);
+
+// [FIX H1] Referral linking — requires wallet authorization to prevent unauthorized linking
+server.post<{ Params: { walletAddress: string }; Body: { referralCode: string; sessionToken?: string; proof?: z.infer<typeof signedActionSchema> } }>(
   "/api/users/:walletAddress/referral",
   async (request, reply) => {
     if (!request.body?.referralCode) {
@@ -624,7 +651,16 @@ server.post<{ Params: { walletAddress: string }; Body: { referralCode: string } 
       return { error: "missing_referral_code" };
     }
 
-    // Need to ensure the user profile exists first
+    try {
+      await requireWalletAuthorization(request.params.walletAddress, {
+        sessionToken: request.body.sessionToken,
+        proof: request.body.proof,
+      });
+    } catch (error) {
+      reply.code(403);
+      return { error: error instanceof Error ? error.message : "forbidden" };
+    }
+
     let user = await getUserProfile(request.params.walletAddress);
     if (!user) {
       user = await createUserProfile(request.params.walletAddress);
@@ -724,7 +760,12 @@ server.post("/api/solver/cron", async (request, reply) => {
       return { error: "cron_not_configured", hint: "Set CRON_SECRET environment variable" };
     }
 
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    // [FIX H3] Use timing-safe comparison to prevent side-channel attacks
+    const expected = `Bearer ${cronSecret}`;
+    const actual = authHeader ?? "";
+    const expectedBuf = Buffer.from(expected, "utf-8");
+    const actualBuf = Buffer.from(actual.padEnd(expected.length, "\0"), "utf-8");
+    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) {
       reply.code(401);
       return { error: "unauthorized" };
     }
@@ -925,13 +966,23 @@ server.get("/api/rebalance/evaluate", async (request, reply) => {
   }
 });
 
-// POST /api/withdrawal/build — Build withdrawal tx params for frontend (public, auth required)
-server.post<{ Body: { walletAddress: string; burnAmountNton: number } }>(
+// [FIX H2] POST /api/withdrawal/build — Build withdrawal tx params (requires wallet auth)
+server.post<{ Body: { walletAddress: string; burnAmountNton: number; sessionToken?: string; proof?: z.infer<typeof signedActionSchema> } }>(
   "/api/withdrawal/build",
   async (request, reply) => {
     const { walletAddress, burnAmountNton } = request.body ?? {};
     if (!walletAddress || !burnAmountNton || burnAmountNton <= 0) {
       return reply.status(400).send({ error: "invalid_payload" });
+    }
+
+    // [FIX H2] Require wallet authorization before revealing tx params
+    try {
+      await requireWalletAuthorization(walletAddress, {
+        sessionToken: request.body?.sessionToken,
+        proof: request.body?.proof,
+      });
+    } catch (error) {
+      return reply.status(403).send({ error: error instanceof Error ? error.message : "forbidden" });
     }
 
     try {
@@ -1007,6 +1058,17 @@ server.get("/api/treasury-check", async (request, reply) => {
 import { scheduleAutoCompoundJob } from "./queue";
 
 const port = Number(process.env.PORT ?? 8787);
+
+// [FIX H5] Startup validation — fail fast if critical env vars are missing in production
+if (process.env.NODE_ENV === "production" || process.env.DATABASE_URL) {
+  const requiredVars = ["NEURO_ADMIN_TOKEN", "DATABASE_URL", "CRON_SECRET"];
+  const missing = requiredVars.filter((v) => !process.env[v]);
+  if (missing.length > 0) {
+    console.error(`[FATAL] Missing required environment variables: ${missing.join(", ")}`);
+    console.error("Set these in your deployment environment (Vercel/Render/Railway).");
+    process.exit(1);
+  }
+}
 
 server
   .listen({ port, host: "0.0.0.0" })

@@ -37,6 +37,7 @@ const schemaSql = `
   CREATE TABLE IF NOT EXISTS consumed_action_nonce (
     wallet_address TEXT NOT NULL,
     nonce TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
     PRIMARY KEY (wallet_address, nonce)
   );
 

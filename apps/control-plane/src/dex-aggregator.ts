@@ -140,7 +140,8 @@ async function fetchOmnichainAVSYields(): Promise<PoolInfo[]> {
 
 async function fetchTonstakersData(): Promise<PoolInfo | null> {
   try {
-    const tonApiKey = process.env.VITE_TONAPI_KEY;
+    // [FIX M5] Use TONAPI_KEY (not VITE_ prefix) on server side
+    const tonApiKey = process.env.TONAPI_KEY;
     const headers: Record<string, string> = {};
     if (tonApiKey) headers["Authorization"] = `Bearer ${tonApiKey}`;
 

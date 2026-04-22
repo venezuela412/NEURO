@@ -20,7 +20,7 @@ import {
   type MarketScanResult,
   type RankedOpportunity,
 } from "./market-scanner";
-import { beginCell, toNano, Address } from "@ton/core";
+import { beginCell, toNano, Address, internal } from "@ton/core";
 import { TonClient, WalletContractV4 } from "@ton/ton";
 import { mnemonicToPrivateKey } from "@ton/crypto";
 
@@ -80,7 +80,8 @@ async function fetchVaultTvlFromChain(): Promise<VaultOnChainState | null> {
   if (!VAULT_ADDRESS) return null;
 
   try {
-    const tonApiKey = process.env.VITE_TONAPI_KEY;
+    // [FIX M5] Use TONAPI_KEY (not VITE_ prefix) on server side
+    const tonApiKey = process.env.TONAPI_KEY;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (tonApiKey) headers["Authorization"] = `Bearer ${tonApiKey}`;
 
@@ -415,11 +416,12 @@ export const OmniChainSolver = {
       seqno,
       secretKey: key.secretKey,
       messages: [
-        {
-          address: Address.parse(VAULT_ADDRESS),
-          amount: toNano("0.05"), // Gas for the transaction
-          payload: rebalancePayload
-        }
+        internal({
+          to: Address.parse(VAULT_ADDRESS),
+          value: toNano("0.05"),
+          body: rebalancePayload,
+          bounce: true,
+        })
       ]
     });
 
