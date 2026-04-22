@@ -2,7 +2,7 @@
 #pragma allow-post-modification;
 #pragma compute-asm-ltr;
 
-;; NeuroVault_NeuroMaster.headers.fc
+;; tact_NeuroMaster.headers.fc
 ;;
 ;; Header files for NeuroMaster
 ;; NOTE: declarations are sorted for optimal order
@@ -129,7 +129,7 @@ slice $global_contractAddress((cell, cell) $s) impure inline;
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
 
 
-;; NeuroVault_NeuroMaster.stdlib.fc
+;; tact_NeuroMaster.stdlib.fc
 global (int, slice, int, slice) __tact_context;
 global slice __tact_context_sender;
 global cell __tact_child_contract_codes;
@@ -351,7 +351,7 @@ int $global_myBalance() impure asm """
     return (($self'total_supply, $self'total_assets, $self'owner, $self'keeper, $self'paused, $self'jetton_content, $self'mintable, $self'whitelist1, $self'whitelist2, $self'whitelist3, $self'whitelist4, $self'whitelist5, $self'maxDelegatePercent), ());
 }
 
-;; NeuroVault_NeuroMaster.constants.fc
+;; tact_NeuroMaster.constants.fc
 ;; Cell PUbhb3vBPozKDI3CDKNVXoOAoEff7W8S0ZG9UiDTpMM=
 cell __gen_cell_cell_3d46e16f7bc13e8cca0c8dc20ca3555e8380a047dfed6f12d191bd5220d3a4c3() asm """
     B{b5ee9c7241010101001000001c000000005769746864726177616c3d0841cb} B>boc PUSHREF
@@ -362,7 +362,7 @@ cell __gen_cell_cell_5a68698decba2c0b1ac0cdf004fb38a5949970689d3bed7cb1e7e31cbc8
     B{b5ee9c7241010101000f00001a00000000526562616c616e6365e733ba51} B>boc PUSHREF
 """;
 
-;; NeuroVault_NeuroMaster.storage.fc
+;; tact_NeuroMaster.storage.fc
 ;;
 ;; Type: StateInit
 ;; TLB: _ code:^cell data:^cell = StateInit

@@ -1,4 +1,4 @@
-// automatically generated from `@stdlib/std/stdlib.fc` `C:/Users/carlo/Desktop/NEURO/apps/contracts/build/NeuroVault/NeuroVault_NeuroMaster.fc` 
+// automatically generated from `/stdlib/std/stdlib.fc` `C:/Users/carlo/Desktop/NEURO/apps/contracts/build/NeuroVault/tact_NeuroMaster.fc` 
 PROGRAM{
   DECLPROC __tact_store_address_opt
   DECLPROC __tact_not_null

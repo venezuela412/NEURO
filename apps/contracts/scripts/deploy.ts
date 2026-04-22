@@ -3,14 +3,24 @@ import { TonClient, WalletContractV4, internal } from '@ton/ton';
 import { mnemonicToPrivateKey } from '@ton/crypto';
 import { NeuroMaster } from '../build/NeuroVault/NeuroVault_NeuroMaster';
 
+async function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 import { getHttpEndpoint } from '@orbs-network/ton-access';
 
 async function main() {
-    // 1. Initialize TonClient for Mainnet
-    const endpoint = await getHttpEndpoint(); // Gets a random unthrottled mainnet RPC
+    // 1. Initialize TonClient with TonCenter API key
+    const apiKey = process.env.TONCENTER_API_KEY;
+    if (!apiKey) {
+        console.error('❌ Set TONCENTER_API_KEY env var first');
+        process.exit(1);
+    }
     const client = new TonClient({
-        endpoint,
+        endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+        apiKey,
     });
+    console.log('✅ Connected to TonCenter');
 
     // 2. Fetch Keeper Mnemonic
     const mnemonic = process.env.NEURO_TREASURY_MNEMONIC || 'solar remain someone weekend adjust sell mother day gather sock paper cart elbow jungle since ocean scissors this salute group entire turkey orbit fashion';
@@ -36,7 +46,6 @@ async function main() {
     }
 
     // 4. Setup NeuroMaster initial data
-    // We set the Keeper as both Owner and Keeper for now, can be updated later if needed.
     const ownerAddress = wallet.address; 
     const keeperAddress = wallet.address;
     
@@ -53,13 +62,15 @@ async function main() {
     const isDeployed = await client.isContractDeployed(masterAddress);
     if (isDeployed) {
         console.log('NeuroMaster is already deployed at this address!');
+        console.log(`View it: https://tonviewer.com/${masterAddress.toString({ testOnly: false })}`);
         return;
     }
 
-    // 5. Deploy
+    // 5. Deploy with retry
     console.log('Deploying NeuroMaster to Mainnet...');
     
     const seqno = await walletContract.getSeqno();
+    console.log('Current seqno:', seqno);
     
     await walletContract.sendTransfer({
         seqno,
@@ -77,8 +88,37 @@ async function main() {
         ]
     });
 
-    console.log('Deployment transaction sent. Wait a few seconds to confirm on-chain.');
-    console.log(`Explore it at: https://tonviewer.com/${masterAddress.toString({ testOnly: false })}`);
+    console.log('Deployment transaction sent! Waiting for confirmation...');
+    
+    // Wait for seqno to increment (confirms the tx was processed)
+    for (let i = 0; i < 30; i++) {
+        await sleep(2000);
+        try {
+            const currentSeqno = await walletContract.getSeqno();
+            if (currentSeqno > seqno) {
+                console.log('✅ Transaction confirmed!');
+                break;
+            }
+        } catch {
+            // RPC hiccup, keep retrying
+        }
+        process.stdout.write('.');
+    }
+
+    // Verify deployment
+    await sleep(3000);
+    const deployed = await client.isContractDeployed(masterAddress);
+    if (deployed) {
+        console.log(`\n✅ NeuroMaster deployed successfully!`);
+    } else {
+        console.log(`\n⚠️  Contract may still be deploying. Check in a few seconds.`);
+    }
+    
+    console.log(`\n📋 NEW CONTRACT ADDRESS: ${masterAddress.toString({ testOnly: false })}`);
+    console.log(`🔗 View it: https://tonviewer.com/${masterAddress.toString({ testOnly: false })}`);
+    console.log(`\n⚠️  UPDATE your .env files with:`);
+    console.log(`   NEURO_VAULT_ADDRESS=${masterAddress.toString({ testOnly: false })}`);
+    console.log(`   VITE_NEURO_VAULT_ADDRESS=${masterAddress.toString({ testOnly: false })}`);
 }
 
 main().catch(console.error);
