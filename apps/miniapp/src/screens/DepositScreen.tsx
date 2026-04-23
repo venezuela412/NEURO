@@ -7,8 +7,8 @@ import { useAppStore } from "../store/appStore";
 import { useNeuroWallet } from "../hooks/useTonWallet";
 import { buildDepositMessage, getIsPaused } from "../lib/vaultTx";
 
-const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
-const MIN_DEPOSIT = 3;
+const PRESET_AMOUNTS = [0.5, 5, 10, 25, 50];
+const MIN_DEPOSIT = 0.5;
 
 const PLAN_LABELS: Record<string, { name: string; color: string; intent: number }> = {
   protect: { name: "Safe Savings", color: "#26d3c7", intent: 1 },

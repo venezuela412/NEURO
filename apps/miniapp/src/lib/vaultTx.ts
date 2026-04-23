@@ -11,11 +11,11 @@
 import { beginCell, toNano, Address } from "@ton/core";
 
 // ── Hardened v3 Vault Address (immutable on-chain) ──
-export const NEURO_VAULT_ADDRESS = import.meta.env.VITE_NEURO_VAULT_ADDRESS || "EQCjAVxDnmPPJfld77JuZuGdjN6OvWIrkwiDa8dwxyZ5ZyWQ";
+export const NEURO_VAULT_ADDRESS = "EQCjAVxDnmPPJfld77JuZuGdjN6OvWIrkwiDa8dwxyZ5ZyWQ";
 
 // ── Opcodes from Tact-compiled ABI ──
 const OPCODES = {
-  deposit: 0x546c1a82, // Deposit { intent: uint8 }
+  deposit: 0x8ea64828, // Deposit { intent: uint8 }
   tokenBurn: 0x595f07bc, // TokenBurn { queryId: uint64, amount: coins, ... }
 } as const;
 
@@ -64,7 +64,7 @@ export function buildWithdrawalMessage(
   userNtonWalletAddress: string,
 ) {
   const payload = beginCell()
-    .storeUint(OPCODES.TokenBurn, 32)
+    .storeUint(OPCODES.tokenBurn, 32)
     .storeUint(0, 64)  // queryId
     .storeCoins(toNano(burnAmountNton.toFixed(9))) // amount to burn
     .storeAddress(Address.parse(userAddress))       // response_destination
