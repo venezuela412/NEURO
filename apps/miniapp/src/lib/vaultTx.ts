@@ -247,6 +247,7 @@ export async function getUserVaultTransactions(userAddress: string): Promise<Vau
           status: evt.in_progress ? "failed" : "success",
         };
       })
+      .filter((tx: VaultTransaction) => tx.amount >= 0.001)
       .slice(0, 20);
   } catch {
     return [];

@@ -170,10 +170,6 @@ export const IntentMenu: React.FC = () => {
         // User cancelled
       }
       return;
-    }
-
-    setGoal('protect');
-    setRiskPreference('low');
     setAmountTon(0);
     navigate('/deposit');
   };

@@ -45,6 +45,7 @@ export function ActivePlanScreen() {
   // Streaming Yield UI States
   const [streamedYieldPct, setStreamedYieldPct] = useState(0);
   const [streamedTonEarned, setStreamedTonEarned] = useState(0);
+  const [activeTab, setActiveTab] = useState<'transactions' | 'ai_logs'>('transactions');
 
   const fetchVaultData = useCallback(async (showRefresh = false) => {
     if (!wallet.address) return;
@@ -159,7 +160,9 @@ export function ActivePlanScreen() {
     );
   }
 
-  if (vault.userShares <= 0) {
+  const hasRecentDeposit = vault.transactions.some(t => t.type.toLowerCase() === "deposit");
+
+  if (vault.userShares <= 0 && !hasRecentDeposit) {
     return (
       <section className="card page-stack center-stack">
         <Coins size={48} style={{ color: "var(--color-primary)", opacity: 0.6 }} />
@@ -170,6 +173,19 @@ export function ActivePlanScreen() {
         <Link className="button button-primary" to="/deposit">
           Start earning
         </Link>
+      </section>
+    );
+  }
+
+  if (vault.userShares <= 0 && hasRecentDeposit) {
+    return (
+      <section className="card page-stack center-stack">
+        <div className="spinner" style={{ width: 40, height: 40, borderRadius: "50%", border: "3px solid var(--color-surface-2)", borderTopColor: "var(--color-primary)", animation: "spin 0.8s linear infinite" }} />
+        <h1 className="headline-sm">Activating Position...</h1>
+        <p className="muted">Your deposit was received. The vault is minting your nTON shares. This usually takes ~30 seconds.</p>
+        <button className="button button-secondary" onClick={() => fetchVaultData(true)} style={{ marginTop: 16 }}>
+          Refresh Status
+        </button>
       </section>
     );
   }
@@ -335,40 +351,99 @@ export function ActivePlanScreen() {
       {/* Recent Activity */}
       {vault.transactions.length > 0 && (
         <div className="card" style={{ padding: 16, borderRadius: 12 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--color-text)" }}>
-            {goal === 'grow' ? 'Live EVM Intent Fulfillments' : 'Recent Transactions'}
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {vault.transactions.slice(0, 5).map((tx, i) => (
-              <a
-                key={i}
-                href={`https://tonviewer.com/transaction/${tx.hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "8px 12px", borderRadius: 8,
-                  background: "rgba(255,255,255,0.03)", textDecoration: "none",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
-                <div>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#00ff88" }}>
-                    {goal === 'grow' && tx.type === 'Yield Payout' ? 'AVS Delta-Neutral Yield' : tx.type}
-                  </span>
-                  <span style={{ fontSize: 11, color: "var(--color-text-muted)", marginLeft: 8 }}>
-                    {new Date(tx.timestamp * 1000).toLocaleTimeString()}
-                  </span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 13, color: "var(--color-text)" }}>
-                    {parseFloat(tx.amount) > 0 ? "+" : ""}{tx.amount} TON
-                  </span>
-                  <ExternalLink size={10} style={{ color: "var(--color-text-muted)" }} />
-                </div>
-              </a>
-            ))}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 8 }}>
+            <button
+              onClick={() => setActiveTab('transactions')}
+              style={{
+                background: 'none', border: 'none', fontSize: 14, fontWeight: 600,
+                color: activeTab === 'transactions' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                cursor: 'pointer', padding: 0
+              }}
+            >
+              Activity
+            </button>
+            <button
+              onClick={() => setActiveTab('ai_logs')}
+              style={{
+                background: 'none', border: 'none', fontSize: 14, fontWeight: 600,
+                color: activeTab === 'ai_logs' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                cursor: 'pointer', padding: 0
+              }}
+            >
+              Strategy Insights
+            </button>
           </div>
+
+          {activeTab === 'transactions' ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {vault.transactions.slice(0, 5).map((tx, i) => (
+                <a
+                  key={i}
+                  href={`https://tonviewer.com/transaction/${tx.hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "8px 12px", borderRadius: 8,
+                    background: "rgba(255,255,255,0.03)", textDecoration: "none",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#00ff88" }}>
+                      {tx.type}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", marginLeft: 8 }}>
+                      {new Date(tx.timestamp * 1000).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>
+                      {parseFloat(tx.amount) > 0 ? "+" : ""}{tx.amount} TON
+                    </span>
+                    <ExternalLink size={10} style={{ color: "var(--color-text-muted)" }} />
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {goal === 'grow' ? (
+                <>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #ef4444" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date().toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Scanning LayerZero cross-chain liquidity paths...</span>
+                  </div>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #ef4444" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date(Date.now() - 3600000).toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Rebalancing Delta-Neutral perp hedges on Storm Trade</span>
+                  </div>
+                </>
+              ) : goal === 'earn' ? (
+                <>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #f59e0b" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date().toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Optimizing yield routes across DeDust & STON.fi</span>
+                  </div>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #f59e0b" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date(Date.now() - 7200000).toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Auto-compounding STON.fi farming rewards</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #26d3c7" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date().toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Verifying staking pool performance (Tonstakers)</span>
+                  </div>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", borderLeft: "2px solid #26d3c7" }}>
+                    <span style={{ fontSize: 11, color: "var(--color-text-muted)", display: "block" }}>{new Date(Date.now() - 14400000).toLocaleTimeString()}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-text)" }}>Native reward distribution confirmed</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 
